@@ -15,7 +15,7 @@ py -3.12 -m venv .venv
 
 日常使用可运行 `.\.venv\Scripts\pythonw.exe -m voxflow`，不会弹出终端窗口。
 
-首次启动后可点击托盘图标打开浮层，通过左侧设备图标选择麦克风。随后在任意应用按 `Ctrl+Shift+Space` 开始录音；再按一次停止，等待最终文本。中央胶囊和右侧麦克风按钮也可操作录音；左侧复制按钮用于复制结果。按 `Esc` 或右侧关闭按钮隐藏；从托盘菜单退出程序。如全局快捷键被其他程序占用，仍可通过托盘菜单操作。单次录音上限 30 秒，默认不保存录音。
+首次启动后可点击托盘图标打开浮层，通过左侧设备图标选择麦克风。随后在任意应用按 `Ctrl+Shift+Space` 开始录音；再按一次停止，等待最终文本。中央胶囊和右侧麦克风按钮也可操作录音；左侧复制按钮用于复制结果。按 `Esc` 或右侧关闭按钮隐藏；从托盘菜单退出程序。如全局快捷键被其他程序占用，仍可通过托盘菜单操作。单次录音上限 5 分钟，默认不保存录音。录音中的长文本会跟随最新内容滚动；长录音按短片段识别，停止后合并结果。
 
 也可用音频文件验证识别：
 
@@ -27,7 +27,7 @@ py -3.12 -m venv .venv
 
 ## 当前模型
 
-使用 [SenseVoiceSmall](https://github.com/QwenAudio/SenseVoice) 的 [sherpa-onnx INT8 转换版本](https://github.com/k2-fsa/sherpa-onnx/releases/tag/asr-models)，本地 CPU 推理；模型约 240 MB，首次单独下载，文件不会进入 Git。该模型是离线整段识别，窗口通过定时重识别显示临时草稿，并非模型原生流式输出。中英混说质量尚需真实语料评测。模型权重遵循其[模型卡中的许可条款](https://huggingface.co/FunAudioLLM/SenseVoiceSmall)。
+使用 [SenseVoiceSmall](https://github.com/QwenAudio/SenseVoice) 的 [sherpa-onnx INT8 转换版本](https://github.com/k2-fsa/sherpa-onnx/releases/tag/asr-models)，本地 CPU 推理；模型约 240 MB，首次单独下载，文件不会进入 Git。该模型是离线整段识别；窗口将长录音按约 20 秒分段，缓存已完成片段，只反复识别当前片段来更新临时草稿，并非模型原生流式输出。中英混说质量尚需真实语料评测。模型权重遵循其[模型卡中的许可条款](https://huggingface.co/FunAudioLLM/SenseVoiceSmall)。
 
 ## 已知边界
 

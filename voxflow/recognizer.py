@@ -23,6 +23,10 @@ class SenseVoiceRecognizer:
             language="auto",
             use_itn=True,
         )
+        self._cache_token: int | None = None
+        self._cache_rate = 0
+        self._cached_until = 0
+        self._cached_texts: list[str] = []
 
     def recognize(self, samples: np.ndarray, sample_rate: int) -> str:
         audio = np.asarray(samples, dtype=np.float32)
@@ -30,6 +34,62 @@ class SenseVoiceRecognizer:
             raise ValueError("expected mono audio")
         if sample_rate <= 0:
             raise ValueError("sample_rate must be positive")
+        return self._decode_segment(audio, sample_rate)
+
+    def recognize_incremental(
+        self, samples: np.ndarray, sample_rate: int, session_token: int, final: bool = False
+    ) -> str:
+        audio = np.asarray(samples, dtype=np.float32)
+        if audio.ndim != 1:
+            raise ValueError("expected mono audio")
+        if sample_rate <= 0:
+            raise ValueError("sample_rate must be positive")
+        if (getattr(self, "_cache_token", None) != session_token
+                or getattr(self, "_cache_rate", 0) != sample_rate
+                or audio.size < getattr(self, "_cached_until", 0)):
+            self._cache_token = session_token
+            self._cache_rate = sample_rate
+            self._cached_until = 0
+            self._cached_texts = []
+        while audio.size - self._cached_until >= 22 * sample_rate:
+            boundary = self._quiet_boundary(audio, self._cached_until, sample_rate)
+            self._cached_texts.append(self._decode_segment(audio[self._cached_until:boundary], sample_rate))
+            self._cached_until = boundary
+        tail = self._decode_segment(audio[self._cached_until:], sample_rate) if audio.size > self._cached_until else ""
+        parts = (*self._cached_texts, tail)
+        result = ""
+        for part in parts:
+            if not part:
+                continue
+            codepoint = ord(part[0])
+            cjk_start = (0x4E00 <= codepoint <= 0x9FFF
+                         or 0x3040 <= codepoint <= 0x30FF
+                         or 0xAC00 <= codepoint <= 0xD7AF)
+            if result and not cjk_start:
+                result += " "
+            result += part
+        if final:
+            self._cache_token = None
+            self._cached_until = 0
+            self._cached_texts = []
+        return result
+
+    @staticmethod
+    def _quiet_boundary(audio: np.ndarray, start: int, sample_rate: int) -> int:
+        frame = max(1, int(sample_rate * 0.12))
+        lower = start + 18 * sample_rate
+        upper = start + 22 * sample_rate - frame
+        quietest = lower
+        lowest_energy = float("inf")
+        for offset in range(lower, upper + 1, frame):
+            segment = audio[offset:offset + frame]
+            energy = float(np.mean(np.square(segment)))
+            if energy < lowest_energy:
+                lowest_energy = energy
+                quietest = offset
+        return quietest + frame // 2
+
+    def _decode_segment(self, audio: np.ndarray, sample_rate: int) -> str:
         if audio.size == 0:
             return ""
         if float(np.sqrt(np.mean(np.square(audio)))) < 0.003:
@@ -53,7 +113,11 @@ def worker_ready() -> bool:
     return _worker_recognizer is not None
 
 
-def transcribe_in_worker(samples: np.ndarray, sample_rate: int) -> str:
+def transcribe_in_worker(
+    samples: np.ndarray, sample_rate: int, session_token: int | None = None, final: bool = False
+) -> str:
     if _worker_recognizer is None:
         raise RuntimeError("ASR worker is not initialized")
-    return _worker_recognizer.recognize(samples, sample_rate)
+    if session_token is None:
+        return _worker_recognizer.recognize(samples, sample_rate)
+    return _worker_recognizer.recognize_incremental(samples, sample_rate, session_token, final)

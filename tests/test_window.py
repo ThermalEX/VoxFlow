@@ -216,6 +216,34 @@ def test_live_transcript_stays_centered_in_safe_area(tmp_path):
     window.close()
 
 
+def test_long_live_transcript_scrolls_to_the_latest_words(tmp_path):
+    app = QApplication.instance() or QApplication([])
+    window = VoxFlowWindow(model_dir=tmp_path, start_worker=False)
+    window.reveal()
+    window._set_mode("recording")
+    window._background_progress = 1.0
+    window.apply_transcript("partial", "earlier words " * 80 + "latest words")
+    app.processEvents()
+    scrollbar = window.transcript.verticalScrollBar()
+    assert scrollbar.maximum() > 0
+    assert scrollbar.maximum() - scrollbar.value() <= 5
+    window.close()
+
+
+def test_recording_continues_past_thirty_seconds(tmp_path):
+    app = QApplication.instance() or QApplication([])
+    window = VoxFlowWindow(model_dir=tmp_path, start_worker=False)
+    window.audio.start(16000)
+    window.limit_reached = window.audio.append(np.zeros(45 * 16000, dtype=np.float32))
+    window.stream = SimpleNamespace(stop=lambda: None, close=lambda: None)
+    window._poll()
+    assert window.stream is not None
+    assert window.audio.duration_seconds == 45
+    assert window.time_label.text() == "00:45 / 05:00"
+    window.close()
+    assert app is not None
+
+
 def test_ambient_glow_has_a_moving_organic_contour(tmp_path):
     app = QApplication.instance() or QApplication([])
     window = VoxFlowWindow(model_dir=tmp_path, start_worker=False)

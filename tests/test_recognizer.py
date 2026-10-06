@@ -1,5 +1,6 @@
 from pathlib import Path
 
+import numpy as np
 import pytest
 import soundfile as sf
 
@@ -41,6 +42,34 @@ def test_very_quiet_audio_skips_decoder():
     recognizer = SenseVoiceRecognizer.__new__(SenseVoiceRecognizer)
     recognizer._recognizer = None
     assert recognizer.recognize([0.002] * 16000, 16000) == ""
+
+
+def test_long_recording_reuses_completed_audio_segments():
+    class CountingRecognizer(SenseVoiceRecognizer):
+        def __init__(self):
+            self.decoded: list[int] = []
+
+        def _decode_segment(self, samples, sample_rate):
+            self.decoded.append(len(samples))
+            return f"segment{len(self.decoded)}"
+
+    recognizer = CountingRecognizer()
+    sample_rate = 100
+    first = recognizer.recognize_incremental(np.ones(25 * sample_rate), sample_rate, session_token=1)
+    committed = recognizer._cached_until
+    assert committed >= 18 * sample_rate
+    assert len(recognizer._cached_texts) == 1
+    assert first.startswith("segment1")
+    before = len(recognizer.decoded)
+    second = recognizer.recognize_incremental(np.ones(27 * sample_rate), sample_rate, session_token=1)
+    assert len(recognizer.decoded) == before + 1
+    assert recognizer._cached_until == committed
+    assert second.startswith("segment1")
+    recognizer.recognize_incremental(np.ones(27 * sample_rate), sample_rate, session_token=1, final=True)
+    assert recognizer._cached_texts == []
+    recognizer.recognize_incremental(np.ones(4 * sample_rate), sample_rate, session_token=2)
+    assert recognizer._cached_until == 0
+    assert recognizer._cached_texts == []
 
 
 @pytest.mark.skipif(not (MODEL_DIR / "model.int8.onnx").exists(), reason="model not downloaded")

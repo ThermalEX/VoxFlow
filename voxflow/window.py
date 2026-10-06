@@ -9,7 +9,7 @@ from pathlib import Path
 
 import sounddevice as sd
 from PySide6.QtCore import QEasingCurve, QPointF, QPropertyAnimation, QRectF, Qt, QTimer
-from PySide6.QtGui import QColor, QCloseEvent, QCursor, QImage, QKeyEvent, QLinearGradient, QPainter, QPainterPath, QRadialGradient, QRegion
+from PySide6.QtGui import QColor, QCloseEvent, QCursor, QImage, QKeyEvent, QLinearGradient, QPainter, QPainterPath, QRadialGradient, QRegion, QTextCursor
 from PySide6.QtWidgets import (
     QApplication,
     QComboBox,
@@ -31,13 +31,15 @@ from .scheduler import RecognitionJob, RecognitionScheduler
 
 HOTKEY_ID = 0x564F
 WM_HOTKEY = 0x0312
+MAX_RECORDING_SECONDS = 300
 
 
 class VoxFlowWindow(QWidget):
     def __init__(self, model_dir: str | Path, start_worker: bool = True) -> None:
         super().__init__()
         self.model_dir = Path(model_dir)
-        self.audio = AudioBuffer(max_seconds=30)
+        self.audio = AudioBuffer(max_seconds=MAX_RECORDING_SECONDS)
+        self._recording_serial = 0
         self.scheduler: RecognitionScheduler | None = None
         self.stream: sd.InputStream | None = None
         self.executor: ProcessPoolExecutor | None = None
@@ -96,7 +98,7 @@ class VoxFlowWindow(QWidget):
         layout.setContentsMargins(28, 16, 28, 22)
         layout.setSpacing(7)
         layout.addStretch(1)
-        self.time_label = QLabel("00:00 / 00:30")
+        self.time_label = QLabel("00:00 / 05:00")
         self.time_label.setObjectName("muted")
         self.time_label.setAlignment(Qt.AlignmentFlag.AlignCenter)
         layout.addWidget(self.time_label)
@@ -111,6 +113,7 @@ class VoxFlowWindow(QWidget):
         self.transcript = QTextEdit()
         self.transcript.setMaximumWidth(620)
         self.transcript.setReadOnly(True)
+        self.transcript.setVerticalScrollBarPolicy(Qt.ScrollBarPolicy.ScrollBarAlwaysOff)
         self.transcript.viewport().setAutoFillBackground(False)
         self.transcript.setAlignment(Qt.AlignmentFlag.AlignCenter)
         layout.addWidget(self.transcript)
@@ -491,6 +494,7 @@ class VoxFlowWindow(QWidget):
                 callback=self._on_audio,
             )
             self.stream.start()
+            self._recording_serial += 1
             self._set_mode("recording")
             self.record_button.setText("Stop recording")
             self.status_label.setText("Listening · live transcription")
@@ -577,7 +581,7 @@ class VoxFlowWindow(QWidget):
 
         if self.stream is not None:
             seconds = int(self.audio.duration_seconds)
-            self.time_label.setText(f"{seconds // 60:02d}:{seconds % 60:02d} / 00:30")
+            self.time_label.setText(f"{seconds // 60:02d}:{seconds % 60:02d} / 05:00")
             if self.capture_warning:
                 self.status_label.setText(f"Recording notice: {self.capture_warning}")
             if self.limit_reached:
@@ -591,6 +595,8 @@ class VoxFlowWindow(QWidget):
                     transcribe_in_worker,
                     self.audio.snapshot(),
                     self.audio.sample_rate,
+                    self._recording_serial,
+                    job.kind == "final",
                 )
 
     def apply_transcript(self, kind: str, text: str) -> None:
@@ -599,6 +605,11 @@ class VoxFlowWindow(QWidget):
         self.transcript.setPlainText(text)
         self.transcript.setAlignment(Qt.AlignmentFlag.AlignCenter)
         self.transcript.setReadOnly(kind != "final")
+        cursor = self.transcript.textCursor()
+        cursor.movePosition(QTextCursor.MoveOperation.End)
+        self.transcript.setTextCursor(cursor)
+        self.transcript.ensureCursorVisible()
+        self.transcript.verticalScrollBar().setValue(self.transcript.verticalScrollBar().maximum())
         if kind == "final":
             self._set_mode("result")
             self.status_label.setText("Transcript ready · edit or copy" if text else "No speech detected. Try again.")
