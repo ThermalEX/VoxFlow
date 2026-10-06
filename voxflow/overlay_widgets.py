@@ -23,10 +23,14 @@ class GlowCapsule(QPushButton):
         self.update()
 
     def set_level(self, level: float) -> None:
-        self.target_level = max(0.0, min(1.0, level * 20))
+        noise_floor = 0.0003
+        full_voice = 0.008
+        self.target_level = max(0.0, min(1.0, math.log(max(level, noise_floor) / noise_floor)
+                                         / math.log(full_voice / noise_floor)))
 
     def tick(self, dt: float) -> None:
-        self.level += (self.target_level - self.level) * min(1.0, dt * 11)
+        response = 18 if self.target_level > self.level else 8
+        self.level += (self.target_level - self.level) * min(1.0, dt * response)
         self.phase = (self.phase + dt * (0.9 + (0.2 if self.recording else 0) + self.level * 3)) % (2 * math.pi)
         self.update()
 
@@ -46,7 +50,7 @@ class GlowCapsule(QPushButton):
         painter.save()
         painter.setClipPath(path)
         breath = (1 + math.sin(self.phase)) / 2
-        activity = min(1.35, self.level + (1.0 if self.recording else 0.0))
+        activity = min(1.65, self.level * 0.65 + (1.0 if self.recording else 0.0))
         glow = QLinearGradient(0, body.top(), 0, body.bottom())
         glow.setColorAt(0.0, QColor(0, 2, 8, 32))
         glow.setColorAt(0.24, QColor(2, 7, 18, 88))
@@ -66,16 +70,19 @@ class GlowCapsule(QPushButton):
             for step in range(59):
                 x = body.left() + body.width() * step / 58
                 distance = (x - body.left()) / body.width()
-                y = (body.top() + body.height() * (0.62 - 0.03 * activity) + offset
-                     + (2.5 + (1.0 if self.recording else 0) + 7 * self.level)
+                y = (body.top() + body.height() * (0.62 - 0.10 * self.level
+                                                    - (0.03 if self.recording else 0)) + offset
+                     + (2.5 + (1.0 if self.recording else 0) + 25 * self.level)
                      * math.sin(distance * 2.4 * math.pi - self.phase * 1.45)
-                     + (1 + 2.5 * self.level) * math.sin(distance * 4.2 * math.pi + self.phase * 0.8))
+                     + (1 + 7 * self.level) * math.sin(distance * 4.2 * math.pi + self.phase * 0.8))
                 wave.lineTo(x, y)
             wave.lineTo(body.right(), body.bottom())
             wave.closeSubpath()
             wave_light = QLinearGradient(0, body.top(), 0, body.bottom())
             wave_light.setColorAt(0.0, QColor(70, 130, 235, 0))
-            wave_light.setColorAt(0.55, QColor(72, 137, 250, 0))
+            wave_light.setColorAt(0.36, QColor(72, 137, 250, 0))
+            wave_light.setColorAt(0.52, QColor(82, 155, 255,
+                                               round((24 + 115 * self.level) * alpha / 130)))
             wave_light.setColorAt(0.78, QColor(113, 181, 255, round(alpha * 0.55 * (1 + 0.35 * activity))))
             wave_light.setColorAt(1.0, QColor(170, 214, 255, round(alpha * (1 + 0.35 * activity))))
             painter.fillPath(wave, wave_light)

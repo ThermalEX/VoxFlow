@@ -82,12 +82,64 @@ def test_recording_reveals_background_from_the_capsule(tmp_path):
     window.update()
     app.processEvents()
     ripple = window.grab().toImage()
-    assert ripple.pixelColor(100, 160).alpha() < 5
+    assert ripple.pixelColor(100, 80).alpha() < 5
     window._background_progress = 1
     window.update()
     app.processEvents()
     frame = window.grab().toImage()
     assert frame.pixelColor(window.width() // 2, window.height() // 2).alpha() > 20
+    window.close()
+
+
+def test_reveal_mask_expands_from_capsule_shape_not_circle(tmp_path):
+    app = QApplication.instance() or QApplication([])
+    window = VoxFlowWindow(model_dir=tmp_path, start_worker=False)
+    window.reveal()
+    app.processEvents()
+    capsule = window.capsule.geometry().adjusted(3, 7, -3, -3)
+    mask = window._make_reveal_mask(0.12)
+    assert mask.pixelColor(capsule.left() - 20, capsule.center().y()).alpha() > 200
+    assert mask.pixelColor(capsule.center().x(), capsule.top() - 50).alpha() < 5
+    window.close()
+
+
+def test_live_text_waits_until_background_has_expanded(tmp_path):
+    app = QApplication.instance() or QApplication([])
+    window = VoxFlowWindow(model_dir=tmp_path, start_worker=False)
+    window.reveal()
+    window.apply_transcript("partial", "hello")
+    assert not window.status_label.isVisible()
+    assert not window.transcript.isVisible()
+    window._background_progress = 0.24
+    window._animate_particles()
+    assert not window.status_label.isVisible()
+    window._background_progress = 0.55
+    window._animate_particles()
+    assert window.status_label.isVisible()
+    assert window.transcript.isVisible()
+    window.close()
+
+
+def test_collapsed_overlay_clears_the_previous_backdrop(tmp_path):
+    app = QApplication.instance() or QApplication([])
+    window = VoxFlowWindow(model_dir=tmp_path, start_worker=False)
+    window.reveal()
+    window.apply_transcript("partial", "hello")
+    for progress in (0.08, 0.24):
+        window._background_progress = progress
+        window._sync_content_visibility()
+        window.update()
+        app.processEvents()
+        window.grab()
+    expanded = window.grab().toImage()
+    point = QPoint(window.width() // 2, 190)
+    assert expanded.pixelColor(point).alpha() > 20
+    window._background_progress = 0.0
+    window.apply_transcript("final", "hello")
+    window.update()
+    app.processEvents()
+    collapsed = window.grab().toImage()
+    assert collapsed.pixelColor(point).alpha() < 5
     window.close()
 
 
@@ -106,6 +158,9 @@ def test_second_click_retracts_particles_and_keeps_result(tmp_path):
     assert window._background_retracting
     assert window._background_progress < 1.0
     assert window.record_button.icon_name == "mic"
+    assert not window.status_label.isVisible()
+    assert not window.time_label.isVisible()
+    assert not window.transcript.isVisible()
     window._animate_particles()
     assert window._background_progress < 1.0
     for _ in range(80):
@@ -113,9 +168,11 @@ def test_second_click_retracts_particles_and_keeps_result(tmp_path):
     assert window._background_progress == 0.0
     window.apply_transcript("final", "hello")
     assert window.transcript.toPlainText() == "hello"
-    assert window.transcript.isVisible()
+    assert not window.transcript.isVisible()
+    assert not window.status_label.isVisible()
     assert not window.mask().contains(QPoint(5, 5))
-    assert window.mask().contains(window.transcript.mapTo(window, window.transcript.rect().center()))
+    window.copy_button.click()
+    assert app.clipboard().text() == "hello"
     window.close()
     assert app is not None
 
@@ -143,6 +200,20 @@ def test_record_again_replays_background_reveal(tmp_path):
     assert window._background_progress > 0
     window.close()
     assert app is not None
+
+
+def test_live_transcript_stays_centered_in_safe_area(tmp_path):
+    app = QApplication.instance() or QApplication([])
+    window = VoxFlowWindow(model_dir=tmp_path, start_worker=False)
+    window.reveal()
+    window.apply_transcript("partial", "The spoken words appear here")
+    window._background_progress = 0.55
+    window._animate_particles()
+    app.processEvents()
+    assert window.transcript.x() >= 70
+    assert window.transcript.geometry().right() <= window.width() - 70
+    assert window.transcript.textCursor().blockFormat().alignment() == Qt.AlignmentFlag.AlignCenter
+    window.close()
 
 
 def test_ambient_glow_has_a_moving_organic_contour(tmp_path):

@@ -9,7 +9,7 @@ from pathlib import Path
 
 import sounddevice as sd
 from PySide6.QtCore import QEasingCurve, QPointF, QPropertyAnimation, QRectF, Qt, QTimer
-from PySide6.QtGui import QColor, QCloseEvent, QCursor, QImage, QKeyEvent, QLinearGradient, QPainter, QRadialGradient, QRegion
+from PySide6.QtGui import QColor, QCloseEvent, QCursor, QImage, QKeyEvent, QLinearGradient, QPainter, QPainterPath, QRadialGradient, QRegion
 from PySide6.QtWidgets import (
     QApplication,
     QComboBox,
@@ -104,14 +104,17 @@ class VoxFlowWindow(QWidget):
         self.status_label.setObjectName("status")
         self.status_label.setWordWrap(True)
         self.status_label.setAlignment(Qt.AlignmentFlag.AlignCenter)
+        self.status_label.setMaximumWidth(660)
         self._add_text_shadow(self.status_label)
         layout.addWidget(self.status_label)
+        layout.setAlignment(self.status_label, Qt.AlignmentFlag.AlignHCenter)
         self.transcript = QTextEdit()
-        self.transcript.setPlaceholderText("Say something…")
+        self.transcript.setMaximumWidth(620)
         self.transcript.setReadOnly(True)
         self.transcript.viewport().setAutoFillBackground(False)
         self.transcript.setAlignment(Qt.AlignmentFlag.AlignCenter)
         layout.addWidget(self.transcript)
+        layout.setAlignment(self.transcript, Qt.AlignmentFlag.AlignHCenter)
         layout.addSpacing(18)
 
         controls = QHBoxLayout()
@@ -173,12 +176,9 @@ class VoxFlowWindow(QWidget):
     def _set_mode(self, mode: str) -> None:
         previous_mode = getattr(self, "mode", None)
         self.mode = mode
-        self.transcript.setVisible(mode != "idle")
-        self.status_label.setVisible(mode != "idle")
-        if mode != "idle":
-            self.transcript.setFixedHeight(82 if mode == "recording" else 102)
+        if mode == "recording":
+            self.transcript.setFixedHeight(82)
         self.device_button.setEnabled(mode != "recording")
-        self.time_label.setVisible(mode == "recording")
         self.capsule.setToolTip("Stop recording" if mode == "recording" else "Start voice input")
         self.capsule.setAccessibleName("Stop recording" if mode == "recording" else "Start voice input")
         self.record_button.setToolTip("Stop recording" if mode == "recording" else "Start recording")
@@ -196,8 +196,19 @@ class VoxFlowWindow(QWidget):
             if not self._background_retracting:
                 self._background_progress = 0.0
             self._background_revealing = False
+        self._sync_content_visibility()
         if self.isVisible():
             self._update_input_mask()
+
+    def _sync_content_visibility(self) -> None:
+        expanded = self.mode == "recording" and self._background_progress >= 0.50
+        for widget, visible in (
+            (self.status_label, expanded),
+            (self.time_label, expanded),
+            (self.transcript, expanded and bool(self.transcript.toPlainText())),
+        ):
+            if widget.isHidden() == visible:
+                widget.setVisible(visible)
 
     def _update_input_mask(self) -> None:
         if self.mode == "recording" or self._background_progress > 0:
@@ -207,10 +218,6 @@ class VoxFlowWindow(QWidget):
         region = QRegion()
         for control in (*self.action_buttons, self.capsule):
             region = region.united(QRegion(control.geometry().adjusted(-14, -14, 14, 14)))
-        if self.mode == "result":
-            for content in (self.status_label, self.transcript):
-                if content.isVisible():
-                    region = region.united(QRegion(content.geometry().adjusted(-6, -6, 6, 6)))
         self.setMask(region)
 
     def paintEvent(self, _event) -> None:
@@ -244,14 +251,7 @@ class VoxFlowWindow(QWidget):
         painter.setCompositionMode(QPainter.CompositionMode.CompositionMode_DestinationIn)
         painter.drawImage(0, 0, self._edge_mask)
         if self._background_progress < 1:
-            eased = self._background_progress ** 0.85
-            origin = self.capsule.mapTo(self, self.capsule.rect().center())
-            radius = max(1.0, eased * math.hypot(self.width() / 2, self.height()) * 1.05)
-            reveal = QRadialGradient(QPointF(origin), radius)
-            reveal.setColorAt(0.0, QColor(255, 255, 255, 255))
-            reveal.setColorAt(0.82, QColor(255, 255, 255, 255))
-            reveal.setColorAt(1.0, QColor(255, 255, 255, 0))
-            painter.fillRect(frame.rect(), reveal)
+            painter.drawImage(0, 0, self._make_reveal_mask(self._background_progress))
         painter.end()
         window_painter = QPainter(self)
         window_painter.drawImage(0, 0, frame)
@@ -308,6 +308,30 @@ class VoxFlowWindow(QWidget):
         painter.end()
         return mask
 
+    def _make_reveal_mask(self, progress: float) -> QImage:
+        """Grow a feathered capsule until it covers the whole backdrop."""
+        mask = QImage(self.size(), QImage.Format.Format_ARGB32_Premultiplied)
+        mask.fill(Qt.GlobalColor.transparent)
+        start = QRectF(self.capsule.geometry()).adjusted(3, 7, -3, -3)
+        end = QRectF(-250, -130, self.width() + 500, self.height() + 260)
+        progress = max(0.0, min(1.0, progress))
+        rect = QRectF(
+            start.left() + (end.left() - start.left()) * progress,
+            start.top() + (end.top() - start.top()) * progress,
+            start.width() + (end.width() - start.width()) * progress,
+            start.height() + (end.height() - start.height()) * progress,
+        )
+        painter = QPainter(mask)
+        painter.setRenderHint(QPainter.RenderHint.Antialiasing)
+        painter.setPen(Qt.PenStyle.NoPen)
+        for spread, opacity in ((6, 18), (4, 36), (2, 72), (0, 255)):
+            layer = rect.adjusted(-spread, -spread, spread, spread)
+            path = QPainterPath()
+            path.addRoundedRect(layer, layer.height() / 2, layer.height() / 2)
+            painter.fillPath(path, QColor(255, 255, 255, opacity))
+        painter.end()
+        return mask
+
     def _animate_particles(self) -> None:
         now = time.perf_counter()
         dt = min(1 / 20, max(1 / 120, now - self._last_particle_tick)) if self._last_particle_tick else 1 / 60
@@ -323,6 +347,8 @@ class VoxFlowWindow(QWidget):
             if self._background_progress <= 0:
                 self._background_retracting = False
                 self._update_input_mask()
+        if self.mode == "recording":
+            self._sync_content_visibility()
         if self.stream is not None:
             self.capsule.set_level(self.audio.recent_level)
         self.capsule.tick(dt)
@@ -496,6 +522,7 @@ class VoxFlowWindow(QWidget):
         self.capsule.reset()
         self.record_button.icon_name = "mic"
         self.record_button.update()
+        self._set_mode("finalizing")
         self.status_label.setText("Finalizing transcript…")
         if self.isVisible():
             self.repaint()
@@ -570,6 +597,7 @@ class VoxFlowWindow(QWidget):
         if kind not in {"partial", "final"}:
             raise ValueError(f"Unknown transcript kind: {kind}")
         self.transcript.setPlainText(text)
+        self.transcript.setAlignment(Qt.AlignmentFlag.AlignCenter)
         self.transcript.setReadOnly(kind != "final")
         if kind == "final":
             self._set_mode("result")

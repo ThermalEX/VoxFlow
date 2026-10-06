@@ -87,3 +87,32 @@ def test_recording_wave_responds_to_sound_then_settles():
         capsule.tick(1 / 60)
     assert capsule.level < 0.01
     capsule.close()
+
+
+def test_quiet_microphone_speech_has_visible_activity():
+    app = QApplication.instance() or QApplication([])
+    capsule = GlowCapsule()
+    capsule.set_recording(True)
+    capsule.set_level(0.00022)
+    for _ in range(20):
+        capsule.tick(1 / 60)
+    assert capsule.level < 0.08
+    capsule.show()
+    capsule.phase = 1.25
+    app.processEvents()
+    quiet = capsule.grab().toImage()
+    capsule.set_level(0.003)
+    for _ in range(12):
+        capsule.tick(1 / 60)
+    assert capsule.level > 0.5
+    capsule.phase = 1.25
+    app.processEvents()
+    speaking = capsule.grab().toImage()
+    assert max(abs(speaking.pixelColor(x, y).blue() - quiet.pixelColor(x, y).blue())
+               for x in range(35, 198, 4) for y in range(30, 47, 2)) > 35
+    capsule.set_level(0.00022)
+    for _ in range(30):
+        capsule.tick(1 / 60)
+    assert capsule.level < 0.08
+    capsule.close()
+    assert app is not None
