@@ -1,0 +1,22 @@
+[build-system]
+requires = ["setuptools>=75", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "voxflow"
+version = "0.1.0"
+description = "Local bilingual speech recognition desktop prototype"
+requires-python = ">=3.12,<3.13"
+dependencies = [
+    "numpy==2.3.5",
+    "PySide6==6.10.1",
+    "sherpa-onnx==1.13.8",
+    "sounddevice==0.5.3",
+    "soundfile==0.13.1",
+]
+
+[project.optional-dependencies]
+test = ["pytest==8.4.2"]
+
+[tool.setuptools.packages.find]
+include = ["voxflow*"]
