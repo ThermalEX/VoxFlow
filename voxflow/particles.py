@@ -33,7 +33,7 @@ class ParticleField:
                 y = height * (row + 0.5 + rng.uniform(-0.35, 0.35)) / rows
                 self.particles.append(
                     Particle(x, y, x, y, rng.uniform(0, 2 * math.pi),
-                             rng.uniform(0.6, 1.0), rng.randint(45, 95))
+                             rng.uniform(0.7, 1.05), rng.randint(90, 150))
                 )
 
     def resize(self, width: int, height: int) -> None:
@@ -58,8 +58,8 @@ class ParticleField:
         frame_scale = dt * 30
         damping = 0.90 ** frame_scale
         for particle in self.particles:
-            drift_x = math.sin(self.time * (0.72 + energy * 2.0) + particle.phase) * (3.5 + energy * 13)
-            drift_y = math.cos(self.time * (0.58 + energy * 1.7) + particle.phase) * (3.0 + energy * 11)
+            drift_x = math.sin(self.time * (0.72 + energy * 1.2) + particle.phase) * (3.5 + energy * 6)
+            drift_y = math.cos(self.time * (0.58 + energy * 1.0) + particle.phase) * (3.0 + energy * 5)
             target_x = particle.anchor_x + drift_x
             target_y = particle.anchor_y + drift_y
             particle.vx += (target_x - particle.x) * 0.025 * frame_scale

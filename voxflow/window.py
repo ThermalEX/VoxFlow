@@ -111,7 +111,7 @@ class VoxFlowWindow(QWidget):
         layout.addWidget(self.status_label)
         layout.setAlignment(self.status_label, Qt.AlignmentFlag.AlignHCenter)
         self.transcript = QTextEdit()
-        self.transcript.setFixedWidth(max(200, min(720, self.width() - 56)))
+        self.transcript.setFixedWidth(max(200, min(660, self.width() - 100)))
         self.transcript.setReadOnly(True)
         self.transcript.setVerticalScrollBarPolicy(Qt.ScrollBarPolicy.ScrollBarAlwaysOff)
         self.transcript.viewport().setAutoFillBackground(False)
@@ -262,13 +262,13 @@ class VoxFlowWindow(QWidget):
             if self.particles.pointer is not None:
                 distance = math.hypot(particle.x - self.particles.pointer[0], particle.y - self.particles.pointer[1])
                 highlight = int(max(0.0, 1 - distance / 142) * 65)
-            visibility = min(1.0, cloud_alpha / 140) ** 1.35
-            opacity = min(160, round((particle.opacity + highlight + energy * 35) * visibility))
+            visibility = min(1.0, cloud_alpha / 110) ** 0.9
+            opacity = min(190, round((particle.opacity + highlight + energy * 20) * visibility))
             color = QColor(214, 233, 255, opacity)
             if index % 7 == 0:
                 color = QColor(245, 250, 255, opacity)
             painter.setBrush(color)
-            radius = particle.radius * (1 + energy * 0.75)
+            radius = particle.radius * (1 + energy * 0.18)
             painter.drawEllipse(QPointF(particle.x, particle.y), radius, radius)
         painter.setCompositionMode(QPainter.CompositionMode.CompositionMode_DestinationIn)
         painter.drawImage(0, 0, self._edge_mask)
@@ -287,14 +287,14 @@ class VoxFlowWindow(QWidget):
         phase = self.particles.time
         width, height = self.width(), self.height()
         clouds = (
-            (0.28 + 0.025 * math.sin(phase * 0.48), 0.75 + 0.085 * math.sin(phase * 0.64),
-             0.25, 0.62, (43, 101, 212), 155 + round(22 * math.sin(phase * 0.7))),
-            (0.50 + 0.045 * math.sin(phase * 0.43 + 1.2), 0.77 + 0.070 * math.sin(phase * 0.52),
-             0.40, 0.67, (60, 120, 224), 175 - round(20 * math.sin(phase * 0.6))),
-            (0.72 + 0.025 * math.sin(phase * 0.50 + 2.2), 0.80 + 0.085 * math.cos(phase * 0.68),
-             0.25, 0.60, (67, 138, 238), 150 + round(18 * math.sin(phase * 0.8))),
-            (0.50 + 0.025 * math.sin(phase * 0.32 + 2), 0.96,
-             0.44, 0.40, (96, 160, 246), 82),
+            (0.26 + 0.025 * math.sin(phase * 0.48), 0.70 + 0.075 * math.sin(phase * 0.64),
+             0.34, 0.72, (43, 101, 212), 155 + round(22 * math.sin(phase * 0.7))),
+            (0.50 + 0.045 * math.sin(phase * 0.43 + 1.2), 0.71 + 0.065 * math.sin(phase * 0.52),
+             0.48, 0.75, (60, 120, 224), 175 - round(20 * math.sin(phase * 0.6))),
+            (0.74 + 0.025 * math.sin(phase * 0.50 + 2.2), 0.72 + 0.075 * math.cos(phase * 0.68),
+             0.34, 0.72, (67, 138, 238), 150 + round(18 * math.sin(phase * 0.8))),
+            (0.50 + 0.025 * math.sin(phase * 0.32 + 2), 0.91,
+             0.52, 0.46, (96, 160, 246), 82),
         )
         painter.setPen(Qt.PenStyle.NoPen)
         for cx, cy, rx, ry, rgb, opacity in clouds:
@@ -391,7 +391,7 @@ class VoxFlowWindow(QWidget):
                 self.particles.resize(self.width(), self.height())
                 self._edge_mask = None
                 if hasattr(self, "transcript"):
-                    self.transcript.setFixedWidth(max(200, min(720, self.width() - 56)))
+                    self.transcript.setFixedWidth(max(200, min(660, self.width() - 100)))
             self.move(area.x() + (area.width() - self.width()) // 2, area.y() + area.height() - self.height())
 
     def reveal(self) -> None:

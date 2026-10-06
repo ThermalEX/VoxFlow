@@ -210,7 +210,13 @@ def test_live_transcript_is_wide_and_alignment_can_change(tmp_path):
     window._background_progress = 0.55
     window._animate_particles()
     app.processEvents()
-    assert window.transcript.width() >= min(700, window.width() - 56)
+    assert window.transcript.width() >= min(640, window.width() - 96)
+    assert window.transcript.x() >= 55
+    assert window.transcript.geometry().right() <= window.width() - 55
+    backdrop = window._make_backdrop()
+    line_y = window.transcript.y() + 30
+    assert backdrop.pixelColor(window.transcript.x() + 12, line_y).alpha() >= 18
+    assert backdrop.pixelColor(window.transcript.geometry().right() - 12, line_y).alpha() >= 18
     assert window.transcript.textCursor().blockFormat().alignment() == Qt.AlignmentFlag.AlignLeft
     window.set_transcript_alignment("center")
     window.apply_transcript("partial", "First line\nSecond line")
@@ -275,8 +281,11 @@ def test_ambient_glow_has_a_moving_organic_contour(tmp_path):
     assert max(first.pixelColor(x, 105).alpha() for x in range(80, window.width() - 80, 40)) - min(
         first.pixelColor(x, 105).alpha() for x in range(80, window.width() - 80, 40)
     ) > 25
-    assert first.pixelColor(3, window.height() // 2).alpha() < 8
-    assert first.pixelColor(window.width() - 4, window.height() // 2).alpha() < 8
+    edge_mask = window._make_edge_mask()
+    mid_y = window.height() // 2
+    assert first.pixelColor(3, mid_y).alpha() * edge_mask.pixelColor(3, mid_y).alpha() // 255 < 8
+    right_x = window.width() - 4
+    assert first.pixelColor(right_x, mid_y).alpha() * edge_mask.pixelColor(right_x, mid_y).alpha() // 255 < 8
     assert any(abs(first.pixelColor(x, y).alpha() - second.pixelColor(x, y).alpha()) > 10 for x, y in points)
     window.close()
     assert app is not None

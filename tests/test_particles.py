@@ -40,7 +40,8 @@ def test_particle_seeds_cover_the_surface_without_an_oval_outline():
     assert len(top) > 100
     assert max(p.x for p in top) - min(p.x for p in top) > 0.85 * field.width
     assert max(p.x for p in middle) - min(p.x for p in middle) > 0.85 * field.width
-    assert sum(p.opacity for p in field.particles) / len(field.particles) < 75
+    average_opacity = sum(p.opacity for p in field.particles) / len(field.particles)
+    assert 95 <= average_opacity <= 140
 
 
 def test_particle_motion_responds_to_audio_energy():
@@ -49,4 +50,6 @@ def test_particle_motion_responds_to_audio_energy():
     for _ in range(20):
         quiet.step(None, dt=1 / 60, energy=0)
         speaking.step(None, dt=1 / 60, energy=0.8)
-    assert abs(quiet.particles[400].x - speaking.particles[400].x) > 1
+    movement = ((quiet.particles[400].x - speaking.particles[400].x) ** 2
+                + (quiet.particles[400].y - speaking.particles[400].y) ** 2) ** 0.5
+    assert 1 < movement < 8
