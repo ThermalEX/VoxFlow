@@ -26,17 +26,15 @@ class ParticleField:
         self.pointer: tuple[float, float] | None = None
         rng = random.Random(seed)
         self.particles: list[Particle] = []
-        count = 960
-        golden_angle = math.pi * (3 - math.sqrt(5))
-        for index in range(count):
-            radius = math.sqrt((index + 0.5) / count)
-            angle = index * golden_angle
-            x = width * (0.5 + 0.46 * radius * math.cos(angle)) + rng.uniform(-3, 3)
-            y = height * (0.53 + 0.46 * radius * math.sin(angle)) + rng.uniform(-3, 3)
-            opacity = round(35 + 130 * (1 - radius ** 1.8))
-            self.particles.append(
-                Particle(x, y, x, y, rng.uniform(0, 2 * math.pi), rng.uniform(0.65, 1.2), opacity)
-            )
+        columns, rows = 32, 20
+        for row in range(rows):
+            for column in range(columns):
+                x = width * (column + 0.5 + rng.uniform(-0.35, 0.35)) / columns
+                y = height * (row + 0.5 + rng.uniform(-0.35, 0.35)) / rows
+                self.particles.append(
+                    Particle(x, y, x, y, rng.uniform(0, 2 * math.pi),
+                             rng.uniform(0.6, 1.0), rng.randint(45, 95))
+                )
 
     def resize(self, width: int, height: int) -> None:
         if width == self.width and height == self.height:

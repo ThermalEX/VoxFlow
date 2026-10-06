@@ -9,7 +9,7 @@ from pathlib import Path
 
 import sounddevice as sd
 from PySide6.QtCore import QEasingCurve, QPointF, QPropertyAnimation, QRectF, Qt, QTimer
-from PySide6.QtGui import QColor, QCloseEvent, QCursor, QImage, QKeyEvent, QLinearGradient, QPainter, QPainterPath, QRadialGradient, QRegion, QTextCursor
+from PySide6.QtGui import QColor, QCloseEvent, QCursor, QImage, QKeyEvent, QLinearGradient, QPainter, QPainterPath, QRadialGradient, QRegion, QTextBlockFormat, QTextCursor
 from PySide6.QtWidgets import (
     QApplication,
     QComboBox,
@@ -111,11 +111,12 @@ class VoxFlowWindow(QWidget):
         layout.addWidget(self.status_label)
         layout.setAlignment(self.status_label, Qt.AlignmentFlag.AlignHCenter)
         self.transcript = QTextEdit()
-        self.transcript.setMaximumWidth(620)
+        self.transcript.setFixedWidth(max(200, min(720, self.width() - 56)))
         self.transcript.setReadOnly(True)
         self.transcript.setVerticalScrollBarPolicy(Qt.ScrollBarPolicy.ScrollBarAlwaysOff)
         self.transcript.viewport().setAutoFillBackground(False)
-        self.transcript.setAlignment(Qt.AlignmentFlag.AlignCenter)
+        self.transcript_alignment = "left"
+        self.set_transcript_alignment(self.transcript_alignment)
         layout.addWidget(self.transcript)
         layout.setAlignment(self.transcript, Qt.AlignmentFlag.AlignHCenter)
         layout.addSpacing(18)
@@ -156,6 +157,21 @@ class VoxFlowWindow(QWidget):
 
         self.device_box = QComboBox(self)
         self.device_box.hide()
+
+    def set_transcript_alignment(self, alignment: str) -> None:
+        options = {
+            "left": Qt.AlignmentFlag.AlignLeft,
+            "center": Qt.AlignmentFlag.AlignCenter,
+            "right": Qt.AlignmentFlag.AlignRight,
+        }
+        if alignment not in options:
+            raise ValueError(f"Unknown transcript alignment: {alignment}")
+        self.transcript_alignment = alignment
+        cursor = QTextCursor(self.transcript.document())
+        cursor.select(QTextCursor.SelectionType.Document)
+        block_format = QTextBlockFormat()
+        block_format.setAlignment(options[alignment])
+        cursor.mergeBlockFormat(block_format)
 
     @staticmethod
     def _add_text_shadow(label: QLabel) -> None:
@@ -229,24 +245,27 @@ class VoxFlowWindow(QWidget):
             return
         if self._edge_mask is None or self._edge_mask.size() != self.size():
             self._edge_mask = self._make_edge_mask()
-        frame = self._make_backdrop()
+        backdrop = self._make_backdrop()
+        frame = backdrop.copy()
         painter = QPainter(frame)
         painter.setRenderHint(QPainter.RenderHint.Antialiasing)
-        if self.particles.pointer is not None:
-            halo = QRadialGradient(QPointF(*self.particles.pointer), 145)
-            halo.setColorAt(0.0, QColor(181, 217, 255, 52))
-            halo.setColorAt(1.0, QColor(181, 217, 255, 0))
-            painter.fillRect(self.rect(), halo)
         painter.setPen(Qt.PenStyle.NoPen)
         energy = self.capsule.level if self.stream is not None else 0.0
         for index, particle in enumerate(self.particles.particles):
+            x, y = round(particle.x), round(particle.y)
+            if not (0 <= x < self.width() and 0 <= y < self.height()):
+                continue
+            cloud_alpha = backdrop.pixelColor(x, y).alpha()
+            if cloud_alpha < 20:
+                continue
             highlight = 0
             if self.particles.pointer is not None:
                 distance = math.hypot(particle.x - self.particles.pointer[0], particle.y - self.particles.pointer[1])
-                highlight = int(max(0.0, 1 - distance / 142) * 110)
-            opacity = min(235, particle.opacity + highlight + round(energy * 80))
+                highlight = int(max(0.0, 1 - distance / 142) * 65)
+            visibility = min(1.0, cloud_alpha / 140) ** 1.35
+            opacity = min(160, round((particle.opacity + highlight + energy * 35) * visibility))
             color = QColor(214, 233, 255, opacity)
-            if index % 5 == 0:
+            if index % 7 == 0:
                 color = QColor(245, 250, 255, opacity)
             painter.setBrush(color)
             radius = particle.radius * (1 + energy * 0.75)
@@ -371,6 +390,8 @@ class VoxFlowWindow(QWidget):
                 self.setFixedWidth(width)
                 self.particles.resize(self.width(), self.height())
                 self._edge_mask = None
+                if hasattr(self, "transcript"):
+                    self.transcript.setFixedWidth(max(200, min(720, self.width() - 56)))
             self.move(area.x() + (area.width() - self.width()) // 2, area.y() + area.height() - self.height())
 
     def reveal(self) -> None:
@@ -603,7 +624,7 @@ class VoxFlowWindow(QWidget):
         if kind not in {"partial", "final"}:
             raise ValueError(f"Unknown transcript kind: {kind}")
         self.transcript.setPlainText(text)
-        self.transcript.setAlignment(Qt.AlignmentFlag.AlignCenter)
+        self.set_transcript_alignment(self.transcript_alignment)
         self.transcript.setReadOnly(kind != "final")
         cursor = self.transcript.textCursor()
         cursor.movePosition(QTextCursor.MoveOperation.End)

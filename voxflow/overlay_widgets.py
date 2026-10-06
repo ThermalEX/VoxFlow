@@ -79,8 +79,12 @@ class GlowCapsule(QPushButton):
             wave.lineTo(body.right(), body.bottom())
             wave.closeSubpath()
             wave_light = QLinearGradient(0, body.top(), 0, body.bottom())
-            wave_light.setColorAt(0.0, QColor(70, 130, 235, 0))
-            wave_light.setColorAt(0.36, QColor(72, 137, 250, 0))
+            wave_light.setColorAt(0.0, QColor(70, 130, 235,
+                                              round(alpha * self.level * 0.5)))
+            wave_light.setColorAt(0.16, QColor(72, 137, 250,
+                                               round(alpha * self.level * 0.85)))
+            wave_light.setColorAt(0.28, QColor(89, 157, 255,
+                                               round(alpha * self.level * 1.15)))
             wave_light.setColorAt(0.52, QColor(82, 155, 255,
                                                round((24 + 115 * self.level) * alpha / 130)))
             wave_light.setColorAt(0.78, QColor(113, 181, 255, round(alpha * 0.55 * (1 + 0.35 * activity))))

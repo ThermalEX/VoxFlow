@@ -110,6 +110,10 @@ def test_quiet_microphone_speech_has_visible_activity():
     speaking = capsule.grab().toImage()
     assert max(abs(speaking.pixelColor(x, y).blue() - quiet.pixelColor(x, y).blue())
                for x in range(35, 198, 4) for y in range(30, 47, 2)) > 35
+    assert max(abs(speaking.pixelColor(x, y).blue() - quiet.pixelColor(x, y).blue())
+               for x in range(35, 198, 4) for y in range(20, 32, 2)) > 25
+    assert max(abs(speaking.pixelColor(x, y).blue() - quiet.pixelColor(x, y).blue())
+               for x in range(35, 198, 4) for y in range(10, 20, 2)) > 15
     capsule.set_level(0.00022)
     for _ in range(30):
         capsule.tick(1 / 60)

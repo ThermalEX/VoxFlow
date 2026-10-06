@@ -4,7 +4,7 @@ from voxflow.particles import ParticleField
 def test_particles_flow_and_react_to_nearby_cursor():
     calm = ParticleField(820, 300, seed=7)
     disturbed = ParticleField(820, 300, seed=7)
-    assert len(calm.particles) >= 700
+    assert len(calm.particles) >= 600
     target = disturbed.particles[len(disturbed.particles) // 2]
     pointer = (target.x - 10, target.y)
     before = (target.x, target.y)
@@ -33,12 +33,14 @@ def test_particle_clock_uses_elapsed_time():
     assert abs(field.time - 1 / 60) < 1e-9
 
 
-def test_particles_form_a_soft_cloud_instead_of_a_rectangle():
+def test_particle_seeds_cover_the_surface_without_an_oval_outline():
     field = ParticleField(820, 300)
     top = [p for p in field.particles if p.y < 75]
     middle = [p for p in field.particles if 120 < p.y < 180]
-    assert len(middle) > len(top)
-    assert max(p.x for p in top) - min(p.x for p in top) < max(p.x for p in middle) - min(p.x for p in middle)
+    assert len(top) > 100
+    assert max(p.x for p in top) - min(p.x for p in top) > 0.85 * field.width
+    assert max(p.x for p in middle) - min(p.x for p in middle) > 0.85 * field.width
+    assert sum(p.opacity for p in field.particles) / len(field.particles) < 75
 
 
 def test_particle_motion_responds_to_audio_energy():

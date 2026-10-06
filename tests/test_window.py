@@ -202,7 +202,7 @@ def test_record_again_replays_background_reveal(tmp_path):
     assert app is not None
 
 
-def test_live_transcript_stays_centered_in_safe_area(tmp_path):
+def test_live_transcript_is_wide_and_alignment_can_change(tmp_path):
     app = QApplication.instance() or QApplication([])
     window = VoxFlowWindow(model_dir=tmp_path, start_worker=False)
     window.reveal()
@@ -210,9 +210,29 @@ def test_live_transcript_stays_centered_in_safe_area(tmp_path):
     window._background_progress = 0.55
     window._animate_particles()
     app.processEvents()
-    assert window.transcript.x() >= 70
-    assert window.transcript.geometry().right() <= window.width() - 70
+    assert window.transcript.width() >= min(700, window.width() - 56)
+    assert window.transcript.textCursor().blockFormat().alignment() == Qt.AlignmentFlag.AlignLeft
+    window.set_transcript_alignment("center")
+    window.apply_transcript("partial", "First line\nSecond line")
     assert window.transcript.textCursor().blockFormat().alignment() == Qt.AlignmentFlag.AlignCenter
+    assert window.transcript.document().lastBlock().blockFormat().alignment() == Qt.AlignmentFlag.AlignCenter
+    window.close()
+
+
+def test_particles_fade_out_with_the_blue_background(tmp_path):
+    app = QApplication.instance() or QApplication([])
+    window = VoxFlowWindow(model_dir=tmp_path, start_worker=False)
+    window.reveal()
+    window._background_progress = 1.0
+    window.update()
+    app.processEvents()
+    rendered = window.grab().toImage()
+    cloud = window._make_backdrop()
+    stray = sum(
+        1 for y in range(15, 180, 2) for x in range(30, window.width() - 30, 2)
+        if cloud.pixelColor(x, y).alpha() < 10 and rendered.pixelColor(x, y).alpha() > 25
+    )
+    assert stray < 5
     window.close()
 
 
