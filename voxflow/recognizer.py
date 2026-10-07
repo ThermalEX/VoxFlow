@@ -5,6 +5,10 @@ from pathlib import Path
 import numpy as np
 
 
+SEGMENT_MIN_SECONDS = 6
+SEGMENT_MAX_SECONDS = 10
+
+
 class SenseVoiceRecognizer:
     def __init__(self, model_dir: str | Path) -> None:
         model_dir = Path(model_dir)
@@ -51,7 +55,7 @@ class SenseVoiceRecognizer:
             self._cache_rate = sample_rate
             self._cached_until = 0
             self._cached_texts = []
-        while audio.size - self._cached_until >= 22 * sample_rate:
+        while audio.size - self._cached_until >= SEGMENT_MAX_SECONDS * sample_rate:
             boundary = self._quiet_boundary(audio, self._cached_until, sample_rate)
             self._cached_texts.append(self._decode_segment(audio[self._cached_until:boundary], sample_rate))
             self._cached_until = boundary
@@ -77,8 +81,8 @@ class SenseVoiceRecognizer:
     @staticmethod
     def _quiet_boundary(audio: np.ndarray, start: int, sample_rate: int) -> int:
         frame = max(1, int(sample_rate * 0.12))
-        lower = start + 18 * sample_rate
-        upper = start + 22 * sample_rate - frame
+        lower = start + SEGMENT_MIN_SECONDS * sample_rate
+        upper = start + SEGMENT_MAX_SECONDS * sample_rate - frame
         quietest = lower
         lowest_energy = float("inf")
         for offset in range(lower, upper + 1, frame):

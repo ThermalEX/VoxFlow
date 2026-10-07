@@ -78,8 +78,8 @@ def test_long_recording_reuses_completed_audio_segments():
     sample_rate = 100
     first = recognizer.recognize_incremental(np.ones(25 * sample_rate), sample_rate, session_token=1)
     committed = recognizer._cached_until
-    assert committed >= 18 * sample_rate
-    assert len(recognizer._cached_texts) == 1
+    assert committed >= 12 * sample_rate
+    assert len(recognizer._cached_texts) >= 2
     assert first.startswith("segment1")
     before = len(recognizer.decoded)
     second = recognizer.recognize_incremental(np.ones(27 * sample_rate), sample_rate, session_token=1)
@@ -102,3 +102,17 @@ def test_official_sample_audio_produces_text(language):
     assert len(result.strip()) >= 5
     if language == "zh":
         assert result.endswith("。")
+
+
+@pytest.mark.skipif(not (MODEL_DIR / "model.int8.onnx").exists(), reason="model not downloaded")
+def test_long_mixed_audio_keeps_the_middle_utterance():
+    english, sample_rate = sf.read(MODEL_DIR / "test_wavs" / "en.wav", dtype="float32")
+    chinese, chinese_rate = sf.read(MODEL_DIR / "test_wavs" / "zh.wav", dtype="float32")
+    assert sample_rate == chinese_rate
+    pause = np.zeros(int(sample_rate * 0.35), dtype=np.float32)
+    recording = np.concatenate((english, pause, chinese, pause, english))
+    result = SenseVoiceRecognizer(MODEL_DIR).recognize_incremental(
+        recording, sample_rate, session_token=1, final=True
+    )
+    assert "chieftain" in result.lower()
+    assert sum(0x4E00 <= ord(character) <= 0x9FFF for character in result) >= 5

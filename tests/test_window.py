@@ -425,6 +425,29 @@ def test_long_live_transcript_scrolls_to_the_latest_words(tmp_path):
     window.close()
 
 
+def test_result_expansion_returns_to_start_after_live_autoscroll(tmp_path):
+    app = QApplication.instance() or QApplication([])
+    window = VoxFlowWindow(model_dir=tmp_path, start_worker=False)
+    window.reveal()
+    window._set_mode("recording")
+    window._background_progress = 1.0
+    transcript = "Beginning of recording. " + "later words " * 180
+    window.apply_transcript("partial", transcript)
+    app.processEvents()
+    scrollbar = window.transcript.verticalScrollBar()
+    assert scrollbar.value() > 0
+
+    window.apply_transcript("final", transcript)
+    window._result_animation.setCurrentTime(260)
+    app.processEvents()
+
+    assert window.height() > 310
+    assert scrollbar.value() == 0
+    assert window.transcript.textCursor().position() == 0
+    assert window.transcript.toPlainText().startswith("Beginning of recording.")
+    window.close()
+
+
 def test_recording_continues_past_thirty_seconds(tmp_path):
     app = QApplication.instance() or QApplication([])
     window = VoxFlowWindow(model_dir=tmp_path, start_worker=False)
