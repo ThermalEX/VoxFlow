@@ -266,6 +266,7 @@ class SettingsWindow(QWidget):
         reset = QPushButton("Restore appearance defaults")
         reset.setObjectName("resetButton")
         reset.setIcon(line_icon("restore", "#285C9D"))
+        reset.setIconSize(QSize(18, 18))
         reset.setCursor(Qt.CursorShape.PointingHandCursor)
         reset.clicked.connect(self._reset_appearance)
         layout.addWidget(reset, alignment=Qt.AlignmentFlag.AlignLeft)

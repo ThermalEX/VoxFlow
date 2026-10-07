@@ -1,7 +1,7 @@
 """Small vector-painted icons shared by the tray and settings window."""
 
 from PySide6.QtCore import QPointF, QRectF, Qt
-from PySide6.QtGui import QColor, QIcon, QPainter, QPen, QPixmap
+from PySide6.QtGui import QColor, QIcon, QPainter, QPainterPath, QPen, QPixmap
 
 
 def app_icon() -> QIcon:
@@ -59,8 +59,13 @@ def line_icon(name: str, color: str = "#526376") -> QIcon:
         ):
             painter.drawLine(QPointF(x1, y1), QPointF(x2, y2))
     elif name == "restore":
-        painter.drawArc(QRectF(3, 3, 14, 14), 35 * 16, 290 * 16)
-        painter.drawLine(QPointF(4.0, 5.0), QPointF(4.0, 10.0))
-        painter.drawLine(QPointF(4.0, 5.0), QPointF(8.5, 5.5))
+        painter.drawArc(QRectF(3, 3, 14, 14), 165 * 16, 270 * 16)
+        arrow = QPainterPath()
+        arrow.moveTo(QPointF(2.0, 7.3))
+        arrow.lineTo(QPointF(7.8, 5.2))
+        arrow.lineTo(QPointF(6.9, 11.1))
+        arrow.closeSubpath()
+        painter.setPen(Qt.PenStyle.NoPen)
+        painter.fillPath(arrow, QColor(color))
     painter.end()
     return QIcon(image)
