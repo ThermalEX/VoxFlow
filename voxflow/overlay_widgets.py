@@ -6,6 +6,8 @@ from PySide6.QtCore import QPointF, QRectF, Qt
 from PySide6.QtGui import QColor, QLinearGradient, QPainter, QPainterPath, QPen
 from PySide6.QtWidgets import QPushButton
 
+from .appearance import DEFAULT_CAPSULE, tint
+
 
 class GlowCapsule(QPushButton):
     def __init__(self, parent=None) -> None:
@@ -17,6 +19,15 @@ class GlowCapsule(QPushButton):
         self.target_level = 0.0
         self.phase = 0.0
         self.recording = False
+        self.accent_color = QColor(DEFAULT_CAPSULE)
+
+    def set_accent_color(self, color: QColor) -> None:
+        if color.isValid():
+            self.accent_color = QColor(color)
+            self.update()
+
+    def _tint(self, color: QColor) -> QColor:
+        return tint(color, self.accent_color, DEFAULT_CAPSULE)
 
     def set_recording(self, recording: bool) -> None:
         self.recording = recording
@@ -55,13 +66,13 @@ class GlowCapsule(QPushButton):
         glow.setColorAt(0.0, QColor(0, 2, 8, 32))
         glow.setColorAt(0.24, QColor(2, 7, 18, 88))
         glow.setColorAt(0.42, QColor(4, 13, 34, 148))
-        glow.setColorAt(0.60, QColor(8, 28, 70, 205))
-        glow.setColorAt(0.82, QColor(22 + round(26 * activity + 5 * breath),
+        glow.setColorAt(0.60, self._tint(QColor(8, 28, 70, 205)))
+        glow.setColorAt(0.82, self._tint(QColor(22 + round(26 * activity + 5 * breath),
                                     66 + round(31 * activity + 5 * breath),
-                                    150 + round(33 * activity), 242))
-        glow.setColorAt(1.0, QColor(39 + round(44 * activity + 8 * breath),
+                                    150 + round(33 * activity), 242)))
+        glow.setColorAt(1.0, self._tint(QColor(39 + round(44 * activity + 8 * breath),
                                    102 + round(50 * activity + 7 * breath),
-                                   214 + round(20 * activity + 5 * breath), 255))
+                                   214 + round(20 * activity + 5 * breath), 255)))
         painter.fillRect(body, glow)
 
         for offset, alpha in ((-9, 70), (2, 130)):
@@ -79,16 +90,16 @@ class GlowCapsule(QPushButton):
             wave.lineTo(body.right(), body.bottom())
             wave.closeSubpath()
             wave_light = QLinearGradient(0, body.top(), 0, body.bottom())
-            wave_light.setColorAt(0.0, QColor(70, 130, 235,
-                                              round(alpha * self.level * 0.5)))
-            wave_light.setColorAt(0.16, QColor(72, 137, 250,
-                                               round(alpha * self.level * 0.85)))
-            wave_light.setColorAt(0.28, QColor(89, 157, 255,
-                                               round(alpha * self.level * 1.15)))
-            wave_light.setColorAt(0.52, QColor(82, 155, 255,
-                                               round((24 + 115 * self.level) * alpha / 130)))
-            wave_light.setColorAt(0.78, QColor(113, 181, 255, round(alpha * 0.55 * (1 + 0.35 * activity))))
-            wave_light.setColorAt(1.0, QColor(170, 214, 255, round(alpha * (1 + 0.35 * activity))))
+            wave_light.setColorAt(0.0, self._tint(QColor(70, 130, 235,
+                                              round(alpha * self.level * 0.5))))
+            wave_light.setColorAt(0.16, self._tint(QColor(72, 137, 250,
+                                               round(alpha * self.level * 0.85))))
+            wave_light.setColorAt(0.28, self._tint(QColor(89, 157, 255,
+                                               round(alpha * self.level * 1.15))))
+            wave_light.setColorAt(0.52, self._tint(QColor(82, 155, 255,
+                                               round((24 + 115 * self.level) * alpha / 130))))
+            wave_light.setColorAt(0.78, self._tint(QColor(113, 181, 255, round(alpha * 0.55 * (1 + 0.35 * activity)))))
+            wave_light.setColorAt(1.0, self._tint(QColor(170, 214, 255, round(alpha * (1 + 0.35 * activity)))))
             painter.fillPath(wave, wave_light)
         painter.restore()
         painter.setPen(QPen(QColor(27, 42, 65, 185), 1.25))

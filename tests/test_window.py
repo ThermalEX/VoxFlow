@@ -8,6 +8,7 @@ os.environ.setdefault("QT_QPA_PLATFORM", "offscreen")
 
 from PySide6.QtWidgets import QApplication
 from PySide6.QtCore import QPoint, QSettings, Qt
+from PySide6.QtGui import QColor, QFont
 from PySide6.QtTest import QTest
 
 from voxflow.window import VoxFlowWindow
@@ -212,7 +213,7 @@ def test_record_again_interrupts_result_expansion(tmp_path):
     window._set_mode("recording")
     window._background_progress = 1.0
     window.apply_transcript("final", "long result " * 500)
-    QTest.qWait(80)
+    window._result_animation.setCurrentTime(80)
     assert window.height() > 310
     window._set_mode("recording")
     assert window.height() == 310
@@ -271,26 +272,30 @@ def test_failed_confirm_keeps_result_and_copies_for_manual_paste(tmp_path, prese
     window.close()
 
 
-def test_settings_panel_saves_alignment(tmp_path):
+def test_standalone_settings_saves_alignment_without_revealing_overlay(tmp_path):
     app = QApplication.instance() or QApplication([])
     settings = QSettings(str(tmp_path / "voxflow.ini"), QSettings.Format.IniFormat)
     window = VoxFlowWindow(model_dir=tmp_path, start_worker=False, settings=settings)
-    window.reveal()
     window.device_button.click()
-    assert window.settings_panel.isVisible()
+    assert window.settings_window.isVisible()
+    assert not window.isVisible()
+    assert window.settings_window.pages.count() == 2
+    assert window.settings_window.categories.item(0).text() == "Personalization"
+    assert window.settings_window.categories.item(1).text() == "App settings"
+    window.settings_window.categories.setCurrentRow(1)
     window.alignment_box.setCurrentIndex(window.alignment_box.findData("right"))
     assert window.transcript_alignment == "right"
     window.close()
     reopened = VoxFlowWindow(model_dir=tmp_path, start_worker=False, settings=settings)
     assert reopened.transcript_alignment == "right"
     reopened.open_settings()
-    assert reopened.isVisible()
-    assert reopened.settings_panel.isVisible()
+    assert not reopened.isVisible()
+    assert reopened.settings_window.isVisible()
     reopened.close()
     assert app is not None
 
 
-def test_settings_panel_remembers_microphone(tmp_path, monkeypatch):
+def test_settings_window_remembers_microphone(tmp_path, monkeypatch):
     QApplication.instance() or QApplication([])
     devices = [
         {"name": "First mic", "hostapi": 0, "max_input_channels": 1},
@@ -306,6 +311,42 @@ def test_settings_panel_remembers_microphone(tmp_path, monkeypatch):
     window.close()
     reopened = VoxFlowWindow(model_dir=tmp_path, start_worker=False, settings=settings)
     assert reopened.device_box.currentIndex() == 1
+    reopened.close()
+
+
+def test_personalization_preview_and_persistence(tmp_path):
+    app = QApplication.instance() or QApplication([])
+    settings = QSettings(str(tmp_path / "appearance.ini"), QSettings.Format.IniFormat)
+    window = VoxFlowWindow(model_dir=tmp_path, start_worker=False, settings=settings)
+    window.open_settings()
+    app.processEvents()
+    assert not window.isVisible()
+    assert window.settings_window.isVisible()
+    white = window.settings_window.grab().toImage().pixelColor(700, 470)
+    assert min(white.red(), white.green(), white.blue()) > 240
+
+    window.settings_window.font_box.setCurrentFont(QFont("Arial"))
+    window.settings_window.text_size_box.setValue(32)
+    window.settings_window.set_color("background", QColor("#e84759"))
+    window.settings_window.set_color("capsule", QColor("#43bf70"))
+    assert window.transcript.font().family() == window.settings_window.font_box.currentFont().family()
+    assert window.transcript.font().pixelSize() == 32
+    assert window.transcript.document().defaultFont().pixelSize() == 32
+    assert window.background_color.name() == "#e84759"
+    assert window.capsule.accent_color.name() == "#43bf70"
+    assert window._make_backdrop().pixelColor(410, 240).red() > window._make_backdrop().pixelColor(410, 240).blue()
+    window.capsule.show()
+    app.processEvents()
+    capsule_color = window.capsule.grab().toImage().pixelColor(116, 62)
+    assert capsule_color.green() > capsule_color.blue()
+    window.close()
+
+    reopened = VoxFlowWindow(model_dir=tmp_path, start_worker=False, settings=settings)
+    assert settings.value("appearance/font") == window.settings_window.font_box.currentFont().family()
+    assert reopened.transcript.font().family() == window.transcript.font().family()
+    assert reopened.transcript.font().pixelSize() == 32
+    assert reopened.background_color.name() == "#e84759"
+    assert reopened.capsule.accent_color.name() == "#43bf70"
     reopened.close()
 
 

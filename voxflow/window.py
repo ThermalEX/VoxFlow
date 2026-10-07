@@ -9,26 +9,25 @@ from pathlib import Path
 
 import sounddevice as sd
 from PySide6.QtCore import QEasingCurve, QPointF, QPropertyAnimation, QRectF, QSettings, Qt, QTimer, QVariantAnimation
-from PySide6.QtGui import QColor, QCloseEvent, QCursor, QImage, QKeyEvent, QLinearGradient, QPainter, QPainterPath, QRadialGradient, QRegion, QTextBlockFormat, QTextCursor
+from PySide6.QtGui import QColor, QCloseEvent, QCursor, QFont, QImage, QKeyEvent, QLinearGradient, QPainter, QPainterPath, QRadialGradient, QRegion, QTextBlockFormat, QTextCursor
 from PySide6.QtWidgets import (
     QApplication,
-    QComboBox,
     QGraphicsDropShadowEffect,
-    QFrame,
     QHBoxLayout,
     QLabel,
-    QPushButton,
     QTextEdit,
     QVBoxLayout,
     QWidget,
 )
 
 from .audio import AudioBuffer
+from .appearance import DEFAULT_BACKGROUND, DEFAULT_CAPSULE, DEFAULT_FONT, DEFAULT_TEXT_SIZE, saved_color, tint
 from .input_target import WindowsPasteTarget
 from .overlay_widgets import CircleIconButton, GlowCapsule
 from .particles import ParticleField
 from .recognizer import initialize_worker, transcribe_in_worker, worker_ready
 from .scheduler import RecognitionJob, RecognitionScheduler
+from .settings_window import SettingsWindow
 
 
 HOTKEY_ID = 0x564F
@@ -74,6 +73,17 @@ class VoxFlowWindow(QWidget):
         self._place_at_bottom()
         self.particles.resize(self.width(), self.height())
         self._build_ui()
+        self.settings_window = SettingsWindow(self.settings)
+        self.device_box = self.settings_window.device_box
+        self.alignment_box = self.settings_window.alignment_box
+        self.settings_window.alignment_changed.connect(self.set_transcript_alignment)
+        self.settings_window.font_changed.connect(lambda _family: self._apply_transcript_font())
+        self.settings_window.text_size_changed.connect(lambda _size: self._apply_transcript_font())
+        self.settings_window.background_color_changed.connect(self._set_background_color)
+        self.settings_window.capsule_color_changed.connect(self.capsule.set_accent_color)
+        self._apply_transcript_font()
+        self._set_background_color(saved_color(self.settings.value("appearance/background_color", DEFAULT_BACKGROUND), DEFAULT_BACKGROUND))
+        self.capsule.set_accent_color(saved_color(self.settings.value("appearance/capsule_color", DEFAULT_CAPSULE), DEFAULT_CAPSULE))
         self._load_devices()
         self.device_box.currentIndexChanged.connect(self._save_device_setting)
         self._set_mode("idle")
@@ -92,28 +102,19 @@ class VoxFlowWindow(QWidget):
             self._start_worker()
 
     def _build_ui(self) -> None:
+        self.setFont(QFont(DEFAULT_FONT))
         self.setStyleSheet(
             """
-            QWidget { color: #F3F7FF; font-family: 'Segoe UI'; }
+            QWidget { color: #F3F7FF; }
             QLabel#status { font-size: 16px; font-weight: 500; color: #F3F7FF; }
             QLabel#muted { font-size: 11px; color: #DBE9FF; }
-            QTextEdit { background: transparent; border: none; color: #F3F7FF; font-size: 24px;
+            QTextEdit { background: transparent; border: none; color: #F3F7FF;
                         selection-background-color: #376DE0; }
             QScrollBar:vertical { background: transparent; width: 6px; margin: 0; }
             QScrollBar::handle:vertical { background: rgba(187, 216, 255, 145); border-radius: 3px;
                                            min-height: 28px; }
             QScrollBar::add-line:vertical, QScrollBar::sub-line:vertical { height: 0; }
             QScrollBar::add-page:vertical, QScrollBar::sub-page:vertical { background: transparent; }
-            QFrame#settingsCard { background-color: rgba(12, 20, 37, 245);
-                                  border: 1px solid rgba(151, 188, 255, 86); border-radius: 20px; }
-            QFrame#settingsCard QLabel { font-size: 12px; color: #DCE9FF; border: none; }
-            QFrame#settingsCard QLabel#settingsTitle { font-size: 17px; font-weight: 600; color: white; }
-            QFrame#settingsCard QLabel#settingsHint { font-size: 11px; color: #B6C9EA; }
-            QFrame#settingsCard QComboBox { background: #192B4C; color: white; border: 1px solid #456391;
-                                             border-radius: 8px; padding: 5px 9px; min-height: 24px; }
-            QFrame#settingsCard QPushButton { background: transparent; color: #DCE9FF; border: none;
-                                               font-size: 18px; min-width: 28px; min-height: 28px; }
-            QFrame#settingsCard QPushButton:hover { background: #294469; border-radius: 14px; }
             """
         )
         layout = QVBoxLayout(self)
@@ -148,7 +149,7 @@ class VoxFlowWindow(QWidget):
         controls.setSpacing(14)
         controls.addStretch(1)
         self.device_button = CircleIconButton("settings", "Open settings")
-        self.device_button.clicked.connect(self._toggle_settings)
+        self.device_button.clicked.connect(self.open_settings)
         controls.addWidget(self.device_button)
         self.confirm_button = CircleIconButton("confirm", "Confirm and insert text")
         self.confirm_button.setEnabled(False)
@@ -179,41 +180,6 @@ class VoxFlowWindow(QWidget):
         controls.addStretch(1)
         layout.addLayout(controls)
 
-        self.settings_panel = QFrame(self)
-        self.settings_panel.setObjectName("settingsCard")
-        self.settings_panel.setFixedSize(330, 202)
-        panel_layout = QVBoxLayout(self.settings_panel)
-        panel_layout.setContentsMargins(16, 12, 16, 12)
-        panel_layout.setSpacing(4)
-        header = QHBoxLayout()
-        title = QLabel("Settings")
-        title.setObjectName("settingsTitle")
-        header.addWidget(title)
-        header.addStretch()
-        close_settings = QPushButton("×")
-        close_settings.setAccessibleName("Close settings")
-        close_settings.clicked.connect(self._toggle_settings)
-        header.addWidget(close_settings)
-        panel_layout.addLayout(header)
-        panel_layout.addWidget(QLabel("Microphone"))
-        self.device_box = QComboBox(self.settings_panel)
-        self.device_box.setAccessibleName("Microphone")
-        panel_layout.addWidget(self.device_box)
-        panel_layout.addWidget(QLabel("Transcript alignment"))
-        self.alignment_box = QComboBox(self.settings_panel)
-        self.alignment_box.setAccessibleName("Transcript alignment")
-        for label, value in (("Left", "left"), ("Center", "center"), ("Right", "right")):
-            self.alignment_box.addItem(label, value)
-        self.alignment_box.setCurrentIndex(self.alignment_box.findData(self.transcript_alignment))
-        self.alignment_box.currentIndexChanged.connect(
-            lambda _index: self.set_transcript_alignment(str(self.alignment_box.currentData()))
-        )
-        panel_layout.addWidget(self.alignment_box)
-        hint = QLabel("Confirm inserts into the last active app.")
-        hint.setObjectName("settingsHint")
-        panel_layout.addWidget(hint)
-        self.settings_panel.hide()
-
     def set_transcript_alignment(self, alignment: str, persist: bool = True) -> None:
         options = {
             "left": Qt.AlignmentFlag.AlignLeft,
@@ -243,26 +209,31 @@ class VoxFlowWindow(QWidget):
         effect.setColor(QColor(12, 31, 87, 180))
         label.setGraphicsEffect(effect)
 
-    def _toggle_settings(self) -> None:
-        if self.settings_panel.isVisible():
-            self.settings_panel.hide()
-        else:
-            self.layout().activate()
-            self._position_settings_panel()
-            self.settings_panel.show()
-            self.settings_panel.raise_()
-        self._update_input_mask()
-
     def open_settings(self) -> None:
-        if not self.isVisible():
-            self.reveal()
-        if not self.settings_panel.isVisible():
-            self._toggle_settings()
+        self.settings_window.show()
+        self.settings_window.raise_()
+        self.settings_window.activateWindow()
 
-    def _position_settings_panel(self) -> None:
-        x = min(self.width() - self.settings_panel.width() - 16, max(16, self.device_button.x() - 16))
-        y = max(8, self.device_button.y() - self.settings_panel.height() - 12)
-        self.settings_panel.move(x, y)
+    def _apply_transcript_font(self) -> None:
+        family = str(self.settings.value("appearance/font", DEFAULT_FONT))
+        try:
+            size = int(self.settings.value("appearance/text_size", DEFAULT_TEXT_SIZE))
+        except (TypeError, ValueError):
+            size = DEFAULT_TEXT_SIZE
+        font = QFont(family)
+        font.setPixelSize(max(14, min(48, size)))
+        self.transcript.setFont(font)
+        self.transcript.document().setDefaultFont(font)
+        if getattr(self, "mode", None) == "result":
+            self._expand_for_result()
+
+    def _set_background_color(self, color: QColor) -> None:
+        self.background_color = QColor(color)
+        self._particle_colors = (
+            tint(QColor(214, 233, 255), color, DEFAULT_BACKGROUND),
+            tint(QColor(245, 250, 255), color, DEFAULT_BACKGROUND),
+        )
+        self.update()
 
     def _save_device_setting(self, _index: int) -> None:
         if self.device_box.currentIndex() >= 0:
@@ -319,8 +290,6 @@ class VoxFlowWindow(QWidget):
         region = QRegion()
         for control in (*self.action_buttons, self.capsule):
             region = region.united(QRegion(control.geometry().adjusted(-14, -14, 14, 14)))
-        if self.settings_panel.isVisible():
-            region = region.united(QRegion(self.settings_panel.geometry()))
         self.setMask(region)
 
     def paintEvent(self, _event) -> None:
@@ -348,9 +317,8 @@ class VoxFlowWindow(QWidget):
                 highlight = int(max(0.0, 1 - distance / 142) * 65)
             visibility = min(1.0, cloud_alpha / 110) ** 0.9
             opacity = min(190, round((particle.opacity + highlight + energy * 20) * visibility))
-            color = QColor(214, 233, 255, opacity)
-            if index % 7 == 0:
-                color = QColor(245, 250, 255, opacity)
+            color = QColor(self._particle_colors[1 if index % 7 == 0 else 0])
+            color.setAlpha(opacity)
             painter.setBrush(color)
             radius = particle.radius * (1 + energy * 0.18)
             painter.drawEllipse(QPointF(particle.x, particle.y), radius, radius)
@@ -386,11 +354,12 @@ class VoxFlowWindow(QWidget):
             painter.translate(cx * width, cy * height)
             painter.scale(rx * width, ry * height)
             glow = QRadialGradient(QPointF(0, 0), 1)
-            glow.setColorAt(0.0, QColor(*rgb, opacity))
-            glow.setColorAt(0.48, QColor(*rgb, round(opacity * 0.68)))
-            glow.setColorAt(0.72, QColor(*rgb, round(opacity * 0.15)))
-            glow.setColorAt(0.90, QColor(*rgb, 0))
-            glow.setColorAt(1.0, QColor(*rgb, 0))
+            shade = tint(QColor(*rgb), self.background_color, DEFAULT_BACKGROUND)
+            glow.setColorAt(0.0, QColor(shade.red(), shade.green(), shade.blue(), opacity))
+            glow.setColorAt(0.48, QColor(shade.red(), shade.green(), shade.blue(), round(opacity * 0.68)))
+            glow.setColorAt(0.72, QColor(shade.red(), shade.green(), shade.blue(), round(opacity * 0.15)))
+            glow.setColorAt(0.90, QColor(shade.red(), shade.green(), shade.blue(), 0))
+            glow.setColorAt(1.0, QColor(shade.red(), shade.green(), shade.blue(), 0))
             painter.fillRect(QRectF(-1, -1, 2, 2), glow)
             painter.restore()
         painter.end()
@@ -489,8 +458,6 @@ class VoxFlowWindow(QWidget):
         self.particles.resize(self.width(), self.height())
         self._edge_mask = None
         self._place_at_bottom()
-        if self.settings_panel.isVisible():
-            self._position_settings_panel()
         self.layout().activate()
 
     def _expand_for_result(self) -> None:
@@ -544,7 +511,6 @@ class VoxFlowWindow(QWidget):
             target = int(self._result_animation.endValue())
             self._result_animation.stop()
             self._set_overlay_height(target)
-        self.settings_panel.hide()
         if self._animation is not None:
             self._animation.stop()
         self.setWindowOpacity(1.0)
@@ -557,10 +523,7 @@ class VoxFlowWindow(QWidget):
 
     def keyPressEvent(self, event: QKeyEvent) -> None:
         if event.key() == Qt.Key.Key_Escape:
-            if self.settings_panel.isVisible():
-                self._toggle_settings()
-            else:
-                self.hide_overlay()
+            self.hide_overlay()
         else:
             super().keyPressEvent(event)
 
@@ -651,7 +614,6 @@ class VoxFlowWindow(QWidget):
             )
             self.stream.start()
             self._recording_serial += 1
-            self.settings_panel.hide()
             self._set_mode("recording")
             self.record_button.setText("Stop recording")
             self.status_label.setText("Listening · live transcription")
@@ -801,6 +763,7 @@ class VoxFlowWindow(QWidget):
             self.status_label.setText("Could not focus the previous input · text copied for manual paste")
 
     def closeEvent(self, event: QCloseEvent) -> None:
+        self.settings_window.close()
         self.timer.stop()
         self.particle_timer.stop()
         if self.hotkey_registered:
