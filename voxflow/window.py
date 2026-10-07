@@ -157,6 +157,7 @@ class VoxFlowWindow(QWidget):
         self.confirm_button.setEnabled(False)
         self.confirm_button.clicked.connect(self._confirm_text)
         self.transcript.textChanged.connect(self._sync_confirm_button)
+        self.transcript.textChanged.connect(self._resize_result_after_edit)
         controls.addWidget(self.confirm_button)
         controls.addSpacing(14)
         self.capsule = GlowCapsule()
@@ -243,6 +244,10 @@ class VoxFlowWindow(QWidget):
 
     def _sync_confirm_button(self) -> None:
         self.confirm_button.setEnabled(self.mode == "result" and bool(self.transcript.toPlainText().strip()))
+
+    def _resize_result_after_edit(self) -> None:
+        if getattr(self, "mode", None) == "result" and not self.transcript.isReadOnly():
+            self._expand_for_result()
 
     def _set_mode(self, mode: str) -> None:
         previous_mode = getattr(self, "mode", None)
@@ -455,7 +460,7 @@ class VoxFlowWindow(QWidget):
             self._set_overlay_height(COMPACT_HEIGHT)
 
     def _set_overlay_height(self, height: int) -> None:
-        self.transcript.setFixedHeight(82 + height - COMPACT_HEIGHT)
+        self.transcript.setFixedHeight(max(24, 82 + height - COMPACT_HEIGHT))
         self.setFixedHeight(height)
         self.particles.resize(self.width(), self.height())
         self._edge_mask = None
@@ -465,11 +470,16 @@ class VoxFlowWindow(QWidget):
     def _expand_for_result(self) -> None:
         screen = QApplication.screenAt(self.pos()) or QApplication.primaryScreen()
         available_height = screen.availableGeometry().height() if screen else 800
-        max_height = max(COMPACT_HEIGHT, min(760, available_height - 24))
+        max_height = available_height // 2
         self.transcript.document().setTextWidth(max(200, self.transcript.viewport().width()))
         text_height = math.ceil(self.transcript.document().size().height()) + 24
-        target_height = min(max_height, max(400, COMPACT_HEIGHT + max(0, text_height - 82)))
+        target_height = min(max_height, COMPACT_HEIGHT + max(0, text_height - 82))
+        if (self._result_animation.state() == QVariantAnimation.State.Running
+                and round(self._result_animation.endValue()) == target_height):
+            return
         self._result_animation.stop()
+        if self.height() == target_height:
+            return
         if not self.isVisible():
             self._set_overlay_height(target_height)
             return
@@ -486,6 +496,7 @@ class VoxFlowWindow(QWidget):
         self.text_output.remember_foreground(int(self.winId()))
         self._place_at_bottom()
         if self.mode == "result" and self.transcript.toPlainText():
+            self._expand_for_result()
             self._background_progress = 1.0
             self._sync_content_visibility()
         screen = QApplication.screenAt(QCursor.pos()) or QApplication.primaryScreen()
@@ -602,8 +613,8 @@ class VoxFlowWindow(QWidget):
             self.scheduler.start()
             self.capture_warning = ""
             self.limit_reached = False
-            self.transcript.clear()
             self.transcript.setReadOnly(True)
+            self.transcript.clear()
             self.confirm_button.setEnabled(False)
             self.device_box.setEnabled(False)
             self.capsule.reset()

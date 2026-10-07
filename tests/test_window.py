@@ -169,13 +169,46 @@ def test_final_result_expands_and_stays_visible(tmp_path):
     assert window.height() == 310
     QTest.qWait(320)
     app.processEvents()
-    assert window.height() >= min(650, app.primaryScreen().availableGeometry().height() - 24)
+    assert window.height() <= app.primaryScreen().availableGeometry().height() // 2
     assert window.geometry().bottom() == bottom
     assert window.transcript.isVisible()
     assert window.transcript.verticalScrollBarPolicy() == Qt.ScrollBarPolicy.ScrollBarAsNeeded
     assert window.transcript.verticalScrollBar().maximum() > 0
     assert window.transcript.verticalScrollBar().value() == 0
     assert window.confirm_button.isEnabled()
+    window.close()
+
+
+def test_result_height_tracks_text_lines_and_edited_content(tmp_path):
+    app = QApplication.instance() or QApplication([])
+    window = VoxFlowWindow(model_dir=tmp_path, start_worker=False)
+    window.reveal()
+    window._background_progress = 1.0
+    bottom = window.geometry().bottom()
+
+    window.apply_transcript("final", "One line.")
+    window._result_animation.setCurrentTime(260)
+    app.processEvents()
+    short_height = window.height()
+    assert short_height == window_module.COMPACT_HEIGHT
+
+    window.transcript.setPlainText("First line\nSecond line\nThird line")
+    window._result_animation.setCurrentTime(260)
+    app.processEvents()
+    medium_height = window.height()
+    assert short_height < medium_height < app.primaryScreen().availableGeometry().height() // 2
+
+    window.transcript.setPlainText("long words " * 500)
+    window._result_animation.setCurrentTime(260)
+    app.processEvents()
+    assert window.height() == app.primaryScreen().availableGeometry().height() // 2
+    assert window.transcript.verticalScrollBar().maximum() > 0
+    assert window.geometry().bottom() == bottom
+
+    window.transcript.setPlainText("Short again.")
+    window._result_animation.setCurrentTime(260)
+    app.processEvents()
+    assert window.height() == short_height
     window.close()
 
 
