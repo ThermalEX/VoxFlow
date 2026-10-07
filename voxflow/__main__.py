@@ -1,37 +1,20 @@
 """Launch the desktop app or transcribe an audio file from the command line."""
 
 import argparse
+import ctypes
+import sys
 from pathlib import Path
 
 import soundfile as sf
-from PySide6.QtCore import Qt
-from PySide6.QtGui import QColor, QIcon, QPainter, QPixmap
 from PySide6.QtWidgets import QApplication, QMenu, QSystemTrayIcon
 
 from .recognizer import SenseVoiceRecognizer
+from .ui_icons import app_icon
 from .window import VoxFlowWindow
 
 
 MODEL_NAME = "sherpa-onnx-sense-voice-zh-en-ja-ko-yue-int8-2024-07-17"
 DEFAULT_MODEL_DIR = Path(__file__).resolve().parents[1] / "models" / MODEL_NAME
-
-
-def tray_icon() -> QIcon:
-    image = QPixmap(64, 64)
-    image.fill(Qt.GlobalColor.transparent)
-    painter = QPainter(image)
-    painter.setRenderHint(QPainter.RenderHint.Antialiasing)
-    painter.setBrush(QColor("#79AFFF"))
-    painter.setPen(Qt.PenStyle.NoPen)
-    painter.drawRoundedRect(8, 8, 48, 48, 16, 16)
-    painter.setBrush(QColor("#0A1D47"))
-    painter.drawRoundedRect(28, 17, 8, 20, 4, 4)
-    painter.setBrush(Qt.BrushStyle.NoBrush)
-    painter.setPen(QColor("#0A1D47"))
-    painter.drawArc(22, 23, 20, 21, 180 * 16, 180 * 16)
-    painter.drawLine(32, 45, 32, 48)
-    painter.end()
-    return QIcon(image)
 
 
 def main() -> int:
@@ -46,12 +29,14 @@ def main() -> int:
         print(SenseVoiceRecognizer(args.model_dir).recognize(samples, sample_rate))
         return 0
 
+    if sys.platform == "win32":
+        ctypes.windll.shell32.SetCurrentProcessExplicitAppUserModelID("VoxFlow.Desktop")
     app = QApplication([])
     app.setApplicationName("VoxFlow")
+    icon = app_icon()
+    app.setWindowIcon(icon)
     app.setQuitOnLastWindowClosed(False)
     window = VoxFlowWindow(args.model_dir)
-    icon = tray_icon()
-    app.setWindowIcon(icon)
     tray = QSystemTrayIcon(icon)
     tray.setToolTip("VoxFlow · Ctrl+Shift+Space to speak")
     menu = QMenu()

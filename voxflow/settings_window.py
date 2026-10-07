@@ -1,13 +1,79 @@
 """Standalone, light settings window for VoxFlow."""
 
-from PySide6.QtCore import QSettings, Qt, Signal
-from PySide6.QtGui import QColor, QFont, QIcon, QPainter, QPixmap
+from PySide6.QtCore import QEasingCurve, QPropertyAnimation, QSettings, QSize, Qt, Signal, QVariantAnimation
+from PySide6.QtGui import QColor, QFont, QIcon, QPainter, QPen, QPixmap
 from PySide6.QtWidgets import (
-    QAbstractSpinBox, QComboBox, QColorDialog, QFontComboBox, QHBoxLayout, QLabel,
-    QListWidget, QPushButton, QSpinBox, QStackedWidget, QVBoxLayout, QWidget,
+    QAbstractSpinBox, QApplication, QComboBox, QColorDialog, QFontComboBox, QFrame,
+    QGraphicsOpacityEffect, QHBoxLayout, QLabel, QListWidget, QListWidgetItem,
+    QPushButton, QSpinBox, QStackedWidget, QVBoxLayout, QWidget,
 )
 
 from .appearance import DEFAULT_BACKGROUND, DEFAULT_CAPSULE, DEFAULT_FONT, DEFAULT_TEXT_SIZE, saved_color
+from .ui_icons import app_icon, line_icon
+
+
+class _Chevron(QWidget):
+    def __init__(self, parent: QWidget) -> None:
+        super().__init__(parent)
+        self.setFixedSize(18, 18)
+        self.setAttribute(Qt.WidgetAttribute.WA_TransparentForMouseEvents)
+        self.angle = 0.0
+
+    def set_angle(self, angle: float) -> None:
+        self.angle = angle
+        self.update()
+
+    def paintEvent(self, _event) -> None:
+        painter = QPainter(self)
+        painter.setRenderHint(QPainter.RenderHint.Antialiasing)
+        painter.translate(9, 9)
+        painter.rotate(self.angle)
+        pen = QPen(QColor("#56677A"), 1.8)
+        pen.setCapStyle(Qt.PenCapStyle.RoundCap)
+        pen.setJoinStyle(Qt.PenJoinStyle.RoundJoin)
+        painter.setPen(pen)
+        painter.drawLine(-4, -1, 0, 3)
+        painter.drawLine(0, 3, 4, -1)
+        painter.end()
+
+
+class _AnimatedCombo:
+    """Keep a consistent chevron while retaining Qt's keyboard and popup behavior."""
+
+    def __init__(self, *args, **kwargs) -> None:
+        super().__init__(*args, **kwargs)
+        self.chevron = _Chevron(self)
+        self._chevron_animation = QVariantAnimation(self)
+        self._chevron_animation.setDuration(150)
+        self._chevron_animation.setEasingCurve(QEasingCurve.Type.OutCubic)
+        self._chevron_animation.valueChanged.connect(self.chevron.set_angle)
+
+    def resizeEvent(self, event) -> None:
+        super().resizeEvent(event)
+        self.chevron.move(self.width() - 33, (self.height() - self.chevron.height()) // 2)
+        self.chevron.raise_()
+
+    def _rotate_chevron(self, angle: float) -> None:
+        self._chevron_animation.stop()
+        self._chevron_animation.setStartValue(self.chevron.angle)
+        self._chevron_animation.setEndValue(angle)
+        self._chevron_animation.start()
+
+    def showPopup(self) -> None:
+        super().showPopup()
+        self._rotate_chevron(180.0)
+
+    def hidePopup(self) -> None:
+        super().hidePopup()
+        self._rotate_chevron(0.0)
+
+
+class SettingsComboBox(_AnimatedCombo, QComboBox):
+    pass
+
+
+class SettingsFontComboBox(_AnimatedCombo, QFontComboBox):
+    pass
 
 
 class SettingsWindow(QWidget):
@@ -21,25 +87,37 @@ class SettingsWindow(QWidget):
         super().__init__()
         self.settings = settings
         self.setWindowTitle("VoxFlow Settings")
-        self.setMinimumSize(680, 470)
-        self.resize(720, 500)
+        self.setWindowIcon(app_icon())
+        self.setMinimumSize(700, 490)
+        self.resize(760, 520)
         self.setObjectName("settingsWindow")
         self.setStyleSheet("""
             QWidget#settingsWindow { background: #FFFFFF; color: #20242B; font-family: 'Segoe UI'; }
+            QFrame#sidebar { background: #F6F8FB; border-radius: 15px; }
             QLabel { color: #20242B; font-size: 14px; background: transparent; }
+            QLabel#brand { font-size: 15px; font-weight: 650; color: #172B48; }
+            QLabel#eyebrow { color: #8693A3; font-size: 10px; font-weight: 600; }
             QLabel#pageTitle { font-size: 24px; font-weight: 650; }
             QLabel#description { color: #66717D; font-size: 13px; }
             QLabel#fieldTitle { font-weight: 600; }
-            QListWidget { background: #F5F6F8; border: none; border-radius: 12px;
-                          color: #3B4652; font-size: 14px; padding: 8px; outline: none; }
-            QListWidget::item { padding: 12px 14px; margin: 3px; border-radius: 8px; }
-            QListWidget::item:selected { background: #E6EDF8; color: #153B75; }
+            QListWidget { background: transparent; border: none;
+                          color: #3B4652; font-size: 14px; outline: none; }
+            QListWidget::item { padding: 12px 10px; margin: 3px 0; border-radius: 9px; }
+            QListWidget::item:selected { background: #E2ECFA; color: #153B75; }
+            QListWidget::item:hover:!selected { background: #ECF1F7; }
             QComboBox, QFontComboBox, QSpinBox { background: #FFFFFF; color: #20242B;
-                border: 1px solid #CFD6DF; border-radius: 8px; padding: 6px 10px;
+                border: 1px solid #CFD6DF; border-radius: 9px; padding: 6px 42px 6px 12px;
                 min-height: 29px; }
+            QComboBox:hover, QFontComboBox:hover, QSpinBox:hover { border-color: #9BAFC8; }
             QComboBox:focus, QFontComboBox:focus, QSpinBox:focus { border: 2px solid #5C87C7; }
+            QComboBox::drop-down, QFontComboBox::drop-down { width: 34px; border: none;
+                background: transparent; }
+            QComboBox::down-arrow, QFontComboBox::down-arrow { image: none; width: 0px; height: 0px; }
+            QComboBox QAbstractItemView { background: #FFFFFF; color: #20242B;
+                border: 1px solid #CFD6DF; selection-background-color: #E2ECFA;
+                selection-color: #153B75; outline: none; }
             QPushButton#colorButton { background: #FFFFFF; color: #20242B;
-                border: 1px solid #CFD6DF; border-radius: 8px; padding: 7px 12px;
+                border: 1px solid #CFD6DF; border-radius: 9px; padding: 7px 12px;
                 text-align: left; min-height: 30px; }
             QPushButton#colorButton:hover { background: #F3F6FA; }
             QPushButton#resetButton { background: #FFFFFF; color: #2A5083;
@@ -48,21 +126,92 @@ class SettingsWindow(QWidget):
         """)
 
         root = QHBoxLayout(self)
-        root.setContentsMargins(24, 24, 30, 24)
-        root.setSpacing(28)
+        root.setContentsMargins(20, 20, 30, 20)
+        root.setSpacing(30)
+        sidebar = QFrame()
+        sidebar.setObjectName("sidebar")
+        sidebar.setFixedWidth(204)
+        sidebar_layout = QVBoxLayout(sidebar)
+        sidebar_layout.setContentsMargins(13, 18, 13, 12)
+        sidebar_layout.setSpacing(8)
+        brand_row = QHBoxLayout()
+        brand_row.setSpacing(9)
+        mark = QLabel()
+        mark.setPixmap(app_icon().pixmap(29, 29))
+        brand_row.addWidget(mark)
+        brand = QLabel("VoxFlow")
+        brand.setObjectName("brand")
+        brand_row.addWidget(brand)
+        brand_row.addStretch()
+        sidebar_layout.addLayout(brand_row)
+        eyebrow = QLabel("PREFERENCES")
+        eyebrow.setObjectName("eyebrow")
+        sidebar_layout.addSpacing(24)
+        sidebar_layout.addWidget(eyebrow)
         self.categories = QListWidget()
-        self.categories.setFixedWidth(190)
+        self.categories.setIconSize(QSize(20, 20))
         self.categories.setHorizontalScrollBarPolicy(Qt.ScrollBarPolicy.ScrollBarAlwaysOff)
         self.categories.setVerticalScrollBarPolicy(Qt.ScrollBarPolicy.ScrollBarAlwaysOff)
-        self.categories.addItems(["Personalization", "App settings"])
+        self.categories.addItem(QListWidgetItem(line_icon("personalize"), "Personalization"))
+        self.categories.addItem(QListWidgetItem(line_icon("settings"), "App settings"))
         self.categories.setAccessibleName("Settings categories")
-        root.addWidget(self.categories)
+        self.categories.viewport().setCursor(Qt.CursorShape.PointingHandCursor)
+        sidebar_layout.addWidget(self.categories, 1)
+        root.addWidget(sidebar)
         self.pages = QStackedWidget()
         root.addWidget(self.pages, 1)
         self.pages.addWidget(self._build_personalization())
         self.pages.addWidget(self._build_app_settings())
-        self.categories.currentRowChanged.connect(self.pages.setCurrentIndex)
+        self._page_effects = []
+        for index in range(self.pages.count()):
+            effect = QGraphicsOpacityEffect(self.pages.widget(index))
+            self.pages.widget(index).setGraphicsEffect(effect)
+            self._page_effects.append(effect)
+        self._page_animation: QPropertyAnimation | None = None
+        self._entrance_animation = QPropertyAnimation(self, b"windowOpacity", self)
+        self._entrance_animation.setDuration(190)
+        self._entrance_animation.setEasingCurve(QEasingCurve.Type.OutCubic)
+        self.categories.currentRowChanged.connect(self._switch_category)
         self.categories.setCurrentRow(0)
+
+    def showEvent(self, event) -> None:
+        super().showEvent(event)
+        if QApplication.platformName() == "offscreen":
+            self.setWindowOpacity(1.0)
+            return
+        self._entrance_animation.stop()
+        self._entrance_animation.setStartValue(0.72)
+        self._entrance_animation.setEndValue(1.0)
+        self.setWindowOpacity(0.72)
+        self._entrance_animation.start()
+
+    def keyPressEvent(self, event) -> None:
+        if event.key() == Qt.Key.Key_Escape:
+            self.close()
+        else:
+            super().keyPressEvent(event)
+
+    def _switch_category(self, row: int) -> None:
+        if row < 0:
+            return
+        if self._page_animation is not None:
+            self._page_animation.stop()
+        self.pages.setCurrentIndex(row)
+        for index in range(self.categories.count()):
+            name = "personalize" if index == 0 else "settings"
+            color = "#285C9D" if index == row else "#657486"
+            self.categories.item(index).setIcon(line_icon(name, color))
+        effect = self._page_effects[row]
+        if not self.isVisible():
+            effect.setOpacity(1.0)
+            return
+        effect.setOpacity(0.3)
+        self._page_animation = QPropertyAnimation(effect, b"opacity", self)
+        self._page_animation.setDuration(190)
+        self._page_animation.setStartValue(0.3)
+        self._page_animation.setEndValue(1.0)
+        self._page_animation.setEasingCurve(QEasingCurve.Type.OutCubic)
+        self._page_animation.start()
 
     @staticmethod
     def _page(title: str, description: str) -> tuple[QWidget, QVBoxLayout]:
@@ -90,7 +239,7 @@ class SettingsWindow(QWidget):
 
     def _build_personalization(self) -> QWidget:
         page, layout = self._page("Personalization", "Changes appear in the voice overlay immediately.")
-        self.font_box = QFontComboBox()
+        self.font_box = SettingsFontComboBox()
         self.font_box.setAccessibleName("Transcript font")
         self.font_box.setCurrentFont(QFont(str(self.settings.value("appearance/font", DEFAULT_FONT))))
         self.font_box.currentFontChanged.connect(self._set_font)
@@ -116,6 +265,8 @@ class SettingsWindow(QWidget):
 
         reset = QPushButton("Restore appearance defaults")
         reset.setObjectName("resetButton")
+        reset.setIcon(line_icon("restore", "#285C9D"))
+        reset.setCursor(Qt.CursorShape.PointingHandCursor)
         reset.clicked.connect(self._reset_appearance)
         layout.addWidget(reset, alignment=Qt.AlignmentFlag.AlignLeft)
         layout.addStretch()
@@ -123,10 +274,10 @@ class SettingsWindow(QWidget):
 
     def _build_app_settings(self) -> QWidget:
         page, layout = self._page("App settings", "Choose how VoxFlow listens and displays speech.")
-        self.device_box = QComboBox()
+        self.device_box = SettingsComboBox()
         self.device_box.setAccessibleName("Microphone")
         self._field(layout, "Microphone", self.device_box)
-        self.alignment_box = QComboBox()
+        self.alignment_box = SettingsComboBox()
         self.alignment_box.setAccessibleName("Transcript alignment")
         for title, value in (("Left", "left"), ("Center", "center"), ("Right", "right")):
             self.alignment_box.addItem(title, value)
@@ -147,6 +298,7 @@ class SettingsWindow(QWidget):
         button = QPushButton()
         button.setObjectName("colorButton")
         button.setAccessibleName(label)
+        button.setCursor(Qt.CursorShape.PointingHandCursor)
         self._show_color(button, saved_color(self.settings.value(f"appearance/{key}_color", fallback), fallback))
         button.clicked.connect(lambda: self._choose_color(key))
         return button

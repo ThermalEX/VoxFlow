@@ -28,6 +28,7 @@ from .particles import ParticleField
 from .recognizer import initialize_worker, transcribe_in_worker, worker_ready
 from .scheduler import RecognitionJob, RecognitionScheduler
 from .settings_window import SettingsWindow
+from .ui_icons import app_icon
 
 
 HOTKEY_ID = 0x564F
@@ -67,6 +68,7 @@ class VoxFlowWindow(QWidget):
         self._background_retracting = False
 
         self.setWindowTitle("VoxFlow")
+        self.setWindowIcon(app_icon())
         self.setWindowFlags(Qt.WindowType.Tool | Qt.WindowType.FramelessWindowHint | Qt.WindowType.WindowStaysOnTopHint)
         self.setAttribute(Qt.WidgetAttribute.WA_TranslucentBackground)
         self.setFixedSize(820, COMPACT_HEIGHT)

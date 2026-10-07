@@ -300,6 +300,8 @@ def test_standalone_settings_saves_alignment_without_revealing_overlay(tmp_path)
     assert window.settings_window.isVisible()
     assert not window.isVisible()
     assert window.settings_window.pages.count() == 2
+    assert not window.settings_window.windowIcon().isNull()
+    assert all(not window.settings_window.categories.item(index).icon().isNull() for index in range(2))
     assert window.settings_window.categories.item(0).text() == "Personalization"
     assert window.settings_window.categories.item(1).text() == "App settings"
     window.settings_window.categories.setCurrentRow(1)
