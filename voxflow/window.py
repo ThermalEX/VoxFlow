@@ -8,21 +8,23 @@ from concurrent.futures import Future, ProcessPoolExecutor
 from pathlib import Path
 
 import sounddevice as sd
-from PySide6.QtCore import QEasingCurve, QPointF, QPropertyAnimation, QRectF, Qt, QTimer
+from PySide6.QtCore import QEasingCurve, QPointF, QPropertyAnimation, QRectF, QSettings, Qt, QTimer, QVariantAnimation
 from PySide6.QtGui import QColor, QCloseEvent, QCursor, QImage, QKeyEvent, QLinearGradient, QPainter, QPainterPath, QRadialGradient, QRegion, QTextBlockFormat, QTextCursor
 from PySide6.QtWidgets import (
     QApplication,
     QComboBox,
     QGraphicsDropShadowEffect,
+    QFrame,
     QHBoxLayout,
     QLabel,
-    QMenu,
+    QPushButton,
     QTextEdit,
     QVBoxLayout,
     QWidget,
 )
 
 from .audio import AudioBuffer
+from .input_target import WindowsPasteTarget
 from .overlay_widgets import CircleIconButton, GlowCapsule
 from .particles import ParticleField
 from .recognizer import initialize_worker, transcribe_in_worker, worker_ready
@@ -32,12 +34,16 @@ from .scheduler import RecognitionJob, RecognitionScheduler
 HOTKEY_ID = 0x564F
 WM_HOTKEY = 0x0312
 MAX_RECORDING_SECONDS = 300
+COMPACT_HEIGHT = 310
 
 
 class VoxFlowWindow(QWidget):
-    def __init__(self, model_dir: str | Path, start_worker: bool = True) -> None:
+    def __init__(self, model_dir: str | Path, start_worker: bool = True,
+                 settings: QSettings | None = None, text_output: WindowsPasteTarget | None = None) -> None:
         super().__init__()
         self.model_dir = Path(model_dir)
+        self.settings = settings if settings is not None else QSettings("VoxFlow", "VoxFlow")
+        self.text_output = text_output if text_output is not None else WindowsPasteTarget()
         self.audio = AudioBuffer(max_seconds=MAX_RECORDING_SECONDS)
         self._recording_serial = 0
         self.scheduler: RecognitionScheduler | None = None
@@ -51,6 +57,9 @@ class VoxFlowWindow(QWidget):
         self.limit_reached = False
         self.hotkey_registered = False
         self._animation: QPropertyAnimation | None = None
+        self._result_animation = QVariantAnimation(self)
+        self._result_animation.valueChanged.connect(lambda value: self._set_overlay_height(round(value)))
+        self._result_animation.finished.connect(self._finish_result_expansion)
         self.particles = ParticleField(820, 310)
         self._edge_mask: QImage | None = None
         self._last_particle_tick: float | None = None
@@ -61,11 +70,12 @@ class VoxFlowWindow(QWidget):
         self.setWindowTitle("VoxFlow")
         self.setWindowFlags(Qt.WindowType.Tool | Qt.WindowType.FramelessWindowHint | Qt.WindowType.WindowStaysOnTopHint)
         self.setAttribute(Qt.WidgetAttribute.WA_TranslucentBackground)
-        self.setFixedSize(820, 310)
+        self.setFixedSize(820, COMPACT_HEIGHT)
         self._place_at_bottom()
         self.particles.resize(self.width(), self.height())
         self._build_ui()
         self._load_devices()
+        self.device_box.currentIndexChanged.connect(self._save_device_setting)
         self._set_mode("idle")
 
         self.timer = QTimer(self)
@@ -89,9 +99,21 @@ class VoxFlowWindow(QWidget):
             QLabel#muted { font-size: 11px; color: #DBE9FF; }
             QTextEdit { background: transparent; border: none; color: #F3F7FF; font-size: 24px;
                         selection-background-color: #376DE0; }
-            QMenu { background: #161E31; color: #F3F6FF; border: 1px solid #354466; padding: 5px; }
-            QMenu::item { padding: 7px 18px; }
-            QMenu::item:selected { background: #294A87; }
+            QScrollBar:vertical { background: transparent; width: 6px; margin: 0; }
+            QScrollBar::handle:vertical { background: rgba(187, 216, 255, 145); border-radius: 3px;
+                                           min-height: 28px; }
+            QScrollBar::add-line:vertical, QScrollBar::sub-line:vertical { height: 0; }
+            QScrollBar::add-page:vertical, QScrollBar::sub-page:vertical { background: transparent; }
+            QFrame#settingsCard { background-color: rgba(12, 20, 37, 245);
+                                  border: 1px solid rgba(151, 188, 255, 86); border-radius: 20px; }
+            QFrame#settingsCard QLabel { font-size: 12px; color: #DCE9FF; border: none; }
+            QFrame#settingsCard QLabel#settingsTitle { font-size: 17px; font-weight: 600; color: white; }
+            QFrame#settingsCard QLabel#settingsHint { font-size: 11px; color: #B6C9EA; }
+            QFrame#settingsCard QComboBox { background: #192B4C; color: white; border: 1px solid #456391;
+                                             border-radius: 8px; padding: 5px 9px; min-height: 24px; }
+            QFrame#settingsCard QPushButton { background: transparent; color: #DCE9FF; border: none;
+                                               font-size: 18px; min-width: 28px; min-height: 28px; }
+            QFrame#settingsCard QPushButton:hover { background: #294469; border-radius: 14px; }
             """
         )
         layout = QVBoxLayout(self)
@@ -115,7 +137,8 @@ class VoxFlowWindow(QWidget):
         self.transcript.setReadOnly(True)
         self.transcript.setVerticalScrollBarPolicy(Qt.ScrollBarPolicy.ScrollBarAlwaysOff)
         self.transcript.viewport().setAutoFillBackground(False)
-        self.transcript_alignment = "left"
+        saved_alignment = str(self.settings.value("transcript/alignment", "left"))
+        self.transcript_alignment = saved_alignment if saved_alignment in {"left", "center", "right"} else "left"
         self.set_transcript_alignment(self.transcript_alignment)
         layout.addWidget(self.transcript)
         layout.setAlignment(self.transcript, Qt.AlignmentFlag.AlignHCenter)
@@ -124,13 +147,14 @@ class VoxFlowWindow(QWidget):
         controls = QHBoxLayout()
         controls.setSpacing(14)
         controls.addStretch(1)
-        self.device_button = CircleIconButton("device", "Select microphone")
-        self.device_button.clicked.connect(self._show_device_menu)
+        self.device_button = CircleIconButton("settings", "Open settings")
+        self.device_button.clicked.connect(self._toggle_settings)
         controls.addWidget(self.device_button)
-        self.copy_button = CircleIconButton("copy", "Copy text")
-        self.copy_button.setEnabled(False)
-        self.copy_button.clicked.connect(self._copy_text)
-        controls.addWidget(self.copy_button)
+        self.confirm_button = CircleIconButton("confirm", "Confirm and insert text")
+        self.confirm_button.setEnabled(False)
+        self.confirm_button.clicked.connect(self._confirm_text)
+        self.transcript.textChanged.connect(self._sync_confirm_button)
+        controls.addWidget(self.confirm_button)
         controls.addSpacing(14)
         self.capsule = GlowCapsule()
         self.capsule.setEnabled(False)
@@ -151,14 +175,46 @@ class VoxFlowWindow(QWidget):
         self.close_button = CircleIconButton("close", "Hide overlay")
         self.close_button.clicked.connect(self.hide_overlay)
         controls.addWidget(self.close_button)
-        self.action_buttons = (self.device_button, self.copy_button, self.record_button, self.close_button)
+        self.action_buttons = (self.device_button, self.confirm_button, self.record_button, self.close_button)
         controls.addStretch(1)
         layout.addLayout(controls)
 
-        self.device_box = QComboBox(self)
-        self.device_box.hide()
+        self.settings_panel = QFrame(self)
+        self.settings_panel.setObjectName("settingsCard")
+        self.settings_panel.setFixedSize(330, 202)
+        panel_layout = QVBoxLayout(self.settings_panel)
+        panel_layout.setContentsMargins(16, 12, 16, 12)
+        panel_layout.setSpacing(4)
+        header = QHBoxLayout()
+        title = QLabel("Settings")
+        title.setObjectName("settingsTitle")
+        header.addWidget(title)
+        header.addStretch()
+        close_settings = QPushButton("×")
+        close_settings.setAccessibleName("Close settings")
+        close_settings.clicked.connect(self._toggle_settings)
+        header.addWidget(close_settings)
+        panel_layout.addLayout(header)
+        panel_layout.addWidget(QLabel("Microphone"))
+        self.device_box = QComboBox(self.settings_panel)
+        self.device_box.setAccessibleName("Microphone")
+        panel_layout.addWidget(self.device_box)
+        panel_layout.addWidget(QLabel("Transcript alignment"))
+        self.alignment_box = QComboBox(self.settings_panel)
+        self.alignment_box.setAccessibleName("Transcript alignment")
+        for label, value in (("Left", "left"), ("Center", "center"), ("Right", "right")):
+            self.alignment_box.addItem(label, value)
+        self.alignment_box.setCurrentIndex(self.alignment_box.findData(self.transcript_alignment))
+        self.alignment_box.currentIndexChanged.connect(
+            lambda _index: self.set_transcript_alignment(str(self.alignment_box.currentData()))
+        )
+        panel_layout.addWidget(self.alignment_box)
+        hint = QLabel("Confirm inserts into the last active app.")
+        hint.setObjectName("settingsHint")
+        panel_layout.addWidget(hint)
+        self.settings_panel.hide()
 
-    def set_transcript_alignment(self, alignment: str) -> None:
+    def set_transcript_alignment(self, alignment: str, persist: bool = True) -> None:
         options = {
             "left": Qt.AlignmentFlag.AlignLeft,
             "center": Qt.AlignmentFlag.AlignCenter,
@@ -167,6 +223,12 @@ class VoxFlowWindow(QWidget):
         if alignment not in options:
             raise ValueError(f"Unknown transcript alignment: {alignment}")
         self.transcript_alignment = alignment
+        if persist:
+            self.settings.setValue("transcript/alignment", alignment)
+        if hasattr(self, "alignment_box") and self.alignment_box.currentData() != alignment:
+            self.alignment_box.blockSignals(True)
+            self.alignment_box.setCurrentIndex(self.alignment_box.findData(alignment))
+            self.alignment_box.blockSignals(False)
         cursor = QTextCursor(self.transcript.document())
         cursor.select(QTextCursor.SelectionType.Document)
         block_format = QTextBlockFormat()
@@ -181,22 +243,42 @@ class VoxFlowWindow(QWidget):
         effect.setColor(QColor(12, 31, 87, 180))
         label.setGraphicsEffect(effect)
 
-    def _show_device_menu(self) -> None:
-        if self.stream is not None:
-            return
-        menu = QMenu(self)
-        for index in range(self.device_box.count()):
-            action = menu.addAction(self.device_box.itemText(index))
-            action.setCheckable(True)
-            action.setChecked(index == self.device_box.currentIndex())
-            action.triggered.connect(lambda _checked=False, selected=index: self.device_box.setCurrentIndex(selected))
-        menu.exec(self.device_button.mapToGlobal(self.device_button.rect().topLeft()))
+    def _toggle_settings(self) -> None:
+        if self.settings_panel.isVisible():
+            self.settings_panel.hide()
+        else:
+            self.layout().activate()
+            self._position_settings_panel()
+            self.settings_panel.show()
+            self.settings_panel.raise_()
+        self._update_input_mask()
+
+    def open_settings(self) -> None:
+        if not self.isVisible():
+            self.reveal()
+        if not self.settings_panel.isVisible():
+            self._toggle_settings()
+
+    def _position_settings_panel(self) -> None:
+        x = min(self.width() - self.settings_panel.width() - 16, max(16, self.device_button.x() - 16))
+        y = max(8, self.device_button.y() - self.settings_panel.height() - 12)
+        self.settings_panel.move(x, y)
+
+    def _save_device_setting(self, _index: int) -> None:
+        if self.device_box.currentIndex() >= 0:
+            self.settings.setValue("microphone/name", self.device_box.currentText())
+
+    def _sync_confirm_button(self) -> None:
+        self.confirm_button.setEnabled(self.mode == "result" and bool(self.transcript.toPlainText().strip()))
 
     def _set_mode(self, mode: str) -> None:
         previous_mode = getattr(self, "mode", None)
         self.mode = mode
+        if mode == "recording" and previous_mode != "recording":
+            self._reset_result_size()
         if mode == "recording":
             self.transcript.setFixedHeight(82)
+            self.transcript.setVerticalScrollBarPolicy(Qt.ScrollBarPolicy.ScrollBarAlwaysOff)
         self.device_button.setEnabled(mode != "recording")
         self.capsule.setToolTip("Stop recording" if mode == "recording" else "Start voice input")
         self.capsule.setAccessibleName("Stop recording" if mode == "recording" else "Start voice input")
@@ -220,7 +302,7 @@ class VoxFlowWindow(QWidget):
             self._update_input_mask()
 
     def _sync_content_visibility(self) -> None:
-        expanded = self.mode == "recording" and self._background_progress >= 0.50
+        expanded = self.mode in {"recording", "finalizing", "result"} and self._background_progress >= 0.50
         for widget, visible in (
             (self.status_label, expanded),
             (self.time_label, expanded),
@@ -237,6 +319,8 @@ class VoxFlowWindow(QWidget):
         region = QRegion()
         for control in (*self.action_buttons, self.capsule):
             region = region.united(QRegion(control.geometry().adjusted(-14, -14, 14, 14)))
+        if self.settings_panel.isVisible():
+            region = region.united(QRegion(self.settings_panel.geometry()))
         self.setMask(region)
 
     def paintEvent(self, _event) -> None:
@@ -394,8 +478,47 @@ class VoxFlowWindow(QWidget):
                     self.transcript.setFixedWidth(max(200, min(660, self.width() - 100)))
             self.move(area.x() + (area.width() - self.width()) // 2, area.y() + area.height() - self.height())
 
-    def reveal(self) -> None:
+    def _reset_result_size(self) -> None:
+        self._result_animation.stop()
+        if self.height() != COMPACT_HEIGHT:
+            self._set_overlay_height(COMPACT_HEIGHT)
+
+    def _set_overlay_height(self, height: int) -> None:
+        self.transcript.setFixedHeight(82 + height - COMPACT_HEIGHT)
+        self.setFixedHeight(height)
+        self.particles.resize(self.width(), self.height())
+        self._edge_mask = None
         self._place_at_bottom()
+        if self.settings_panel.isVisible():
+            self._position_settings_panel()
+        self.layout().activate()
+
+    def _expand_for_result(self) -> None:
+        screen = QApplication.screenAt(self.pos()) or QApplication.primaryScreen()
+        available_height = screen.availableGeometry().height() if screen else 800
+        max_height = max(COMPACT_HEIGHT, min(760, available_height - 24))
+        self.transcript.document().setTextWidth(max(200, self.transcript.viewport().width()))
+        text_height = math.ceil(self.transcript.document().size().height()) + 24
+        target_height = min(max_height, max(400, COMPACT_HEIGHT + max(0, text_height - 82)))
+        self._result_animation.stop()
+        if not self.isVisible():
+            self._set_overlay_height(target_height)
+            return
+        self._result_animation.setDuration(260)
+        self._result_animation.setStartValue(self.height())
+        self._result_animation.setEndValue(target_height)
+        self._result_animation.setEasingCurve(QEasingCurve.Type.OutCubic)
+        self._result_animation.start()
+
+    def _finish_result_expansion(self) -> None:
+        self._set_overlay_height(int(self._result_animation.endValue()))
+
+    def reveal(self) -> None:
+        self.text_output.remember_foreground(int(self.winId()))
+        self._place_at_bottom()
+        if self.mode == "result" and self.transcript.toPlainText():
+            self._background_progress = 1.0
+            self._sync_content_visibility()
         screen = QApplication.screenAt(QCursor.pos()) or QApplication.primaryScreen()
         if screen:
             self.particle_timer.setInterval(self._frame_interval(screen.refreshRate()))
@@ -417,6 +540,11 @@ class VoxFlowWindow(QWidget):
     def hide_overlay(self) -> None:
         if self.stream is not None:
             self._stop_recording()
+        if self._result_animation.state() == QVariantAnimation.State.Running:
+            target = int(self._result_animation.endValue())
+            self._result_animation.stop()
+            self._set_overlay_height(target)
+        self.settings_panel.hide()
         if self._animation is not None:
             self._animation.stop()
         self.setWindowOpacity(1.0)
@@ -429,7 +557,10 @@ class VoxFlowWindow(QWidget):
 
     def keyPressEvent(self, event: QKeyEvent) -> None:
         if event.key() == Qt.Key.Key_Escape:
-            self.hide_overlay()
+            if self.settings_panel.isVisible():
+                self._toggle_settings()
+            else:
+                self.hide_overlay()
         else:
             super().keyPressEvent(event)
 
@@ -463,6 +594,10 @@ class VoxFlowWindow(QWidget):
                     self.device_box.addItem(f"{device['name']} · {host}", index)
                     if index == default_id:
                         self.device_box.setCurrentIndex(self.device_box.count() - 1)
+            saved_name = str(self.settings.value("microphone/name", ""))
+            saved_index = self.device_box.findText(saved_name)
+            if saved_index >= 0:
+                self.device_box.setCurrentIndex(saved_index)
         except Exception as exc:
             self.status_label.setText(f"Microphone unavailable: {exc}")
 
@@ -504,7 +639,7 @@ class VoxFlowWindow(QWidget):
             self.limit_reached = False
             self.transcript.clear()
             self.transcript.setReadOnly(True)
-            self.copy_button.setEnabled(False)
+            self.confirm_button.setEnabled(False)
             self.device_box.setEnabled(False)
             self.capsule.reset()
             self.stream = sd.InputStream(
@@ -516,6 +651,7 @@ class VoxFlowWindow(QWidget):
             )
             self.stream.start()
             self._recording_serial += 1
+            self.settings_panel.hide()
             self._set_mode("recording")
             self.record_button.setText("Stop recording")
             self.status_label.setText("Listening · live transcription")
@@ -540,9 +676,7 @@ class VoxFlowWindow(QWidget):
     def _stop_recording(self) -> None:
         if self.stream is None:
             return
-        self._background_revealing = False
-        self._background_retracting = True
-        self._background_progress = max(0.0, self._background_progress - 0.06)
+        self._background_retracting = False
         self.capsule.set_recording(False)
         self.capsule.reset()
         self.record_button.icon_name = "mic"
@@ -572,6 +706,8 @@ class VoxFlowWindow(QWidget):
             self._set_mode("idle")
 
     def _poll(self) -> None:
+        if not self.isVisible():
+            self.text_output.remember_foreground(int(self.winId()))
         if self.ready_future is not None and self.ready_future.done():
             try:
                 self.model_ready = self.ready_future.result()
@@ -624,7 +760,7 @@ class VoxFlowWindow(QWidget):
         if kind not in {"partial", "final"}:
             raise ValueError(f"Unknown transcript kind: {kind}")
         self.transcript.setPlainText(text)
-        self.set_transcript_alignment(self.transcript_alignment)
+        self.set_transcript_alignment(self.transcript_alignment, persist=False)
         self.transcript.setReadOnly(kind != "final")
         cursor = self.transcript.textCursor()
         cursor.movePosition(QTextCursor.MoveOperation.End)
@@ -632,19 +768,37 @@ class VoxFlowWindow(QWidget):
         self.transcript.ensureCursorVisible()
         self.transcript.verticalScrollBar().setValue(self.transcript.verticalScrollBar().maximum())
         if kind == "final":
+            self._background_progress = 1.0
+            self._background_revealing = False
+            self._background_retracting = False
+            if text:
+                self._expand_for_result()
+            else:
+                self._reset_result_size()
             self._set_mode("result")
-            self.status_label.setText("Transcript ready · edit or copy" if text else "No speech detected. Try again.")
+            self.transcript.setVerticalScrollBarPolicy(Qt.ScrollBarPolicy.ScrollBarAsNeeded)
+            cursor = self.transcript.textCursor()
+            cursor.movePosition(QTextCursor.MoveOperation.Start)
+            self.transcript.setTextCursor(cursor)
+            self.transcript.verticalScrollBar().setValue(0)
+            self.status_label.setText("Transcript ready · edit or confirm" if text else "No speech detected. Try again.")
             self.record_button.setText("Record again")
             self.record_button.setEnabled(self.model_ready)
             self.capsule.setEnabled(self.model_ready)
-            self.copy_button.setEnabled(bool(text))
+            self.confirm_button.setEnabled(bool(text.strip()))
         else:
             self._set_mode("recording")
             self.status_label.setText("Listening · draft may change")
 
-    def _copy_text(self) -> None:
-        QApplication.clipboard().setText(self.transcript.toPlainText())
-        self.status_label.setText("Copied to clipboard")
+    def _confirm_text(self) -> None:
+        text = self.transcript.toPlainText()
+        if not text.strip():
+            return
+        if self.text_output.paste(text):
+            self.hide_overlay()
+        else:
+            QApplication.clipboard().setText(text)
+            self.status_label.setText("Could not focus the previous input · text copied for manual paste")
 
     def closeEvent(self, event: QCloseEvent) -> None:
         self.timer.stop()

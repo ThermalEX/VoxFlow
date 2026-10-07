@@ -2,7 +2,7 @@
 
 import math
 
-from PySide6.QtCore import QRectF, Qt
+from PySide6.QtCore import QPointF, QRectF, Qt
 from PySide6.QtGui import QColor, QLinearGradient, QPainter, QPainterPath, QPen
 from PySide6.QtWidgets import QPushButton
 
@@ -129,10 +129,22 @@ class CircleIconButton(QPushButton):
         elif self.icon_name == "close":
             painter.drawLine(20, 20, 34, 34)
             painter.drawLine(34, 20, 20, 34)
-        elif self.icon_name == "copy":
-            painter.drawRoundedRect(QRectF(21, 18, 17, 20), 3, 3)
-            painter.drawLine(17, 20, 17, 36)
-            painter.drawLine(17, 36, 33, 36)
+        elif self.icon_name == "confirm":
+            painter.drawLine(17, 27, 24, 34)
+            painter.drawLine(24, 34, 38, 19)
+        elif self.icon_name == "settings":
+            gear = QPainterPath()
+            for step in range(32):
+                angle = step * math.pi / 16 - math.pi / 2
+                radius = 14 if step % 4 in (1, 2) else 11
+                point = QPointF(27 + radius * math.cos(angle), 27 + radius * math.sin(angle))
+                if step == 0:
+                    gear.moveTo(point)
+                else:
+                    gear.lineTo(point)
+            gear.closeSubpath()
+            painter.drawPath(gear)
+            painter.drawEllipse(QRectF(23, 23, 8, 8))
         elif self.icon_name == "device":
             painter.drawRoundedRect(QRectF(17, 18, 20, 18), 4, 4)
             painter.drawLine(22, 41, 32, 41)

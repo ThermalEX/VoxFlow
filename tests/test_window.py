@@ -2,13 +2,25 @@ import os
 from types import SimpleNamespace
 
 import numpy as np
+import pytest
 
 os.environ.setdefault("QT_QPA_PLATFORM", "offscreen")
 
 from PySide6.QtWidgets import QApplication
-from PySide6.QtCore import QPoint, Qt
+from PySide6.QtCore import QPoint, QSettings, Qt
+from PySide6.QtTest import QTest
 
 from voxflow.window import VoxFlowWindow
+import voxflow.window as window_module
+
+
+@pytest.fixture(autouse=True)
+def isolated_window_settings(tmp_path, monkeypatch):
+    settings_path = tmp_path / "default-settings.ini"
+    monkeypatch.setattr(
+        window_module, "QSettings",
+        lambda *_args: QSettings(str(settings_path), QSettings.Format.IniFormat),
+    )
 
 
 def test_transcript_stays_provisional_until_final_result(tmp_path):
@@ -60,8 +72,7 @@ def test_transcript_stays_provisional_until_final_result(tmp_path):
     window.apply_transcript("final", "hello world")
     assert window.transcript.toPlainText() == "hello world"
     assert not window.transcript.isReadOnly()
-    window.copy_button.click()
-    assert app.clipboard().text() == "hello world"
+    assert window.confirm_button.isEnabled()
     window.hide_overlay()
     assert not window.isVisible()
     assert not window.particle_timer.isActive()
@@ -120,30 +131,34 @@ def test_live_text_waits_until_background_has_expanded(tmp_path):
     window.close()
 
 
-def test_collapsed_overlay_clears_the_previous_backdrop(tmp_path):
+def test_final_result_expands_and_stays_visible(tmp_path):
     app = QApplication.instance() or QApplication([])
     window = VoxFlowWindow(model_dir=tmp_path, start_worker=False)
     window.reveal()
-    window.apply_transcript("partial", "hello")
-    for progress in (0.08, 0.24):
-        window._background_progress = progress
-        window._sync_content_visibility()
-        window.update()
-        app.processEvents()
-        window.grab()
-    expanded = window.grab().toImage()
-    point = QPoint(window.width() // 2, 190)
-    assert expanded.pixelColor(point).alpha() > 20
-    window._background_progress = 0.0
-    window.apply_transcript("final", "hello")
-    window.update()
+    window._set_mode("recording")
+    window._background_progress = 1.0
+    bottom = window.geometry().bottom()
+    window.audio.start(16000)
+    window.audio.append(np.full(4800, 0.03, dtype=np.float32))
+    window.stream = SimpleNamespace(stop=lambda: None, close=lambda: None)
+    window._stop_recording()
+    assert not window._background_retracting
+    assert window._background_progress == 1.0
+    window.apply_transcript("final", "word " * 700)
+    assert window.height() == 310
+    QTest.qWait(320)
     app.processEvents()
-    collapsed = window.grab().toImage()
-    assert collapsed.pixelColor(point).alpha() < 5
+    assert window.height() >= min(650, app.primaryScreen().availableGeometry().height() - 24)
+    assert window.geometry().bottom() == bottom
+    assert window.transcript.isVisible()
+    assert window.transcript.verticalScrollBarPolicy() == Qt.ScrollBarPolicy.ScrollBarAsNeeded
+    assert window.transcript.verticalScrollBar().maximum() > 0
+    assert window.transcript.verticalScrollBar().value() == 0
+    assert window.confirm_button.isEnabled()
     window.close()
 
 
-def test_second_click_retracts_particles_and_keeps_result(tmp_path):
+def test_second_click_keeps_background_open_for_final_result(tmp_path):
     app = QApplication.instance() or QApplication([])
     window = VoxFlowWindow(model_dir=tmp_path, start_worker=False)
     window.reveal()
@@ -155,24 +170,13 @@ def test_second_click_retracts_particles_and_keeps_result(tmp_path):
     window.stream = SimpleNamespace(stop=lambda: None, close=lambda: None)
     window.capsule.setEnabled(True)
     window.capsule.click()
-    assert window._background_retracting
-    assert window._background_progress < 1.0
+    assert not window._background_retracting
+    assert window._background_progress == 1.0
     assert window.record_button.icon_name == "mic"
-    assert not window.status_label.isVisible()
-    assert not window.time_label.isVisible()
-    assert not window.transcript.isVisible()
-    window._animate_particles()
-    assert window._background_progress < 1.0
-    for _ in range(80):
-        window._animate_particles()
-    assert window._background_progress == 0.0
     window.apply_transcript("final", "hello")
     assert window.transcript.toPlainText() == "hello"
-    assert not window.transcript.isVisible()
-    assert not window.status_label.isVisible()
-    assert not window.mask().contains(QPoint(5, 5))
-    window.copy_button.click()
-    assert app.clipboard().text() == "hello"
+    assert window.transcript.isVisible()
+    assert window.status_label.isVisible()
     window.close()
     assert app is not None
 
@@ -199,12 +203,116 @@ def test_record_again_replays_background_reveal(tmp_path):
     window._animate_particles()
     assert window._background_progress > 0
     window.close()
+
+
+def test_record_again_interrupts_result_expansion(tmp_path):
+    app = QApplication.instance() or QApplication([])
+    window = VoxFlowWindow(model_dir=tmp_path, start_worker=False)
+    window.reveal()
+    window._set_mode("recording")
+    window._background_progress = 1.0
+    window.apply_transcript("final", "long result " * 500)
+    QTest.qWait(80)
+    assert window.height() > 310
+    window._set_mode("recording")
+    assert window.height() == 310
+    QTest.qWait(300)
+    assert window.height() == 310
+    window.close()
     assert app is not None
+
+
+def test_confirm_inserts_edited_result_into_previous_input(tmp_path):
+    class FakeOutput:
+        def __init__(self):
+            self.calls = []
+            self.remembered = []
+
+        def remember_foreground(self, own_hwnd):
+            self.remembered.append(own_hwnd)
+
+        def paste(self, text):
+            self.calls.append(text)
+            return True
+
+    app = QApplication.instance() or QApplication([])
+    output = FakeOutput()
+    window = VoxFlowWindow(model_dir=tmp_path, start_worker=False, text_output=output)
+    window.reveal()
+    remembered_on_reveal = len(output.remembered)
+    window._poll()
+    assert len(output.remembered) == remembered_on_reveal
+    window._background_progress = 1.0
+    window.apply_transcript("final", "hello")
+    window.transcript.setPlainText("edited text")
+    window.confirm_button.click()
+    assert output.calls == ["edited text"]
+    assert not window.isVisible()
+    window.close()
+
+
+def test_failed_confirm_keeps_result_and_copies_for_manual_paste(tmp_path, preserve_clipboard):
+    class UnavailableOutput:
+        def remember_foreground(self, _own_hwnd):
+            pass
+
+        def paste(self, _text):
+            return False
+
+    app = QApplication.instance() or QApplication([])
+    window = VoxFlowWindow(model_dir=tmp_path, start_worker=False, text_output=UnavailableOutput())
+    window.reveal()
+    window.apply_transcript("final", "keep this text")
+    window.confirm_button.click()
+    assert window.isVisible()
+    assert window.transcript.toPlainText() == "keep this text"
+    assert app.clipboard().text() == "keep this text"
+    assert "manual paste" in window.status_label.text()
+    window.close()
+
+
+def test_settings_panel_saves_alignment(tmp_path):
+    app = QApplication.instance() or QApplication([])
+    settings = QSettings(str(tmp_path / "voxflow.ini"), QSettings.Format.IniFormat)
+    window = VoxFlowWindow(model_dir=tmp_path, start_worker=False, settings=settings)
+    window.reveal()
+    window.device_button.click()
+    assert window.settings_panel.isVisible()
+    window.alignment_box.setCurrentIndex(window.alignment_box.findData("right"))
+    assert window.transcript_alignment == "right"
+    window.close()
+    reopened = VoxFlowWindow(model_dir=tmp_path, start_worker=False, settings=settings)
+    assert reopened.transcript_alignment == "right"
+    reopened.open_settings()
+    assert reopened.isVisible()
+    assert reopened.settings_panel.isVisible()
+    reopened.close()
+    assert app is not None
+
+
+def test_settings_panel_remembers_microphone(tmp_path, monkeypatch):
+    QApplication.instance() or QApplication([])
+    devices = [
+        {"name": "First mic", "hostapi": 0, "max_input_channels": 1},
+        {"name": "Second mic", "hostapi": 0, "max_input_channels": 1},
+    ]
+    monkeypatch.setattr(window_module.sd, "query_devices", lambda *_args: devices)
+    monkeypatch.setattr(window_module.sd, "query_hostapis", lambda _index: {"name": "WASAPI"})
+    settings = QSettings(str(tmp_path / "microphone.ini"), QSettings.Format.IniFormat)
+    window = VoxFlowWindow(model_dir=tmp_path, start_worker=False, settings=settings)
+    window.device_box.setCurrentIndex(0)
+    window.device_box.setCurrentIndex(1)
+    assert settings.value("microphone/name") == "Second mic · WASAPI"
+    window.close()
+    reopened = VoxFlowWindow(model_dir=tmp_path, start_worker=False, settings=settings)
+    assert reopened.device_box.currentIndex() == 1
+    reopened.close()
 
 
 def test_live_transcript_is_wide_and_alignment_can_change(tmp_path):
     app = QApplication.instance() or QApplication([])
-    window = VoxFlowWindow(model_dir=tmp_path, start_worker=False)
+    settings = QSettings(str(tmp_path / "alignment.ini"), QSettings.Format.IniFormat)
+    window = VoxFlowWindow(model_dir=tmp_path, start_worker=False, settings=settings)
     window.reveal()
     window.apply_transcript("partial", "The spoken words appear here")
     window._background_progress = 0.55

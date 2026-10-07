@@ -57,6 +57,7 @@ def main() -> int:
     menu = QMenu()
     menu.addAction("Show VoxFlow", window.reveal)
     menu.addAction("Start voice input", window.toggle_recording)
+    menu.addAction("Settings", window.open_settings)
     menu.addSeparator()
     def quit_app() -> None:
         window.close()
