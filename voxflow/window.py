@@ -721,6 +721,9 @@ class VoxFlowWindow(QWidget):
     def apply_transcript(self, kind: str, text: str) -> None:
         if kind not in {"partial", "final"}:
             raise ValueError(f"Unknown transcript kind: {kind}")
+        recovered_draft = kind == "final" and not text.strip() and bool(self.transcript.toPlainText().strip())
+        if recovered_draft:
+            text = self.transcript.toPlainText()
         self.transcript.setPlainText(text)
         self.set_transcript_alignment(self.transcript_alignment, persist=False)
         self.transcript.setReadOnly(kind != "final")
@@ -743,7 +746,10 @@ class VoxFlowWindow(QWidget):
             cursor.movePosition(QTextCursor.MoveOperation.Start)
             self.transcript.setTextCursor(cursor)
             self.transcript.verticalScrollBar().setValue(0)
-            self.status_label.setText("Transcript ready · edit or confirm" if text else "No speech detected. Try again.")
+            self.status_label.setText(
+                "Live draft saved · edit or confirm" if recovered_draft else
+                "Transcript ready · edit or confirm" if text else "No speech detected. Try again."
+            )
             self.record_button.setText("Record again")
             self.record_button.setEnabled(self.model_ready)
             self.capsule.setEnabled(self.model_ready)

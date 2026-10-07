@@ -44,6 +44,27 @@ def test_very_quiet_audio_skips_decoder():
     assert recognizer.recognize([0.002] * 16000, 16000) == ""
 
 
+def test_speech_followed_by_silence_is_not_discarded():
+    class FakeStream:
+        result = type("Result", (), {"text": "heard words"})()
+
+        def accept_waveform(self, _sample_rate, _audio):
+            pass
+
+    class FakeRecognizer:
+        def create_stream(self):
+            return FakeStream()
+
+        def decode_stream(self, _stream):
+            pass
+
+    recognizer = SenseVoiceRecognizer.__new__(SenseVoiceRecognizer)
+    recognizer._recognizer = FakeRecognizer()
+    audio = np.concatenate((np.full(16000, 0.004, dtype=np.float32),
+                            np.zeros(10 * 16000, dtype=np.float32)))
+    assert recognizer.recognize(audio, 16000) == "heard words"
+
+
 def test_long_recording_reuses_completed_audio_segments():
     class CountingRecognizer(SenseVoiceRecognizer):
         def __init__(self):

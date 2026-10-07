@@ -81,6 +81,26 @@ def test_transcript_stays_provisional_until_final_result(tmp_path):
     assert app is not None
 
 
+def test_empty_final_result_keeps_last_live_transcript(tmp_path):
+    QApplication.instance() or QApplication([])
+    window = VoxFlowWindow(model_dir=tmp_path, start_worker=False)
+    window.reveal()
+    window._set_mode("recording")
+    window._background_progress = 1.0
+    window.apply_transcript("partial", "Words heard while speaking")
+    assert window.transcript.isVisible()
+
+    window._set_mode("finalizing")
+    window.apply_transcript("final", "")
+
+    assert window.transcript.toPlainText() == "Words heard while speaking"
+    assert window.transcript.isVisible()
+    assert not window.transcript.isReadOnly()
+    assert window.confirm_button.isEnabled()
+    assert "draft" in window.status_label.text().lower()
+    window.close()
+
+
 def test_recording_reveals_background_from_the_capsule(tmp_path):
     app = QApplication.instance() or QApplication([])
     window = VoxFlowWindow(model_dir=tmp_path, start_worker=False)

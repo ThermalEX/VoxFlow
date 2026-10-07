@@ -92,7 +92,10 @@ class SenseVoiceRecognizer:
     def _decode_segment(self, audio: np.ndarray, sample_rate: int) -> str:
         if audio.size == 0:
             return ""
-        if float(np.sqrt(np.mean(np.square(audio)))) < 0.003:
+        # A long pause must not dilute the average below the speech threshold.
+        window = max(1, int(sample_rate * 0.25))
+        if not any(float(np.mean(np.square(audio[start:start + window]))) >= 0.003 ** 2
+                   for start in range(0, audio.size, window)):
             return ""
         stream = self._recognizer.create_stream()
         stream.accept_waveform(sample_rate, audio)
