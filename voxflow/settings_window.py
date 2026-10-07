@@ -1,7 +1,7 @@
 """Standalone, light settings window for VoxFlow."""
 
 from PySide6.QtCore import QEasingCurve, QPropertyAnimation, QSettings, QSize, Qt, Signal, QVariantAnimation
-from PySide6.QtGui import QColor, QFont, QIcon, QPainter, QPen, QPixmap
+from PySide6.QtGui import QColor, QFont, QIcon, QPainter, QPixmap
 from PySide6.QtWidgets import (
     QAbstractSpinBox, QApplication, QComboBox, QColorDialog, QFontComboBox, QFrame,
     QGraphicsOpacityEffect, QHBoxLayout, QLabel, QListWidget, QListWidgetItem,
@@ -9,7 +9,7 @@ from PySide6.QtWidgets import (
 )
 
 from .appearance import DEFAULT_BACKGROUND, DEFAULT_CAPSULE, DEFAULT_FONT, DEFAULT_TEXT_SIZE, saved_color
-from .ui_icons import app_icon, line_icon
+from .ui_icons import app_icon, line_icon, symbol_pixmap
 
 
 class _Chevron(QWidget):
@@ -18,6 +18,7 @@ class _Chevron(QWidget):
         self.setFixedSize(18, 18)
         self.setAttribute(Qt.WidgetAttribute.WA_TransparentForMouseEvents)
         self.angle = 0.0
+        self._symbol = symbol_pixmap("keyboard_arrow_down", 18, "#56677A")
 
     def set_angle(self, angle: float) -> None:
         self.angle = angle
@@ -28,12 +29,7 @@ class _Chevron(QWidget):
         painter.setRenderHint(QPainter.RenderHint.Antialiasing)
         painter.translate(9, 9)
         painter.rotate(self.angle)
-        pen = QPen(QColor("#56677A"), 1.8)
-        pen.setCapStyle(Qt.PenCapStyle.RoundCap)
-        pen.setJoinStyle(Qt.PenJoinStyle.RoundJoin)
-        painter.setPen(pen)
-        painter.drawLine(-4, -1, 0, 3)
-        painter.drawLine(0, 3, 4, -1)
+        painter.drawPixmap(-9, -9, self._symbol)
         painter.end()
 
 
