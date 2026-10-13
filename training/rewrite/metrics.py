@@ -7,6 +7,12 @@ from collections import defaultdict
 from .schema import INSTRUCTION_WORDS, NEGATIVE_CATEGORIES, normalize, validate_suggestion
 
 _NUMBER = re.compile(r"\d+")
+# Seed validation keeps a narrow list; scoring also catches the style and language phrasings users speak.
+RESIDUE_WORDS = INSTRUCTION_WORDS + (
+    "热情一点", "客气一点", "温柔一点", "随意一点", "口语化", "专业一点", "严肃一点", "幽默一点",
+    "说得", "用英文", "用中文", "英文怎么说", "翻译一下", "in chinese", "in english", "make it",
+    "be more", "say it",
+)
 
 
 def char_error_rate(prediction: str, gold: str) -> float:
@@ -57,7 +63,7 @@ def clean_metrics(records: list[dict]) -> dict:
         else:
             others += 1
             residue += any(word in prediction.casefold() and word not in gold.casefold()
-                           for word in INSTRUCTION_WORDS)
+                           for word in RESIDUE_WORDS)
     total = len(records)
     return {
         "count": total,

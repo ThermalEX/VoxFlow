@@ -86,3 +86,13 @@ def test_tokenize_example_trains_only_on_the_answer():
     assert tokenize_example(CharTokenizer(), {"messages": [
         {"role": "system", "content": "S"}, {"role": "user", "content": "U"}, {"role": "assistant", "content": "AB"},
     ]}, max_length=10) is None
+
+
+def test_instruction_residue_covers_style_and_translation_phrasings():
+    records = [
+        row("clean", "周六来我家，热情一点", "周六来我家呀！", "周六来我家，热情一点。", ["instr_style"]),
+        row("clean", "用英文说，我到了", "I'm here.", "用英文说，I'm here.", ["instr_translate"]),
+        row("clean", "see you, in Chinese please", "回头见。", "回头见，in Chinese please", ["instr_translate"]),
+        row("clean", "make it shorter, see you soon", "See you soon.", "See you soon.", ["instr_style"]),
+    ]
+    assert metrics.clean_metrics(records)["instruction_residue"] == pytest.approx(3 / 4)
