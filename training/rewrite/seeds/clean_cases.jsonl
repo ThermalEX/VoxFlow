@@ -1,0 +1,140 @@
+{"id": "filler-0001", "categories": ["filler"], "scene": "work_chat", "raw": "额，那个，就是我明天想请个假啊。", "output": "我明天想请个假。"}
+{"id": "filler-0002", "categories": ["filler"], "scene": "family_friends", "raw": "嗯，妈，我周末，那个，就不回去吃饭了。", "output": "妈，我周末就不回去吃饭了。"}
+{"id": "filler-0003", "categories": ["filler"], "scene": "tech", "raw": "然后就是，呃，这个接口的超时时间我们设成5秒吧。", "output": "这个接口的超时时间我们设成5秒吧。"}
+{"id": "filler-0004", "categories": ["filler"], "scene": "email", "raw": "Um, hi Sarah, uh, just wanted to check if you got my last email.", "output": "Hi Sarah, just wanted to check if you got my last email."}
+{"id": "filler-0005", "categories": ["filler", "repetition"], "scene": "shopping", "raw": "啊，老板，这个，呃，这个西瓜怎么卖？", "output": "老板，这个西瓜怎么卖？"}
+{"id": "filler-0006", "categories": ["filler"], "scene": "school", "raw": "嗯，老师您好，那个，我想问一下期末考试的范围。", "output": "老师您好，我想问一下期末考试的范围。"}
+{"id": "filler-0007", "categories": ["filler"], "scene": "customer_service", "raw": "额，你好，我上周买的耳机，就是，右边没声音了。", "output": "你好，我上周买的耳机右边没声音了。"}
+{"id": "filler-0008", "categories": ["filler"], "scene": "social_media", "raw": "So, like, today was honestly, you know, the best day ever.", "output": "Today was honestly the best day ever."}
+{"id": "filler-0009", "categories": ["filler"], "scene": "schedule", "raw": "嗯，然后，周四下午我们，额，去看一下场地。", "output": "周四下午我们去看一下场地。"}
+{"id": "filler-0010", "categories": ["filler"], "scene": "daily", "raw": "额，我刚刚那个，就是把wifi密码发你了，你看一下啊。", "output": "我刚刚把wifi密码发你了，你看一下。"}
+{"id": "rep-0001", "categories": ["repetition"], "scene": "work_chat", "raw": "我我我觉得这个这个方案可以，就按这个来。", "output": "我觉得这个方案可以，就按这个来。"}
+{"id": "rep-0002", "categories": ["repetition"], "scene": "family_friends", "raw": "你你明天几点几点到家？", "output": "你明天几点到家？"}
+{"id": "rep-0003", "categories": ["repetition"], "scene": "tech", "raw": "这个bug这个bug是在登录的时候出现的。", "output": "这个bug是在登录的时候出现的。"}
+{"id": "rep-0004", "categories": ["repetition"], "scene": "email", "raw": "I I think we we should push the deadline to next week.", "output": "I think we should push the deadline to next week."}
+{"id": "rep-0005", "categories": ["repetition"], "scene": "shopping", "raw": "帮我帮我看一下这件衣服有没有有没有L码的。", "output": "帮我看一下这件衣服有没有L码的。"}
+{"id": "rep-0006", "categories": ["repetition"], "scene": "school", "raw": "这道题这道题我我还是不太懂。", "output": "这道题我还是不太懂。"}
+{"id": "rep-0007", "categories": ["repetition"], "scene": "customer_service", "raw": "我要我要退货，这个这个质量太差了。", "output": "我要退货，这个质量太差了。"}
+{"id": "rep-0008", "categories": ["repetition"], "scene": "schedule", "raw": "下周下周一我们我们开个会吧。", "output": "下周一我们开个会吧。"}
+{"id": "rep-0009", "categories": ["repetition"], "scene": "social_media", "raw": "This this is the the coolest thing I've seen all week.", "output": "This is the coolest thing I've seen all week."}
+{"id": "rep-0010", "categories": ["repetition"], "scene": "daily", "raw": "我们我们晚上去吃火锅吧。", "output": "我们晚上去吃火锅吧。"}
+{"id": "corr-0001", "categories": ["immediate_correction"], "scene": "schedule", "raw": "周五，不对，周六下午开会。", "output": "周六下午开会。"}
+{"id": "corr-0002", "categories": ["immediate_correction"], "scene": "work_chat", "raw": "这个需求下周二上线，哦不是，下周三上线。", "output": "这个需求下周三上线。"}
+{"id": "corr-0003", "categories": ["immediate_correction"], "scene": "shopping", "raw": "帮我买3斤，不，买5斤排骨。", "output": "帮我买5斤排骨。"}
+{"id": "corr-0004", "categories": ["immediate_correction"], "scene": "family_friends", "raw": "我7点，说错了，8点到你家楼下。", "output": "我8点到你家楼下。"}
+{"id": "corr-0005", "categories": ["immediate_correction"], "scene": "email", "raw": "The meeting is on Tuesday, sorry, Wednesday at 10 am.", "output": "The meeting is on Wednesday at 10 am."}
+{"id": "corr-0006", "categories": ["immediate_correction"], "scene": "tech", "raw": "把端口设成8080，不对，是8081。", "output": "把端口设成8081。"}
+{"id": "corr-0007", "categories": ["immediate_correction"], "scene": "customer_service", "raw": "我的订单号是20231015，不对不对，是20231016。", "output": "我的订单号是20231016。"}
+{"id": "corr-0008", "categories": ["immediate_correction"], "scene": "school", "raw": "作业是第3章，啊不是，第4章的习题。", "output": "作业是第4章的习题。"}
+{"id": "corr-0009", "categories": ["immediate_correction"], "scene": "social_media", "raw": "今天去了上海，不对，是杭州，天气超好。", "output": "今天去了杭州，天气超好。"}
+{"id": "corr-0010", "categories": ["immediate_correction"], "scene": "daily", "raw": "Grab some milk, I mean, oat milk on your way home.", "output": "Grab some oat milk on your way home."}
+{"id": "edit-del-0001", "categories": ["edit_delete", "implicit_reason"], "scene": "shopping", "raw": "我今天要买苹果，梨子，哦昨天买过苹果了，去掉苹果", "output": "我今天要买梨子。"}
+{"id": "edit-del-0002", "categories": ["edit_delete", "implicit_reason"], "scene": "work_chat", "raw": "明天开会要带电脑、投影仪和合同，投影仪会议室有，不用带了，去掉投影仪。", "output": "明天开会要带电脑和合同。"}
+{"id": "edit-del-0003", "categories": ["edit_delete"], "scene": "email", "raw": "附件里有报价单和合同草稿，还有发票，算了发票先别发，把发票删掉。", "output": "附件里有报价单和合同草稿。"}
+{"id": "edit-del-0004", "categories": ["edit_delete", "implicit_reason"], "scene": "family_friends", "raw": "周末我们去爬山，然后去吃烤肉，最后去看电影，看电影就算了，太累了。", "output": "周末我们去爬山，然后去吃烤肉。"}
+{"id": "edit-del-0005", "categories": ["edit_delete"], "scene": "tech", "raw": "这个PR改了登录页面和支付模块，还有README，README那个不算，去掉。", "output": "这个PR改了登录页面和支付模块。"}
+{"id": "edit-del-0006", "categories": ["edit_delete"], "scene": "schedule", "raw": "下周一见客户，下周二出差，下周三团建，刚才那句团建不要了。", "output": "下周一见客户，下周二出差。"}
+{"id": "edit-del-0007", "categories": ["edit_delete"], "scene": "school", "raw": "我报名了数学竞赛和英语演讲，还有书法比赛，书法比赛那句不要了。", "output": "我报名了数学竞赛和英语演讲。"}
+{"id": "edit-del-0008", "categories": ["edit_delete"], "scene": "daily", "raw": "I need eggs, bread, and cheese, actually scratch the cheese.", "output": "I need eggs and bread."}
+{"id": "edit-del-0009", "categories": ["edit_delete"], "scene": "customer_service", "raw": "我想咨询一下退款进度，顺便问下积分怎么用，积分的问题不问了，删掉后面那句。", "output": "我想咨询一下退款进度。"}
+{"id": "edit-del-0010", "categories": ["edit_delete", "implicit_reason"], "scene": "social_media", "raw": "今天打卡了外滩，吃了生煎，还排了两小时队买奶茶，最后那个别写了，太丢人。", "output": "今天打卡了外滩，吃了生煎。"}
+{"id": "edit-rep-0001", "categories": ["edit_replace"], "scene": "family_friends", "raw": "帮我约张三周六吃饭，把张三换成李四。", "output": "帮我约李四周六吃饭。"}
+{"id": "edit-rep-0002", "categories": ["edit_replace"], "scene": "work_chat", "raw": "麻烦小王把周报发我一下，周报改成月报。", "output": "麻烦小王把月报发我一下。"}
+{"id": "edit-rep-0003", "categories": ["edit_replace"], "scene": "email", "raw": "Please send the invoice to John, actually change John to Maria.", "output": "Please send the invoice to Maria."}
+{"id": "edit-rep-0004", "categories": ["edit_replace"], "scene": "shopping", "raw": "买两箱牛奶一袋大米，牛奶要三箱。", "output": "买三箱牛奶、一袋大米。"}
+{"id": "edit-rep-0005", "categories": ["edit_replace"], "scene": "tech", "raw": "把缓存时间设成一小时，日志级别设成debug，日志级别还是用info吧。", "output": "把缓存时间设成一小时，日志级别设成info。"}
+{"id": "edit-rep-0006", "categories": ["edit_replace"], "scene": "schedule", "raw": "跟牙医约在周四上午10点，时间往后挪一个小时。", "output": "跟牙医约在周四上午11点。"}
+{"id": "edit-rep-0007", "categories": ["edit_replace"], "scene": "school", "raw": "我们小组的题目是城市交通，题目换成城市绿化吧。", "output": "我们小组的题目是城市绿化。"}
+{"id": "edit-rep-0008", "categories": ["edit_replace"], "scene": "customer_service", "raw": "收货地址写朝阳区建国路88号，门牌号写错了，是86号。", "output": "收货地址写朝阳区建国路86号。"}
+{"id": "edit-rep-0009", "categories": ["edit_replace"], "scene": "social_media", "raw": "新的一年要多读书多运动，多运动换成早睡早起。", "output": "新的一年要多读书、早睡早起。"}
+{"id": "edit-rep-0010", "categories": ["edit_replace"], "scene": "daily", "raw": "提醒我晚上给我妈打电话，不是我妈，是我姐。", "output": "提醒我晚上给我姐打电话。"}
+{"id": "edit-ins-0001", "categories": ["edit_insert"], "scene": "shopping", "raw": "买牛奶和面包，哦还有鸡蛋。", "output": "买牛奶、面包和鸡蛋。"}
+{"id": "edit-ins-0002", "categories": ["edit_insert"], "scene": "work_chat", "raw": "会议纪要发给产品和设计，测试也抄送一下。", "output": "会议纪要发给产品和设计，也抄送测试。"}
+{"id": "edit-ins-0003", "categories": ["edit_insert"], "scene": "email", "raw": "Thanks for the update, oh and add that I'll be out on Friday.", "output": "Thanks for the update. I'll be out on Friday."}
+{"id": "edit-ins-0004", "categories": ["edit_insert"], "scene": "family_friends", "raw": "周日去奶奶家，前面加上上午两个字。", "output": "周日上午去奶奶家。"}
+{"id": "edit-ins-0005", "categories": ["edit_insert"], "scene": "tech", "raw": "部署步骤是先拉代码再重启服务，中间要先跑一下数据库迁移。", "output": "部署步骤是先拉代码，再跑数据库迁移，最后重启服务。"}
+{"id": "edit-ins-0006", "categories": ["edit_insert"], "scene": "schedule", "raw": "下午3点开会，地点在3楼会议室，开头加一句今天的。", "output": "今天下午3点开会，地点在3楼会议室。"}
+{"id": "edit-ins-0007", "categories": ["edit_insert"], "scene": "school", "raw": "实验报告要写目的和结论，对了还有实验步骤，放在中间。", "output": "实验报告要写目的、实验步骤和结论。"}
+{"id": "edit-ins-0008", "categories": ["edit_insert"], "scene": "customer_service", "raw": "你好，我要换货，订单号123456，补充一下，要换成M码。", "output": "你好，我要换货，订单号123456，要换成M码。", "keeps_instruction_words": true}
+{"id": "edit-ins-0009", "categories": ["edit_insert"], "scene": "social_media", "raw": "周末去露营了，星星超多，结尾加个感叹号。", "output": "周末去露营了，星星超多！"}
+{"id": "edit-ins-0010", "categories": ["edit_insert"], "scene": "daily", "raw": "Pick up the kids at 4, and also, before that, get gas.", "output": "Get gas, then pick up the kids at 4."}
+{"id": "implicit-0001", "categories": ["implicit_reason", "edit_replace"], "scene": "schedule", "raw": "订周二的票，哦周二我有课，那就周三吧。", "output": "订周三的票。"}
+{"id": "implicit-0002", "categories": ["implicit_reason", "edit_delete"], "scene": "shopping", "raw": "晚饭买鱼和虾，算了小宝对虾过敏，只买鱼。", "output": "晚饭买鱼。"}
+{"id": "implicit-0003", "categories": ["implicit_reason"], "scene": "work_chat", "raw": "这周五交方案，哦这周五放假，那就周四交。", "output": "这周四交方案。"}
+{"id": "implicit-0004", "categories": ["implicit_reason"], "scene": "family_friends", "raw": "我们去吃日料吧，你上次说吃生的胃不舒服，那还是吃火锅。", "output": "我们去吃火锅吧。"}
+{"id": "implicit-0005", "categories": ["implicit_reason"], "scene": "tech", "raw": "用Redis做缓存，哦不行，服务器内存不够，先用本地缓存。", "output": "先用本地缓存。"}
+{"id": "implicit-0006", "categories": ["implicit_reason"], "scene": "email", "raw": "Let's schedule the call for Monday, oh wait, Monday is a holiday, let's do Tuesday.", "output": "Let's schedule the call for Tuesday."}
+{"id": "implicit-0007", "categories": ["implicit_reason"], "scene": "school", "raw": "周六去图书馆复习，周六图书馆不开门，改去咖啡馆。", "output": "周六去咖啡馆复习。"}
+{"id": "implicit-0008", "categories": ["implicit_reason"], "scene": "customer_service", "raw": "我要申请退款，等等，已经过了七天了，那就申请维修吧。", "output": "我要申请维修。"}
+{"id": "implicit-0009", "categories": ["implicit_reason"], "scene": "social_media", "raw": "今天出去骑车了，哦不对，下午下雨了，是在家看了一下午书。", "output": "今天在家看了一下午书。"}
+{"id": "implicit-0010", "categories": ["implicit_reason"], "scene": "daily", "raw": "帮我定个明早6点的闹钟，算了明天周末，定8点。", "output": "帮我定个明早8点的闹钟。"}
+{"id": "fmt-0001", "categories": ["spoken_format"], "scene": "work_chat", "raw": "今天的待办，第一，回复客户邮件，第二，改完周报，第三，约下周的会。", "output": "今天的待办：\n1. 回复客户邮件\n2. 改完周报\n3. 约下周的会"}
+{"id": "fmt-0002", "categories": ["spoken_format"], "scene": "family_friends", "raw": "到家了吗问号记得吃药感叹号", "output": "到家了吗？记得吃药！"}
+{"id": "fmt-0003", "categories": ["spoken_format"], "scene": "email", "raw": "张总您好逗号换行附件是本季度的报告句号换行谢谢", "output": "张总您好，\n附件是本季度的报告。\n谢谢"}
+{"id": "fmt-0004", "categories": ["spoken_format"], "scene": "shopping", "raw": "购物清单冒号，鸡蛋，牛奶，面包，分行写。", "output": "购物清单：\n鸡蛋\n牛奶\n面包"}
+{"id": "fmt-0005", "categories": ["spoken_format"], "scene": "tech", "raw": "步骤一安装依赖，步骤二运行测试，步骤三提交代码。", "output": "1. 安装依赖\n2. 运行测试\n3. 提交代码"}
+{"id": "fmt-0006", "categories": ["spoken_format"], "scene": "schedule", "raw": "明天安排，上午开会，下午拜访客户，晚上健身，列成清单。", "output": "明天安排：\n- 上午开会\n- 下午拜访客户\n- 晚上健身"}
+{"id": "fmt-0007", "categories": ["spoken_format"], "scene": "school", "raw": "引号学而时习之引号是论语里的第一句", "output": "“学而时习之”是《论语》里的第一句。"}
+{"id": "fmt-0008", "categories": ["spoken_format"], "scene": "email", "raw": "Hi team comma new line the release is moved to Friday period", "output": "Hi team,\nThe release is moved to Friday."}
+{"id": "fmt-0009", "categories": ["spoken_format"], "scene": "social_media", "raw": "今天的三个小确幸，一是早起看到日出，二是咖啡买一送一，三是下班没堵车。", "output": "今天的三个小确幸：\n1. 早起看到日出\n2. 咖啡买一送一\n3. 下班没堵车"}
+{"id": "fmt-0010", "categories": ["spoken_format"], "scene": "customer_service", "raw": "问题描述冒号屏幕闪烁句号出现时间冒号昨天晚上句号", "output": "问题描述：屏幕闪烁。出现时间：昨天晚上。"}
+{"id": "tr-0001", "categories": ["instr_translate"], "scene": "work_chat", "raw": "明天下午开会，翻译成英文", "output": "There's a meeting tomorrow afternoon.", "instr_position": "suffix"}
+{"id": "tr-0002", "categories": ["instr_translate"], "scene": "customer_service", "raw": "翻译成英文：感谢您的耐心等待，我们会尽快处理您的订单。", "output": "Thank you for your patience. We'll process your order as soon as possible.", "instr_position": "prefix"}
+{"id": "tr-0003", "categories": ["instr_translate"], "scene": "family_friends", "raw": "Translate to Chinese, I'll be home late tonight, don't wait for me for dinner.", "output": "我今晚会晚点回家，晚饭别等我了。", "instr_position": "prefix"}
+{"id": "tr-0004", "categories": ["instr_translate"], "scene": "tech", "raw": "这个接口已经废弃了，请改用新版本，帮我翻成英文", "output": "This API has been deprecated. Please use the new version instead.", "instr_position": "suffix"}
+{"id": "tr-0005", "categories": ["instr_translate"], "scene": "school", "raw": "帮我把我明天请假这句话翻译成英文", "output": "I'm taking a day off tomorrow.", "instr_position": "infix"}
+{"id": "tr-0006", "categories": ["instr_translate"], "scene": "social_media", "raw": "Just finished my first marathon, so proud of myself, translate this into Chinese", "output": "刚跑完人生第一个马拉松，太为自己骄傲了！", "instr_position": "suffix"}
+{"id": "tr-0007", "categories": ["instr_translate"], "scene": "shopping", "raw": "用英文说，这个有没有大一号的？", "output": "Do you have this in a larger size?", "instr_position": "prefix"}
+{"id": "tr-0008", "categories": ["instr_translate"], "scene": "email", "raw": "您好，您的退款已经原路退回，预计三到五个工作日到账，翻译成英文", "output": "Hello, your refund has been issued to your original payment method and should arrive within 3 to 5 business days.", "instr_position": "suffix"}
+{"id": "tr-0009", "categories": ["instr_translate"], "scene": "schedule", "raw": "The flight leaves at 7:45 am from Terminal 2, put that in Chinese", "output": "航班早上7:45从2号航站楼起飞。", "instr_position": "suffix"}
+{"id": "tr-0010", "categories": ["instr_translate", "filler"], "scene": "daily", "raw": "额，翻译成英文，就是，我在路上了，十分钟后到。", "output": "I'm on my way, I'll be there in ten minutes.", "instr_position": "prefix"}
+{"id": "style-0001", "categories": ["instr_style"], "scene": "work_chat", "raw": "明天的会我去不了，你们先开吧，说得正式一点", "output": "抱歉，我明天无法参加会议，请大家先行开始。", "instr_position": "suffix"}
+{"id": "style-0002", "categories": ["instr_style"], "scene": "family_friends", "raw": "你借我的钱什么时候还，委婉一点", "output": "之前借你的那笔钱，你看什么时候方便还一下？", "instr_position": "suffix"}
+{"id": "style-0003", "categories": ["instr_style"], "scene": "email", "raw": "正式一点：老板，那个报价我改好了，你看下有没有问题。", "output": "您好，报价已修改完成，请您审阅，如有问题请随时告知。", "instr_position": "prefix"}
+{"id": "style-0004", "categories": ["instr_style"], "scene": "customer_service", "raw": "你们这个快递怎么还没到，都一个星期了，礼貌一点", "output": "您好，我的快递已经一个星期了还没送到，麻烦帮忙查一下，谢谢。", "instr_position": "suffix"}
+{"id": "style-0005", "categories": ["instr_style", "filler"], "scene": "tech", "raw": "简洁一点，就是我们这个服务呢，在高峰的时候响应会比较慢，然后我觉得可能是数据库连接池不够用了。", "output": "服务高峰期响应慢，可能是数据库连接池不够。", "instr_position": "prefix"}
+{"id": "style-0006", "categories": ["instr_style"], "scene": "social_media", "raw": "本人于今日完成了人生第一次高空跳伞，体验极佳，口语一点", "output": "今天第一次玩高空跳伞，太爽了！", "instr_position": "suffix"}
+{"id": "style-0007", "categories": ["instr_style"], "scene": "school", "raw": "委婉一点，你的报告写得不行，要重写。", "output": "你的报告还有不少需要完善的地方，建议重新写一版。", "instr_position": "prefix"}
+{"id": "style-0008", "categories": ["instr_style"], "scene": "email", "raw": "hey can you send me the files by tomorrow, make it more formal", "output": "Could you please send me the files by tomorrow?", "instr_position": "suffix"}
+{"id": "style-0009", "categories": ["instr_style"], "scene": "schedule", "raw": "周六的聚会大家都来啊，七点在老地方，热情一点", "output": "周六聚会大家一定要来呀！晚上七点，老地方不见不散！", "instr_position": "suffix"}
+{"id": "style-0010", "categories": ["instr_style"], "scene": "shopping", "raw": "老板能不能便宜点，客气一点", "output": "老板您好，请问价格方面还能再优惠一点吗？", "instr_position": "suffix"}
+{"id": "combo-0001", "categories": ["instr_combo", "immediate_correction"], "scene": "work_chat", "raw": "周五交报告，不对，周四交，翻译成英文", "output": "The report is due Thursday.", "instr_position": "suffix"}
+{"id": "combo-0002", "categories": ["instr_combo", "edit_delete", "implicit_reason"], "scene": "shopping", "raw": "晚上回来买牛奶和可乐，哦可乐家里还有，去掉可乐，翻译成英文", "output": "I'll pick up some milk on my way home tonight.", "instr_position": "suffix"}
+{"id": "combo-0003", "categories": ["instr_combo", "filler", "implicit_reason"], "scene": "email", "raw": "额，跟客户说，样品下周一寄出，哦下周一放假，那就下周二，说得正式一点", "output": "样品将于下周二寄出，敬请留意。", "instr_position": "suffix"}
+{"id": "combo-0004", "categories": ["instr_combo", "repetition"], "scene": "family_friends", "raw": "委婉一点，你周末别来了，我我家里有事", "output": "不好意思，我这周末家里有事，你先别过来了。", "instr_position": "prefix"}
+{"id": "combo-0005", "categories": ["instr_combo", "edit_delete", "implicit_reason"], "scene": "tech", "raw": "这个版本修复了登录问题和支付问题，支付那个还没修完，去掉，翻成英文", "output": "This release fixes the login issue.", "instr_position": "suffix"}
+{"id": "combo-0006", "categories": ["instr_combo", "immediate_correction"], "scene": "schedule", "raw": "Move the meeting to 3, sorry, 4 pm, and make it more polite", "output": "Would it be possible to move the meeting to 4 pm?", "instr_position": "suffix"}
+{"id": "combo-0007", "categories": ["instr_combo", "immediate_correction"], "scene": "customer_service", "raw": "我要退两件衣服，不，三件，礼貌一点", "output": "您好，我想退三件衣服，麻烦帮忙处理一下，谢谢。", "instr_position": "suffix"}
+{"id": "combo-0008", "categories": ["instr_combo", "filler"], "scene": "school", "raw": "正式一点，老师，那个，我发烧了，明天想请假一天", "output": "老师您好，我因发烧，明天需要请假一天，望批准。", "instr_position": "prefix"}
+{"id": "combo-0009", "categories": ["instr_combo", "edit_delete", "implicit_reason"], "scene": "social_media", "raw": "今天去了故宫和天坛，天坛没去成，人太多，删掉天坛，翻译成英文", "output": "Visited the Forbidden City today.", "instr_position": "suffix"}
+{"id": "combo-0010", "categories": ["instr_combo", "edit_delete", "implicit_reason"], "scene": "daily", "raw": "提醒我买猫粮和狗粮，我又没养狗，去掉狗粮，简洁一点", "output": "提醒我买猫粮。", "instr_position": "suffix"}
+{"id": "neg-instr-0001", "categories": ["neg_instruction_like"], "scene": "work_chat", "raw": "他让我把这段翻译成英文，我晚点弄", "output": "他让我把这段翻译成英文，我晚点弄。"}
+{"id": "neg-instr-0002", "categories": ["neg_instruction_like"], "scene": "email", "raw": "老板说邮件要写得正式一点，我再改改", "output": "老板说邮件要写得正式一点，我再改改。"}
+{"id": "neg-instr-0003", "categories": ["neg_instruction_like"], "scene": "school", "raw": "老师说作文结尾要去掉那段抒情", "output": "老师说作文结尾要去掉那段抒情。"}
+{"id": "neg-instr-0004", "categories": ["neg_instruction_like"], "scene": "tech", "raw": "这个函数的作用是把中文翻译成英文", "output": "这个函数的作用是把中文翻译成英文。"}
+{"id": "neg-instr-0005", "categories": ["neg_instruction_like"], "scene": "family_friends", "raw": "我妈总让我说话委婉一点", "output": "我妈总让我说话委婉一点。"}
+{"id": "neg-instr-0006", "categories": ["neg_instruction_like"], "scene": "customer_service", "raw": "你们能不能把收货地址换成公司地址", "output": "你们能不能把收货地址换成公司地址？"}
+{"id": "neg-instr-0007", "categories": ["neg_instruction_like"], "scene": "social_media", "raw": "学了一年英语终于能把歌词翻译成英文了", "output": "学了一年英语，终于能把歌词翻译成英文了。"}
+{"id": "neg-instr-0008", "categories": ["neg_instruction_like"], "scene": "daily", "raw": "Can you translate this menu for me", "output": "Can you translate this menu for me?"}
+{"id": "neg-instr-0009", "categories": ["neg_instruction_like"], "scene": "shopping", "raw": "这件衣服能把扣子换成金色的吗", "output": "这件衣服能把扣子换成金色的吗？"}
+{"id": "neg-instr-0010", "categories": ["neg_instruction_like"], "scene": "schedule", "raw": "会议室的牌子记得把名字改成新部门的", "output": "会议室的牌子记得把名字改成新部门的。"}
+{"id": "neg-cs-0001", "categories": ["neg_code_switch"], "scene": "tech", "raw": "这个PR帮我review一下", "output": "这个PR帮我review一下。"}
+{"id": "neg-cs-0002", "categories": ["neg_code_switch"], "scene": "work_chat", "raw": "明天的meeting挪到下午了，记得check一下calendar", "output": "明天的meeting挪到下午了，记得check一下calendar。"}
+{"id": "neg-cs-0003", "categories": ["neg_code_switch"], "scene": "email", "raw": "附件是Q3的report，有问题随时ping我", "output": "附件是Q3的report，有问题随时ping我。"}
+{"id": "neg-cs-0004", "categories": ["neg_code_switch"], "scene": "social_media", "raw": "今天的OOTD是全身Uniqlo", "output": "今天的OOTD是全身Uniqlo。"}
+{"id": "neg-cs-0005", "categories": ["neg_code_switch"], "scene": "school", "raw": "这个presentation的deadline是周五", "output": "这个presentation的deadline是周五。"}
+{"id": "neg-cs-0006", "categories": ["neg_code_switch"], "scene": "shopping", "raw": "这个iPhone有没有256G的", "output": "这个iPhone有没有256G的？"}
+{"id": "neg-cs-0007", "categories": ["neg_code_switch"], "scene": "schedule", "raw": "下午三点有个one on one，帮我block一下时间", "output": "下午三点有个one on one，帮我block一下时间。"}
+{"id": "neg-cs-0008", "categories": ["neg_code_switch"], "scene": "family_friends", "raw": "周末一起去看那个新出的Marvel电影吧", "output": "周末一起去看那个新出的Marvel电影吧。"}
+{"id": "neg-cs-0009", "categories": ["neg_code_switch"], "scene": "customer_service", "raw": "我的App一直闪退，已经重装了还是不行", "output": "我的App一直闪退，已经重装了还是不行。"}
+{"id": "neg-cs-0010", "categories": ["neg_code_switch"], "scene": "daily", "raw": "帮我把这个link发到群里", "output": "帮我把这个link发到群里。"}
+{"id": "neg-clean-0001", "categories": ["neg_clean"], "scene": "work_chat", "raw": "好的，收到，我马上处理。", "output": "好的，收到，我马上处理。"}
+{"id": "neg-clean-0002", "categories": ["neg_clean"], "scene": "email", "raw": "附件是本月的考勤表，请查收。", "output": "附件是本月的考勤表，请查收。"}
+{"id": "neg-clean-0003", "categories": ["neg_clean"], "scene": "family_friends", "raw": "我到家了，你早点休息。", "output": "我到家了，你早点休息。"}
+{"id": "neg-clean-0004", "categories": ["neg_clean"], "scene": "tech", "raw": "数据库备份每天凌晨两点自动执行。", "output": "数据库备份每天凌晨两点自动执行。"}
+{"id": "neg-clean-0005", "categories": ["neg_clean"], "scene": "schedule", "raw": "See you at the station at 9.", "output": "See you at the station at 9."}
+{"id": "neg-clean-0006", "categories": ["neg_clean"], "scene": "shopping", "raw": "这款洗衣液还有货吗？", "output": "这款洗衣液还有货吗？"}
+{"id": "neg-clean-0007", "categories": ["neg_clean"], "scene": "school", "raw": "下周一交实验报告，别忘了。", "output": "下周一交实验报告，别忘了。"}
+{"id": "neg-clean-0008", "categories": ["neg_clean"], "scene": "customer_service", "raw": "您好，我想查询一下物流信息。", "output": "您好，我想查询一下物流信息。"}
+{"id": "neg-clean-0009", "categories": ["neg_clean"], "scene": "social_media", "raw": "今天的晚霞真好看。", "output": "今天的晚霞真好看。"}
+{"id": "neg-clean-0010", "categories": ["neg_clean"], "scene": "daily", "raw": "冰箱里还有半个西瓜，记得吃。", "output": "冰箱里还有半个西瓜，记得吃。"}

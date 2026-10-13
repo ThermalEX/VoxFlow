@@ -1,0 +1,20 @@
+{"id": "sug-0001", "scene": "work_chat", "input": "明天的会我去不了了，你们先开吧。", "suggestions": [{"label": "更礼貌", "text": "不好意思，明天的会我去不了，大家先开，会后我再看一下纪要。"}, {"label": "译成英文", "text": "I can't make it to tomorrow's meeting, please go ahead without me."}]}
+{"id": "sug-0002", "scene": "email", "input": "报价单我已经改好了，你看一下。", "suggestions": [{"label": "更正式", "text": "您好，报价单已修改完成，请您审阅，如有问题请随时告知。"}, {"label": "更简洁", "text": "报价单已改好，请查看。"}]}
+{"id": "sug-0003", "scene": "family_friends", "input": "我今晚加班，不回来吃饭了。", "suggestions": [{"label": "更体贴", "text": "今晚要加班，就不回来吃饭了，你们先吃，别等我。"}, {"label": "译成英文", "text": "I'm working late tonight, so I won't be home for dinner."}]}
+{"id": "sug-0004", "scene": "customer_service", "input": "你们的快递怎么还没到？", "suggestions": [{"label": "更礼貌", "text": "您好，请问我的快递什么时候能送到？麻烦帮忙查一下，谢谢。"}, {"label": "更委婉", "text": "想问一下我的快递大概什么时候能到呢？"}]}
+{"id": "sug-0005", "scene": "tech", "input": "这个bug我修好了，你拉一下最新代码。", "suggestions": [{"label": "更完整", "text": "这个bug已经修复了，麻烦拉一下最新代码验证一下，有问题再告诉我。"}, {"label": "译成英文", "text": "I've fixed the bug. Please pull the latest code."}]}
+{"id": "sug-0006", "scene": "shopping", "input": "这件衣服能便宜点吗？", "suggestions": [{"label": "更客气", "text": "您好，这件衣服价格上还能再优惠一些吗？"}, {"label": "更直接", "text": "这件最低多少钱？"}]}
+{"id": "sug-0007", "scene": "schedule", "input": "周五下午三点开会，大家准时参加。", "suggestions": [{"label": "改成通知", "text": "【会议通知】本周五下午三点召开会议，请各位准时参加。"}, {"label": "更随和", "text": "周五下午三点开个会，大家记得准时来哈。"}]}
+{"id": "sug-0008", "scene": "school", "input": "老师，作业我晚交一天可以吗？", "suggestions": [{"label": "更正式", "text": "老师您好，请问作业能否延期一天提交？"}, {"label": "更诚恳", "text": "老师，不好意思，作业想晚交一天，可以吗？"}]}
+{"id": "sug-0009", "scene": "social_media", "input": "今天终于爬上了泰山顶。", "suggestions": [{"label": "更有感染力", "text": "今天终于登上泰山之巅，一览众山小！"}, {"label": "译成英文", "text": "Finally made it to the top of Mount Tai today!"}]}
+{"id": "sug-0010", "scene": "daily", "input": "记得带伞，今天下雨。", "suggestions": [{"label": "更关心", "text": "今天要下雨，出门记得带伞哦。"}]}
+{"id": "sug-0011", "scene": "work_chat", "input": "Can you send me the slides?", "suggestions": [{"label": "More polite", "text": "Could you please send me the slides when you get a chance?"}, {"label": "In Chinese", "text": "能把幻灯片发我一下吗？"}]}
+{"id": "sug-0012", "scene": "email", "input": "I won't make it to the meeting tomorrow.", "suggestions": [{"label": "More formal", "text": "Unfortunately, I will be unable to attend tomorrow's meeting."}, {"label": "Ask for notes", "text": "I won't make it to the meeting tomorrow. Could you share the notes afterward?"}]}
+{"id": "sug-0013", "scene": "family_friends", "input": "Happy birthday, have a great day!", "suggestions": [{"label": "Warmer", "text": "Happy birthday! Wishing you a wonderful day filled with love and laughter."}, {"label": "In Chinese", "text": "生日快乐，祝你今天开开心心！"}]}
+{"id": "sug-0014", "scene": "work_chat", "input": "好的。", "suggestions": []}
+{"id": "sug-0015", "scene": "customer_service", "input": "收到，谢谢。", "suggestions": []}
+{"id": "sug-0016", "scene": "work_chat", "input": "这个方案我觉得不太行，需要再改改。", "suggestions": [{"label": "更委婉", "text": "这个方案我觉得还有一些可以优化的地方，我们再完善一下？"}, {"label": "更正式", "text": "我认为该方案仍需进一步修改完善。"}]}
+{"id": "sug-0017", "scene": "customer_service", "input": "我要退货。", "suggestions": [{"label": "更完整", "text": "您好，我想申请退货，请问需要怎么操作？"}]}
+{"id": "sug-0018", "scene": "tech", "input": "服务器又挂了，赶紧看一下。", "suggestions": [{"label": "更冷静", "text": "服务器又出现故障了，麻烦尽快排查一下。"}, {"label": "改成告警", "text": "【故障】服务器再次宕机，请值班同学尽快处理。"}]}
+{"id": "sug-0019", "scene": "email", "input": "下周二我请假，有事找小李。", "suggestions": [{"label": "更正式", "text": "下周二我请假一天，期间如有事务请联系小李，谢谢。"}, {"label": "译成英文", "text": "I'll be off next Tuesday. Please contact Xiao Li if anything comes up."}]}
+{"id": "sug-0020", "scene": "family_friends", "input": "周末一起吃饭吗？", "suggestions": [{"label": "更热情", "text": "周末有空吗？一起吃个饭呀！"}, {"label": "译成英文", "text": "Want to grab a meal this weekend?"}]}
