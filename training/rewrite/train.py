@@ -50,8 +50,13 @@ def main() -> int:
     parser.add_argument("--batch-size", type=int, default=1)
     parser.add_argument("--grad-accum", type=int, default=8)
     parser.add_argument("--seed", type=int, default=3407)
+    parser.add_argument("--resume", action="store_true", help="continue from the latest checkpoint in --output")
     args = parser.parse_args()
 
+    import os
+
+    # The 6 GB laptop GPU is shared with the desktop; avoid fragmentation-driven OOMs.
+    os.environ.setdefault("PYTORCH_CUDA_ALLOC_CONF", "expandable_segments:True")
     from unsloth import FastLanguageModel  # must be imported before transformers
     from datasets import Dataset
     from transformers import DataCollatorForSeq2Seq, Trainer, TrainingArguments
@@ -86,7 +91,8 @@ def main() -> int:
             warmup_steps=20,
             logging_steps=10,
             eval_strategy="epoch",
-            save_strategy="epoch",
+            save_strategy="steps",
+            save_steps=100,
             save_total_limit=1,
             bf16=True,
             optim="adamw_8bit",
@@ -98,7 +104,7 @@ def main() -> int:
         eval_dataset=datasets["valid"],
         data_collator=DataCollatorForSeq2Seq(tokenizer, padding=True, label_pad_token_id=-100),
     )
-    result = trainer.train()
+    result = trainer.train(resume_from_checkpoint=args.resume or None)
     evaluation = trainer.evaluate()
     model.save_pretrained(str(args.output / "adapter"))
     processor.save_pretrained(str(args.output / "adapter"))
