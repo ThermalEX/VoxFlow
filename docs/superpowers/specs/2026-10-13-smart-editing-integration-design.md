@@ -19,6 +19,8 @@
   - **自定义接口**：用户填写地址、模型名、API Key（以 `Authorization: Bearer` 发送；保存在 QSettings，明文）。可指向 LM Studio、Ollama、llama.cpp server 或云端服务。
 - 超时：清理 15 s、建议 20 s。失败或超时一律保留原文，状态栏提示，不影响上屏。
 
+> **2026-10-13 更新**：应用户要求运行时不再使用 WSL。本地模型改为导出 GGUF（`training/rewrite/export_gguf.py`），由 VoxFlow 直接启动 Windows 版 `llama-server.exe`（`--chat-template-kwargs {"enable_thinking":false}`），健康检查 `GET /health`，用 Windows 作业对象随 VoxFlow 结束；设置中的本地字段改为 llama-server 路径与 GGUF 模型路径。下文第 3 节中 WSL/`serve.py` 的描述仅保留作历史。
+
 ## 3. 本地模型服务
 
 - `training/rewrite/serve.py`：在 WSL 训练环境中加载基座模型与 LoRA 适配器，使用标准库 `ThreadingHTTPServer` 提供上述两个接口；生成串行加锁；`enable_thinking=False`，贪心解码。

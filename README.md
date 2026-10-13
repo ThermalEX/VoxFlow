@@ -31,7 +31,7 @@ py -3.12 -m venv .venv
 
 在设置的 Smart editing 页勾选启用后，停录得到的最终文字会交给改写模型整理：去掉口气词、按改口和“去掉……/换成……”修改前文，执行“翻译成英文”“正式一点”等语音指令。整理结果以一次修改动画替换原文；鼠标悬停 “Undo edits” 可预览原文，点击撤回或恢复；下方还会浮动 0–3 个改写建议，点击即采用。确认或回车只上屏当前文字。模型出错、超时或未就绪时保留原文，不影响正常使用。
 
-- **VoxFlow local model**：使用本仓库训练的 Qwen3.5-2B 适配器，由 VoxFlow 在 WSL 中自动启动本地服务（首次加载约 1 分钟），需要先按 `training/rewrite/setup_wsl.sh` 建好训练环境并完成训练，适配器默认在 `training/rewrite/runs/qwen3.5-2b/adapter`。
+- **VoxFlow local model**：VoxFlow 直接启动 Windows 版 llama.cpp `llama-server.exe`（不需要 WSL），加载本仓库训练并导出的 GGUF 模型，约 4 秒就绪，每句整理约 0.25 秒。默认路径：程序 `runtime/llama.cpp/llama-server.exe`（从 llama.cpp 发布页下载 Windows CUDA 版及对应 cudart 解压到此），模型 `training/rewrite/runs/qwen3.5-2b/gguf/voxflow-rewrite-q8_0.gguf`（由 `training.rewrite.export_gguf` 导出）。两者都不进 Git，可在设置中改为其他位置。
 - **Custom OpenAI-compatible endpoint**：填写地址、模型名和可选 API Key，可接 LM Studio、Ollama、llama.cpp server 或云端服务。API Key 以明文保存在本机设置中。
 
 “Test connection” 可检查当前配置。实时草稿不做改写。
