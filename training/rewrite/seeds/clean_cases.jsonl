@@ -608,3 +608,51 @@
 {"id": "combo-0040", "categories": ["instr_combo", "filler", "implicit_reason"], "scene": "schedule", "raw": "额，跟客户约周五见，嗯周五客户在外地，约下周一，正式一点", "output": "与客户的会面安排在下周一。", "instr_position": "suffix"}
 {"id": "combo-0041", "categories": ["instr_combo", "edit_delete"], "scene": "social_media", "raw": "今天去了动物园，看了熊猫、长颈鹿，还被猴子抢了吃的，猴子那段别写，翻成英文", "output": "Went to the zoo today and saw pandas and giraffes.", "instr_position": "suffix"}
 {"id": "combo-0042", "categories": ["instr_combo", "immediate_correction"], "scene": "tech", "raw": "简洁一点，翻成英文，这个问题影响了大概一百个，不对，两百个用户，现在已经修好了。", "output": "About 200 users were affected. It's fixed now.", "instr_position": "prefix"}
+{"id": "fmt-0011", "categories": ["spoken_format"], "scene": "work_chat", "raw": "收到逗号我马上处理句号", "output": "收到，我马上处理。"}
+{"id": "fmt-0012", "categories": ["spoken_format"], "scene": "family_friends", "raw": "你吃饭了吗问号我刚下班", "output": "你吃饭了吗？我刚下班。"}
+{"id": "fmt-0013", "categories": ["spoken_format"], "scene": "social_media", "raw": "今天天气太好了感叹号感叹号", "output": "今天天气太好了！！"}
+{"id": "fmt-0014", "categories": ["spoken_format"], "scene": "email", "raw": "李老师您好冒号附件是我的论文初稿句号", "output": "李老师您好：附件是我的论文初稿。"}
+{"id": "fmt-0015", "categories": ["spoken_format"], "scene": "shopping", "raw": "这个多少钱问号能便宜点吗问号", "output": "这个多少钱？能便宜点吗？"}
+{"id": "fmt-0016", "categories": ["spoken_format"], "scene": "tech", "raw": "请把文件名改为引号config点yaml引号", "output": "请把文件名改为“config.yaml”。"}
+{"id": "fmt-0017", "categories": ["spoken_format"], "scene": "school", "raw": "书名号红楼梦书名号读完了吗", "output": "《红楼梦》读完了吗？"}
+{"id": "fmt-0018", "categories": ["spoken_format"], "scene": "schedule", "raw": "明天的安排冒号上午开会顿号下午出差", "output": "明天的安排：上午开会、下午出差。"}
+{"id": "fmt-0019", "categories": ["spoken_format"], "scene": "daily", "raw": "记得买牛奶括号要低脂的括号", "output": "记得买牛奶（要低脂的）。"}
+{"id": "fmt-0020", "categories": ["spoken_format"], "scene": "customer_service", "raw": "订单号冒号A12345句号问题冒号少发了一件句号", "output": "订单号：A12345。问题：少发了一件。"}
+{"id": "fmt-0021", "categories": ["spoken_format"], "scene": "social_media", "raw": "Best day ever exclamation mark", "output": "Best day ever!"}
+{"id": "fmt-0022", "categories": ["spoken_format"], "scene": "email", "raw": "Hi Mark comma quick question question mark are we still on for lunch question mark", "output": "Hi Mark, quick question? Are we still on for lunch?"}
+{"id": "fmt-0023", "categories": ["spoken_format"], "scene": "work_chat", "raw": "破折号以上是本周的进展破折号", "output": "——以上是本周的进展——"}
+{"id": "fmt-0024", "categories": ["spoken_format"], "scene": "family_friends", "raw": "晚上吃什么问号火锅还是烧烤问号", "output": "晚上吃什么？火锅还是烧烤？"}
+{"id": "fmt-0025", "categories": ["spoken_format"], "scene": "tech", "raw": "Run the command colon npm install period", "output": "Run the command: npm install."}
+{"id": "fmt-0026", "categories": ["spoken_format"], "scene": "email", "raw": "各位好换行下周一放假一天换行请提前安排好工作", "output": "各位好\n下周一放假一天\n请提前安排好工作"}
+{"id": "fmt-0027", "categories": ["spoken_format"], "scene": "work_chat", "raw": "会议纪要冒号换行一，确定了上线时间换行二，分配了测试任务", "output": "会议纪要：\n一，确定了上线时间\n二，分配了测试任务"}
+{"id": "fmt-0028", "categories": ["spoken_format"], "scene": "family_friends", "raw": "妈，我到了，另起一段，明天去看外婆", "output": "妈，我到了。\n\n明天去看外婆。"}
+{"id": "fmt-0029", "categories": ["spoken_format"], "scene": "email", "raw": "Dear Sir comma new paragraph thank you for your letter period", "output": "Dear Sir,\n\nThank you for your letter."}
+{"id": "fmt-0030", "categories": ["spoken_format"], "scene": "social_media", "raw": "今日份快乐换行一杯咖啡换行一本书换行一个下午", "output": "今日份快乐\n一杯咖啡\n一本书\n一个下午"}
+{"id": "fmt-0031", "categories": ["spoken_format"], "scene": "school", "raw": "通知换行明天下午三点开班会换行请全体同学参加", "output": "通知\n明天下午三点开班会\n请全体同学参加"}
+{"id": "fmt-0032", "categories": ["spoken_format"], "scene": "work_chat", "raw": "本周目标，一，完成登录模块，二，修复已知bug，三，准备演示。", "output": "本周目标：\n1. 完成登录模块\n2. 修复已知bug\n3. 准备演示"}
+{"id": "fmt-0033", "categories": ["spoken_format"], "scene": "tech", "raw": "排查步骤，首先看日志，然后检查配置，最后重启服务。", "output": "排查步骤：\n1. 看日志\n2. 检查配置\n3. 重启服务"}
+{"id": "fmt-0034", "categories": ["spoken_format"], "scene": "shopping", "raw": "要买的东西，第一个是洗衣液，第二个是纸巾，第三个是垃圾袋。", "output": "要买的东西：\n1. 洗衣液\n2. 纸巾\n3. 垃圾袋"}
+{"id": "fmt-0035", "categories": ["spoken_format"], "scene": "school", "raw": "复习计划，周一数学，周二英语，周三物理，按天列出来。", "output": "复习计划：\n- 周一：数学\n- 周二：英语\n- 周三：物理"}
+{"id": "fmt-0036", "categories": ["spoken_format"], "scene": "schedule", "raw": "Agenda for tomorrow, first, budget review, second, hiring update, third, Q&A.", "output": "Agenda for tomorrow:\n1. Budget review\n2. Hiring update\n3. Q&A"}
+{"id": "fmt-0037", "categories": ["spoken_format"], "scene": "email", "raw": "请准备以下材料，身份证复印件，学历证明，还有两张照片，分条列出。", "output": "请准备以下材料：\n1. 身份证复印件\n2. 学历证明\n3. 两张照片"}
+{"id": "fmt-0038", "categories": ["spoken_format"], "scene": "customer_service", "raw": "我遇到两个问题，一是登录不了，二是付款失败。", "output": "我遇到两个问题：\n1. 登录不了\n2. 付款失败"}
+{"id": "fmt-0039", "categories": ["spoken_format"], "scene": "daily", "raw": "旅行要带的，护照，充电器，雨伞，药，列个清单。", "output": "旅行要带的：\n- 护照\n- 充电器\n- 雨伞\n- 药"}
+{"id": "fmt-0040", "categories": ["spoken_format"], "scene": "family_friends", "raw": "Packing list, sunscreen, swimsuit, flip flops, make it a list.", "output": "Packing list:\n- Sunscreen\n- Swimsuit\n- Flip flops"}
+{"id": "fmt-0041", "categories": ["spoken_format"], "scene": "work_chat", "raw": "需求优先级，第一优先级是支付，第二是搜索，第三是推荐。", "output": "需求优先级：\n1. 支付\n2. 搜索\n3. 推荐"}
+{"id": "fmt-0042", "categories": ["spoken_format"], "scene": "tech", "raw": "环境要求，Python三点十二以上，内存八G以上，硬盘五十G以上，列出来。", "output": "环境要求：\n- Python 3.12 以上\n- 内存 8G 以上\n- 硬盘 50G 以上"}
+{"id": "fmt-0043", "categories": ["spoken_format"], "scene": "social_media", "raw": "这次旅行的三个推荐，一，夜市小吃，二，海边日落，三，老街咖啡馆。", "output": "这次旅行的三个推荐：\n1. 夜市小吃\n2. 海边日落\n3. 老街咖啡馆"}
+{"id": "fmt-0044", "categories": ["spoken_format"], "scene": "school", "raw": "Homework, one, read chapter two, two, finish the worksheet.", "output": "Homework:\n1. Read chapter two\n2. Finish the worksheet"}
+{"id": "fmt-0045", "categories": ["spoken_format", "filler"], "scene": "work_chat", "raw": "额，待办，第一，嗯，回邮件，第二，那个，订会议室。", "output": "待办：\n1. 回邮件\n2. 订会议室"}
+{"id": "fmt-0046", "categories": ["spoken_format", "filler"], "scene": "family_friends", "raw": "就是，到家了吗问号，嗯，早点睡句号", "output": "到家了吗？早点睡。"}
+{"id": "fmt-0047", "categories": ["spoken_format", "filler"], "scene": "shopping", "raw": "那个，购物清单冒号，呃，苹果，香蕉，酸奶，分行。", "output": "购物清单：\n苹果\n香蕉\n酸奶"}
+{"id": "fmt-0048", "categories": ["spoken_format", "filler"], "scene": "tech", "raw": "嗯，上线前检查，一，那个，跑测试，二，就是，备份数据库。", "output": "上线前检查：\n1. 跑测试\n2. 备份数据库"}
+{"id": "fmt-0049", "categories": ["spoken_format"], "scene": "schedule", "raw": "会议时间是下午两点到三点半，写成数字。", "output": "会议时间是14:00-15:30。"}
+{"id": "fmt-0050", "categories": ["spoken_format"], "scene": "customer_service", "raw": "我的电话是一三八一二三四五六七八九", "output": "我的电话是13812345678。"}
+{"id": "fmt-0051", "categories": ["spoken_format"], "scene": "shopping", "raw": "总共是一百二十八块五毛", "output": "总共是128.5元。"}
+{"id": "fmt-0052", "categories": ["spoken_format"], "scene": "tech", "raw": "版本号是二点三点一", "output": "版本号是2.3.1。"}
+{"id": "fmt-0053", "categories": ["spoken_format"], "scene": "email", "raw": "会议定在二零二六年十一月三号", "output": "会议定在2026年11月3号。"}
+{"id": "fmt-0054", "categories": ["spoken_format"], "scene": "school", "raw": "这次考试及格率是百分之八十五", "output": "这次考试及格率是85%。"}
+{"id": "fmt-0055", "categories": ["spoken_format"], "scene": "daily", "raw": "我的邮箱是zhang艾特example点com", "output": "我的邮箱是zhang@example.com。"}
+{"id": "fmt-0056", "categories": ["spoken_format"], "scene": "work_chat", "raw": "预算是三十五万，用阿拉伯数字。", "output": "预算是350,000元。"}
+{"id": "fmt-0057", "categories": ["spoken_format"], "scene": "social_media", "raw": "今天跑了二十一点零九七五公里，半马完成", "output": "今天跑了21.0975公里，半马完成！"}
+{"id": "fmt-0058", "categories": ["spoken_format"], "scene": "tech", "raw": "访问地址是http冒号斜杠斜杠localhost冒号八零八零", "output": "访问地址是http://localhost:8080。"}
