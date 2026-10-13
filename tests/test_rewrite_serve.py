@@ -64,3 +64,17 @@ def test_generation_errors_return_500(running):
     with pytest.raises(urllib.error.HTTPError) as caught:
         post(base + "/v1/chat/completions", {"messages": [{"role": "user", "content": "hi"}]})
     assert caught.value.code == 500
+
+
+def test_truncated_generation_reports_length(running):
+    base = running(lambda messages, max_tokens: ("前半段", "length"))
+    reply = post(base + "/v1/chat/completions", {"messages": [{"role": "user", "content": "hi"}]})
+    assert reply["choices"][0]["finish_reason"] == "length"
+
+
+def test_parent_watch_exits_when_stdin_closes():
+    import io
+
+    exits = []
+    serve.watch_parent(io.StringIO("ignored\n"), lambda code: exits.append(code))
+    assert exits == [0]

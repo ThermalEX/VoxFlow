@@ -4,7 +4,7 @@ import html
 from concurrent.futures import Future, ThreadPoolExecutor
 from pathlib import Path
 
-from PySide6.QtCore import QEasingCurve, QObject, QVariantAnimation
+from PySide6.QtCore import QEasingCurve, QObject, QTimer, QVariantAnimation
 from PySide6.QtWidgets import QHBoxLayout, QWidget
 
 from .edit_diff import frame_html, same_text
@@ -14,6 +14,10 @@ from .rewriter import LOCAL_ENDPOINT, RewriteClient, RewriteConfig, RewriteError
 
 REPO_ROOT = Path(__file__).resolve().parents[1]
 EDIT_ANIMATION_MS = 800
+# Suggestions are requested only after the polished text has been on screen a moment, so a quick
+# confirm never leaves a slow suggestion request queued ahead of the next sentence.
+SUGGEST_DELAY_MS = 1200
+READY_STATUS = "Transcript ready · edit or confirm"
 MAX_SUGGESTIONS = 3
 TEXT_RGB = (243, 247, 255)
 REMOVED_RGB = (150, 162, 180)
@@ -60,6 +64,10 @@ class SmartEditor(QObject):
         self.animation.setEasingCurve(QEasingCurve.Type.InOutCubic)
         self.animation.valueChanged.connect(self._render_frame)
         self.animation.finished.connect(self._finish_animation)
+        self.suggest_delay_ms = SUGGEST_DELAY_MS
+        self._suggest_timer = QTimer(self)
+        self._suggest_timer.setSingleShot(True)
+        self._suggest_timer.timeout.connect(self._request_suggestions)
 
         self.bar = QWidget()
         bar_layout = QHBoxLayout(self.bar)
@@ -97,7 +105,11 @@ class SmartEditor(QObject):
             self.server.stop()
             self.server = None
         if not config.enabled:
+            had_session = self.session is not None
+            self.reset()
             self.client = None
+            if had_session and self.window.mode == "result":
+                self._set_status(READY_STATUS)
             return
         self.client = self._fixed_client or RewriteClient(config.base_url, config.model_name, config.api_key)
         if config.provider == "local" and self.server is None and self._server_factory is not None:
@@ -136,7 +148,16 @@ class SmartEditor(QObject):
             self._set_status("Waiting for the local model · you can confirm the original now")
 
     def reset(self) -> None:
-        self.animation.stop()
+        if self.future is not None and self.future.cancel():
+            self.future = None
+        self._suggest_timer.stop()
+        if self.animation.state() == QVariantAnimation.State.Running:
+            self.animation.stop()
+            if self.window.mode == "result":
+                self._set_plain(self.original_text)
+                self.transcript.setReadOnly(False)
+        if self._hover_text is not None:
+            self._end_preview(self._hover_text)
         self.session = None
         self._waiting = False
         self._user_edited = False
@@ -158,6 +179,8 @@ class SmartEditor(QObject):
         return (self.session is not None and not self._user_edited and self.window.mode == "result")
 
     def poll(self) -> None:
+        if not self.active:
+            return
         if self._waiting and self.session is not None:
             if self.server is not None and self.server.failed:
                 self._waiting = False
@@ -186,9 +209,9 @@ class SmartEditor(QObject):
     def _apply_clean(self, cleaned: str) -> None:
         if self.transcript.toPlainText() != self.original_text:
             return
-        if same_text(cleaned, self.original_text):
+        if "".join(cleaned.split()) == "".join(self.original_text.split()):
             self._set_status("Transcript ready · no edits needed")
-            self._submit("suggest", self.original_text)
+            self._suggest_timer.start(self.suggest_delay_ms)
             return
         self.edited_text = cleaned
         self.transcript.setReadOnly(True)
@@ -205,7 +228,11 @@ class SmartEditor(QObject):
         self._sync_bar()
         self.window._expand_for_result()
         self._set_status("Polished · hover Undo edits to see the original")
-        self._submit("suggest", self.edited_text)
+        self._suggest_timer.start(self.suggest_delay_ms)
+
+    def _request_suggestions(self) -> None:
+        if self.active and self._still_current():
+            self._submit("suggest", self.edited_text)
 
     def _show_suggestions(self, suggestions: list[dict]) -> None:
         self._suggestions = [item for item in suggestions if not same_text(item["text"], self.edited_text)]
@@ -256,7 +283,10 @@ class SmartEditor(QObject):
         if self._programmatic or self.session is None:
             return
         self._user_edited = True
+        if self._waiting or (self.future is not None and self._future_kind == "clean"):
+            self._set_status(READY_STATUS)
         self._waiting = False
+        self._suggest_timer.stop()
         if self.bar.isVisible():
             self._suggestions = []
             self.edited_text = self.original_text

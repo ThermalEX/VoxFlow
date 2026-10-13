@@ -132,3 +132,15 @@ def test_stop_closes_stdin_then_terminates_a_hung_server(tmp_path):
     server.stop()
     assert popen.process.stdin.closed and popen.process.terminated
     assert not server.ready()
+
+
+def test_missing_wsl_is_reported_instead_of_crashing(tmp_path):
+    def no_wsl(command, **kwargs):
+        raise FileNotFoundError("wsl.exe not found")
+
+    server = LocalRewriteServer(["wsl.exe"], "http://127.0.0.1:8765/v1/models", tmp_path / "serve.log", popen=no_wsl)
+    server.start()
+    assert not server.ready()
+    assert "wsl.exe not found" in server.failed
+    server.start()
+    server.stop()

@@ -40,6 +40,7 @@ class LocalRewriteServer:
         self._log = None
         self._ready = False
         self._next_check = 0.0
+        self._start_error: str | None = None
 
     @staticmethod
     def wsl_command(repo_root: Path, distro: str, environment: str, adapter: str,
@@ -51,18 +52,27 @@ class LocalRewriteServer:
         return prefix + ["--", "bash", "-lc", script]
 
     def start(self) -> None:
-        if self.process is not None:
+        if self.process is not None or self._start_error:
             return
-        self.log_path.parent.mkdir(parents=True, exist_ok=True)
-        self._log = open(self.log_path, "w", encoding="utf-8")
         flags = subprocess.CREATE_NO_WINDOW if sys.platform == "win32" else 0
-        self.process = self._popen(self.command, stdin=subprocess.PIPE, stdout=self._log,
-                                   stderr=subprocess.STDOUT, creationflags=flags)
+        try:
+            self.log_path.parent.mkdir(parents=True, exist_ok=True)
+            self._log = open(self.log_path, "w", encoding="utf-8")
+            self.process = self._popen(self.command, stdin=subprocess.PIPE, stdout=self._log,
+                                       stderr=subprocess.STDOUT, creationflags=flags)
+        except OSError as exc:  # no WSL, broken PATH or unwritable log: report, never crash the app
+            self._start_error = f"Could not start the local model ({exc})"
+            if self._log is not None:
+                self._log.close()
+                self._log = None
+            return
         self._ready = False
         self._next_check = 0.0
 
     @property
     def failed(self) -> str | None:
+        if self._start_error:
+            return self._start_error
         if self.process is None or self.process.poll() is None:
             return None
         return f"Local model server exited (code {self.process.returncode}). See {self.log_path}"

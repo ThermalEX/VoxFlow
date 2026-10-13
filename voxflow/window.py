@@ -826,6 +826,7 @@ class VoxFlowWindow(QWidget):
         text = self.smart.current_text()
         if not text.strip():
             return
+        self.smart.reset()  # confirming ends the editing session; late rewrites must not replace it
         if self.text_output.paste(text):
             self.hide_overlay()
         else:

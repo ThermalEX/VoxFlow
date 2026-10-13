@@ -6,17 +6,24 @@ The server exits when its stdin closes, so VoxFlow can stop it by closing the pi
 
 import argparse
 import json
+import os
 import sys
 import threading
 import time
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 from typing import Callable
 
-MAX_NEW_TOKENS = 512
-DEFAULT_NEW_TOKENS = 384
+MAX_NEW_TOKENS = 4096
+DEFAULT_NEW_TOKENS = 512
 
 
-def make_handler(generate: Callable[[list[dict], int], str], model_name: str) -> type[BaseHTTPRequestHandler]:
+def watch_parent(stream, exit_process) -> None:
+    """Block until the parent closes our stdin, then exit (works even while the model is loading)."""
+    stream.read()
+    exit_process(0)
+
+
+def make_handler(generate: Callable[[list[dict], int], str | tuple[str, str]], model_name: str) -> type[BaseHTTPRequestHandler]:
     class Handler(BaseHTTPRequestHandler):
         def log_message(self, format, *args):
             print(f"{self.address_string()} {format % args}", file=sys.stderr, flush=True)
@@ -52,7 +59,8 @@ def make_handler(generate: Callable[[list[dict], int], str], model_name: str) ->
                 self._error(400, f"bad request: {exc}")
                 return
             try:
-                content = generate(messages, max_tokens)
+                result = generate(messages, max_tokens)
+                content, finish_reason = result if isinstance(result, tuple) else (result, "stop")
             except Exception as exc:  # report model failures to the client instead of dropping the socket
                 self._error(500, str(exc))
                 return
@@ -61,7 +69,7 @@ def make_handler(generate: Callable[[list[dict], int], str], model_name: str) ->
                 "object": "chat.completion",
                 "model": model_name,
                 "choices": [{"index": 0, "message": {"role": "assistant", "content": content},
-                             "finish_reason": "stop"}],
+                             "finish_reason": finish_reason}],
             })
 
     return Handler
@@ -75,6 +83,7 @@ def main() -> int:
     parser.add_argument("--port", type=int, default=8765)
     parser.add_argument("--name", default="voxflow-rewrite")
     args = parser.parse_args()
+    threading.Thread(target=watch_parent, args=(sys.stdin, os._exit), daemon=True).start()
 
     from unsloth import FastLanguageModel  # must be imported before transformers
     import torch
@@ -87,20 +96,21 @@ def main() -> int:
     FastLanguageModel.for_inference(model)
     lock = threading.Lock()
 
-    def generate(messages: list[dict], max_tokens: int) -> str:
+    def generate(messages: list[dict], max_tokens: int) -> tuple[str, str]:
         with lock, torch.inference_mode():
             inputs = tokenizer(render_prompt(tokenizer, messages), return_tensors="pt",
                                add_special_tokens=False).to(model.device)
             output = model.generate(**inputs, max_new_tokens=max_tokens, do_sample=False)
-            text = tokenizer.decode(output[0][inputs["input_ids"].shape[1]:], skip_special_tokens=True)
-        return text.replace("<think>", "").replace("</think>", "").strip()
+            new_tokens = output[0][inputs["input_ids"].shape[1]:]
+            text = tokenizer.decode(new_tokens, skip_special_tokens=True)
+        stopped_early = len(new_tokens) < max_tokens or int(new_tokens[-1]) == tokenizer.eos_token_id
+        text = text.replace("<think>", "").replace("</think>", "").strip()
+        return text, "stop" if stopped_early else "length"
 
     generate([{"role": "system", "content": "warm up"}, {"role": "user", "content": "你好"}], 8)
     server = ThreadingHTTPServer((args.host, args.port), make_handler(generate, args.name))
-    threading.Thread(target=server.serve_forever, daemon=True).start()
     print("READY", flush=True)
-    sys.stdin.read()  # EOF means the parent (VoxFlow) went away
-    server.shutdown()
+    server.serve_forever()  # watch_parent ends the process when VoxFlow closes our stdin
     return 0
 
 

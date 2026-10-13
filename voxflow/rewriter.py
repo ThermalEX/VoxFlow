@@ -1,6 +1,7 @@
 """Call a rewrite model through an OpenAI-compatible chat endpoint, and keep its settings."""
 
 import json
+import re
 import urllib.error
 import urllib.request
 from dataclasses import asdict, dataclass
@@ -14,6 +15,9 @@ LOCAL_MODEL = "voxflow-rewrite"
 CLEAN_TIMEOUT = 15
 SUGGEST_TIMEOUT = 20
 MAX_SUGGESTIONS = 3
+MIN_ANSWER_TOKENS = 512
+MAX_ANSWER_TOKENS = 4096
+_REASONING = re.compile(r"<think>.*?</think>", re.S)
 
 
 class RewriteError(Exception):
@@ -79,16 +83,22 @@ class RewriteClient:
         reply = self._request("/chat/completions", {
             "model": self.model,
             "messages": [{"role": "system", "content": system}, {"role": "user", "content": text}],
-            "max_tokens": 512,
+            # A rewrite can be as long as the dictation; Chinese is roughly one token per character.
+            "max_tokens": min(MAX_ANSWER_TOKENS, max(MIN_ANSWER_TOKENS, 2 * len(text))),
             "temperature": 0,
         }, timeout)
         try:
-            content = reply["choices"][0]["message"]["content"]
+            choice = reply["choices"][0]
+            content = choice["message"]["content"]
         except (KeyError, IndexError, TypeError) as exc:
             raise RewriteError("unexpected response from the rewrite model") from exc
-        if not isinstance(content, str) or not content.strip():
+        if choice.get("finish_reason") == "length":
+            raise RewriteError("the rewrite was cut off")
+        if isinstance(content, str):
+            content = _REASONING.sub("", content).strip()
+        if not isinstance(content, str) or not content:
             raise RewriteError("the rewrite model returned no text")
-        return content.strip()
+        return content
 
     def clean(self, text: str) -> str:
         return self._chat(CLEAN_SYSTEM_PROMPT, text, CLEAN_TIMEOUT)

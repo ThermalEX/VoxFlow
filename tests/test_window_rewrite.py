@@ -263,3 +263,100 @@ def test_status_line_is_as_wide_as_the_transcript(tmp_path):
     polish(app, window)
     assert window.status_label.width() == window.transcript.width()
     window.close()
+
+
+def test_reset_cancels_queued_rewrite(tmp_path):
+    gate = threading.Event()
+    app, window, _output = make_window(tmp_path, FakeClient(gate=gate))
+    window.apply_transcript("final", ORIGINAL)
+    window.smart.reset()
+    window.apply_transcript("final", ORIGINAL)
+    queued = window.smart.future
+    window.hide_overlay()
+    assert queued.cancelled()
+    gate.set()
+    window.close()
+
+
+def test_suggestions_wait_and_are_skipped_after_confirm(tmp_path):
+    client = FakeClient(suggestions=[{"label": "更正式", "text": "我明天需请假一天。"}])
+    app, window, output = make_window(tmp_path, client)
+    polish(app, window)
+    assert not any(kind == "suggest" for kind, _text in client.calls)
+    window.confirm_button.click()
+    deadline = time.monotonic() + window.smart.suggest_delay_ms / 1000 + 0.5
+    while time.monotonic() < deadline:
+        window._poll()
+        app.processEvents()
+        time.sleep(0.02)
+    assert output.calls == [POLISHED]
+    assert not any(kind == "suggest" for kind, _text in client.calls)
+    window.close()
+
+
+def test_disabling_mid_request_discards_the_result(tmp_path):
+    gate = threading.Event()
+    app, window, _output = make_window(tmp_path, FakeClient(gate=gate))
+    window.apply_transcript("final", ORIGINAL)
+    window.settings_window.rewrite_enabled.setChecked(False)
+    gate.set()
+    for _ in range(30):
+        window._poll()
+        app.processEvents()
+        time.sleep(0.01)
+    assert window.transcript.toPlainText() == ORIGINAL
+    assert window.smart.animation.state() != window.smart.animation.State.Running
+    assert "Polishing" not in window.status_label.text()
+    window.close()
+
+
+def test_editing_while_polishing_restores_the_status(tmp_path):
+    gate = threading.Event()
+    app, window, _output = make_window(tmp_path, FakeClient(gate=gate))
+    window.apply_transcript("final", ORIGINAL)
+    assert "Polishing" in window.status_label.text()
+    window.transcript.setPlainText("我自己改过了")
+    assert window.status_label.text() == "Transcript ready · edit or confirm"
+    gate.set()
+    window.close()
+
+
+def test_punctuation_and_case_fixes_are_applied(tmp_path):
+    client = FakeClient(clean="I think so. It's fine.")
+    app, window, _output = make_window(tmp_path, client)
+    window.apply_transcript("final", "i think so its fine")
+    animation = window.smart.animation
+    settle(app, window, lambda: animation.state() == animation.State.Running)
+    animation.setCurrentTime(animation.duration())
+    app.processEvents()
+    assert window.transcript.toPlainText() == "I think so. It's fine."
+    window.close()
+
+
+def test_failed_paste_ends_the_session(tmp_path):
+    class RefusingOutput(RecordingOutput):
+        def paste(self, text):
+            self.calls.append(text)
+            return False
+
+    gate = threading.Event()
+    app = QApplication.instance() or QApplication([])
+    settings = QSettings(str(tmp_path / "voxflow.ini"), QSettings.Format.IniFormat)
+    RewriteConfig(enabled=True, provider="custom", endpoint="http://example.test/v1", model="m").save(settings)
+    window = VoxFlowWindow(model_dir=tmp_path, start_worker=False, settings=settings, text_output=RefusingOutput(),
+                           rewrite_client=FakeClient(gate=gate))
+    window.model_ready = True
+    window.reveal()
+    window._background_progress = 1.0
+    window.apply_transcript("final", ORIGINAL)
+    window.confirm_button.click()
+    gate.set()
+    settle(app, window, lambda: window.smart.future is None)
+    for _ in range(20):
+        window._poll()
+        app.processEvents()
+        time.sleep(0.01)
+    assert window.smart.animation.state() != window.smart.animation.State.Running
+    assert window.transcript.toPlainText() == ORIGINAL
+    assert "manual paste" in window.status_label.text()
+    window.close()

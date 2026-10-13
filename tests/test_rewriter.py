@@ -41,7 +41,8 @@ class FakeEndpoint:
                     self._send(endpoint.reply["status"], {"error": "boom"})
                     return
                 self._send(200, {"choices": [{"message": {"role": "assistant",
-                                                          "content": endpoint.reply["content"]}}]})
+                                                          "content": endpoint.reply["content"]},
+                                              "finish_reason": endpoint.reply.get("finish_reason", "stop")}]})
 
         self.server = ThreadingHTTPServer(("127.0.0.1", 0), Handler)
         self.base_url = f"http://127.0.0.1:{self.server.server_address[1]}/v1"
@@ -130,3 +131,23 @@ def test_config_round_trip_and_local_defaults(tmp_path):
     loaded = rewriter.RewriteConfig.from_settings(settings)
     assert loaded == custom
     assert loaded.base_url == "http://host:1234/v1" and loaded.model_name == "qwen"
+
+
+def test_truncated_output_is_an_error(endpoint):
+    client = rewriter.RewriteClient(endpoint.base_url, "m")
+    endpoint.reply = {"content": "前半段", "finish_reason": "length"}
+    with pytest.raises(rewriter.RewriteError):
+        client.clean("很长的一段话")
+
+
+def test_long_input_gets_room_to_answer(endpoint):
+    rewriter.RewriteClient(endpoint.base_url, "m").clean("字" * 1500)
+    assert endpoint.requests[-1][3]["max_tokens"] >= 1500
+
+
+def test_reasoning_blocks_are_removed(endpoint):
+    client = rewriter.RewriteClient(endpoint.base_url, "m")
+    endpoint.reply = {"content": "<think>\n用户想请假。\n</think>\n\n我明天请个假。"}
+    assert client.clean("额，我明天请个假") == "我明天请个假。"
+    endpoint.reply = {"content": '<think>想想</think>[{"label": "更正式", "text": "明日请假。"}]'}
+    assert client.suggest("我明天请个假。") == [{"label": "更正式", "text": "明日请假。"}]
