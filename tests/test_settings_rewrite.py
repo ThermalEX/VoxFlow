@@ -16,7 +16,8 @@ def test_smart_editing_page_exists_with_safe_defaults(tmp_path):
     assert window.categories.item(2).text() == "Smart editing"
     assert not window.rewrite_enabled.isChecked()
     assert window.rewrite_provider.currentData() == "local"
-    assert window.rewrite_environment.text() == "~/voxflow-train"
+    assert window.rewrite_server_path.text().endswith("llama-server.exe")
+    assert window.rewrite_model_path.text().endswith(".gguf")
     window.close()
 
 
@@ -42,9 +43,9 @@ def test_changes_are_saved_and_announced(tmp_path):
 
 def test_provider_switch_shows_matching_fields(tmp_path):
     window, _settings = make(tmp_path)
-    assert window.rewrite_endpoint_row.isHidden() and not window.rewrite_adapter_row.isHidden()
+    assert window.rewrite_endpoint_row.isHidden() and not window.rewrite_model_path_row.isHidden()
     window.rewrite_provider.setCurrentIndex(window.rewrite_provider.findData("custom"))
-    assert not window.rewrite_endpoint_row.isHidden() and window.rewrite_adapter_row.isHidden()
+    assert not window.rewrite_endpoint_row.isHidden() and window.rewrite_model_path_row.isHidden()
     assert window.rewrite_api_key.echoMode() == window.rewrite_api_key.EchoMode.Password
     window.close()
 

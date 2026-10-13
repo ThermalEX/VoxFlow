@@ -1,41 +1,62 @@
-"""Start and stop the WSL-hosted rewrite model server that backs the "VoxFlow local model" option."""
+"""Start and stop the native llama.cpp server that backs the "VoxFlow local model" option."""
 
-import shlex
+import ctypes
 import subprocess
 import sys
 import time
 import urllib.request
-from pathlib import Path, PureWindowsPath
+from pathlib import Path
 
 HEALTH_INTERVAL = 2.0
 DEFAULT_PORT = 8765
+MODEL_ALIAS = "voxflow-rewrite"
 
 
-def windows_to_wsl_path(path: Path | str) -> str:
-    windows = PureWindowsPath(path)
-    if not windows.drive:
-        return str(path).replace("\\", "/")
-    rest = "/".join(windows.parts[1:])
-    return f"/mnt/{windows.drive[0].lower()}/{rest}".rstrip("/")
+def attach_to_job(process) -> None:
+    """Put the server in a Windows job that closes with VoxFlow, so a crash never leaves it running."""
+    if sys.platform != "win32":
+        return
+    kernel32 = ctypes.WinDLL("kernel32", use_last_error=True)
 
+    class BasicLimits(ctypes.Structure):
+        _fields_ = [("PerProcessUserTimeLimit", ctypes.c_int64), ("PerJobUserTimeLimit", ctypes.c_int64),
+                    ("LimitFlags", ctypes.c_uint32), ("MinimumWorkingSetSize", ctypes.c_size_t),
+                    ("MaximumWorkingSetSize", ctypes.c_size_t), ("ActiveProcessLimit", ctypes.c_uint32),
+                    ("Affinity", ctypes.c_size_t), ("PriorityClass", ctypes.c_uint32),
+                    ("SchedulingClass", ctypes.c_uint32)]
 
-def _bash_path(path: str) -> str:
-    if path.startswith("~/"):
-        return '"$HOME"/' + shlex.quote(path[2:])
-    if PureWindowsPath(path).drive:
-        path = windows_to_wsl_path(path)
-    return shlex.quote(path)
+    class IoCounters(ctypes.Structure):
+        _fields_ = [(name, ctypes.c_uint64) for name in (
+            "ReadOperationCount", "WriteOperationCount", "OtherOperationCount",
+            "ReadTransferCount", "WriteTransferCount", "OtherTransferCount")]
+
+    class ExtendedLimits(ctypes.Structure):
+        _fields_ = [("BasicLimitInformation", BasicLimits), ("IoInfo", IoCounters),
+                    ("ProcessMemoryLimit", ctypes.c_size_t), ("JobMemoryLimit", ctypes.c_size_t),
+                    ("PeakProcessMemoryUsed", ctypes.c_size_t), ("PeakJobMemoryUsed", ctypes.c_size_t)]
+
+    kernel32.CreateJobObjectW.restype = ctypes.c_void_p
+    job = kernel32.CreateJobObjectW(None, None)
+    if not job:
+        return
+    limits = ExtendedLimits()
+    limits.BasicLimitInformation.LimitFlags = 0x2000  # JOB_OBJECT_LIMIT_KILL_ON_JOB_CLOSE
+    kernel32.SetInformationJobObject(ctypes.c_void_p(job), 9, ctypes.byref(limits), ctypes.sizeof(limits))
+    kernel32.AssignProcessToJobObject(ctypes.c_void_p(job), ctypes.c_void_p(int(process._handle)))
+    process._voxflow_job = job  # keep the handle open for the life of VoxFlow
 
 
 class LocalRewriteServer:
     def __init__(self, command: list[str], health_url: str, log_path: Path,
-                 popen=subprocess.Popen, opener=urllib.request.urlopen, clock=time.monotonic) -> None:
+                 popen=subprocess.Popen, opener=urllib.request.urlopen, clock=time.monotonic,
+                 attach=attach_to_job) -> None:
         self.command = command
         self.health_url = health_url
         self.log_path = Path(log_path)
         self._popen = popen
         self._open = opener
         self._clock = clock
+        self._attach = attach
         self.process = None
         self._log = None
         self._ready = False
@@ -43,13 +64,13 @@ class LocalRewriteServer:
         self._start_error: str | None = None
 
     @staticmethod
-    def wsl_command(repo_root: Path, distro: str, environment: str, adapter: str,
-                    port: int = DEFAULT_PORT) -> list[str]:
-        script = (f"source {_bash_path(environment.rstrip('/') + '/bin/activate')} && "
-                  f"cd {_bash_path(windows_to_wsl_path(repo_root))} && "
-                  f"exec python -m training.rewrite.serve --adapter {_bash_path(adapter)} --port {port}")
-        prefix = ["wsl.exe", "-d", distro] if distro.strip() else ["wsl.exe"]
-        return prefix + ["--", "bash", "-lc", script]
+    def llama_command(server_path: Path, model_path: Path, port: int = DEFAULT_PORT) -> list[str]:
+        return [
+            str(server_path), "-m", str(model_path),
+            "--host", "127.0.0.1", "--port", str(port), "--alias", MODEL_ALIAS,
+            "--n-gpu-layers", "99", "--ctx-size", "4096", "--parallel", "1",
+            "--jinja", "--chat-template-kwargs", '{"enable_thinking":false}',
+        ]
 
     def start(self) -> None:
         if self.process is not None or self._start_error:
@@ -58,14 +79,18 @@ class LocalRewriteServer:
         try:
             self.log_path.parent.mkdir(parents=True, exist_ok=True)
             self._log = open(self.log_path, "w", encoding="utf-8")
-            self.process = self._popen(self.command, stdin=subprocess.PIPE, stdout=self._log,
+            self.process = self._popen(self.command, stdin=subprocess.DEVNULL, stdout=self._log,
                                        stderr=subprocess.STDOUT, creationflags=flags)
-        except OSError as exc:  # no WSL, broken PATH or unwritable log: report, never crash the app
+        except OSError as exc:  # missing binary or unwritable log: report, never crash the app
             self._start_error = f"Could not start the local model ({exc})"
             if self._log is not None:
                 self._log.close()
                 self._log = None
             return
+        try:
+            self._attach(self.process)
+        except OSError:
+            pass  # the server still works; it just is not tied to VoxFlow's lifetime
         self._ready = False
         self._next_check = 0.0
 
@@ -96,19 +121,16 @@ class LocalRewriteServer:
     def stop(self) -> None:
         process, self.process = self.process, None
         self._ready = False
-        if process is not None:
+        if process is not None and process.poll() is None:
+            process.terminate()
             try:
-                process.stdin.close()
-            except OSError:
-                pass
-            try:
-                process.wait(timeout=5)
+                process.wait(timeout=3)
             except subprocess.TimeoutExpired:
-                process.terminate()
+                process.kill()
                 try:
                     process.wait(timeout=3)
                 except subprocess.TimeoutExpired:
-                    process.kill()
+                    pass
         if self._log is not None:
             self._log.close()
             self._log = None

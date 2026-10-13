@@ -31,9 +31,8 @@ class RewriteConfig:
     endpoint: str = ""
     model: str = ""
     api_key: str = ""
-    wsl_distro: str = ""
-    environment: str = "~/voxflow-train"
-    adapter: str = "training/rewrite/runs/qwen3.5-2b/adapter"
+    server_path: str = "runtime/llama.cpp/llama-server.exe"
+    model_path: str = "training/rewrite/runs/qwen3.5-2b/gguf/voxflow-rewrite-q8_0.gguf"
 
     @property
     def base_url(self) -> str:

@@ -280,17 +280,15 @@ class SettingsWindow(QWidget):
         self.rewrite_endpoint = line(config.endpoint, "http://localhost:1234/v1")
         self.rewrite_model = line(config.model, "Model name")
         self.rewrite_api_key = line(config.api_key, "Optional", password=True)
-        self.rewrite_distro = line(config.wsl_distro, "Default distribution")
-        self.rewrite_environment = line(config.environment, "~/voxflow-train")
-        self.rewrite_adapter = line(config.adapter, "training/rewrite/runs/qwen3.5-2b/adapter")
+        self.rewrite_server_path = line(config.server_path, RewriteConfig.server_path)
+        self.rewrite_model_path = line(config.model_path, RewriteConfig.model_path)
         self.rewrite_endpoint_row = self._field_row("Endpoint", self.rewrite_endpoint)
         self.rewrite_model_row = self._field_row("Model", self.rewrite_model)
         self.rewrite_api_key_row = self._field_row("API key", self.rewrite_api_key)
-        self.rewrite_distro_row = self._field_row("WSL distribution", self.rewrite_distro)
-        self.rewrite_environment_row = self._field_row("Training environment", self.rewrite_environment)
-        self.rewrite_adapter_row = self._field_row("Adapter", self.rewrite_adapter)
+        self.rewrite_server_path_row = self._field_row("llama-server", self.rewrite_server_path)
+        self.rewrite_model_path_row = self._field_row("Model file (GGUF)", self.rewrite_model_path)
         for row in (self.rewrite_endpoint_row, self.rewrite_model_row, self.rewrite_api_key_row,
-                    self.rewrite_distro_row, self.rewrite_environment_row, self.rewrite_adapter_row):
+                    self.rewrite_server_path_row, self.rewrite_model_path_row):
             layout.addWidget(row)
 
         test_row = QHBoxLayout()
@@ -319,16 +317,15 @@ class SettingsWindow(QWidget):
             endpoint=self.rewrite_endpoint.text().strip(),
             model=self.rewrite_model.text().strip(),
             api_key=self.rewrite_api_key.text().strip(),
-            wsl_distro=self.rewrite_distro.text().strip(),
-            environment=self.rewrite_environment.text().strip() or RewriteConfig.environment,
-            adapter=self.rewrite_adapter.text().strip() or RewriteConfig.adapter,
+            server_path=self.rewrite_server_path.text().strip() or RewriteConfig.server_path,
+            model_path=self.rewrite_model_path.text().strip() or RewriteConfig.model_path,
         )
 
     def _sync_rewrite_rows(self) -> None:
         custom = self.rewrite_provider.currentData() == "custom"
         for row in (self.rewrite_endpoint_row, self.rewrite_model_row, self.rewrite_api_key_row):
             row.setVisible(custom)
-        for row in (self.rewrite_distro_row, self.rewrite_environment_row, self.rewrite_adapter_row):
+        for row in (self.rewrite_server_path_row, self.rewrite_model_path_row):
             row.setVisible(not custom)
 
     def _save_rewrite(self) -> None:

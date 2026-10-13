@@ -23,12 +23,18 @@ TEXT_RGB = (243, 247, 255)
 REMOVED_RGB = (150, 162, 180)
 ADDED_RGB = (150, 200, 255)
 PREVIEW_COLOR = "#9AA6B6"
-SERVER_FIELDS = ("provider", "wsl_distro", "environment", "adapter")
+SERVER_FIELDS = ("provider", "server_path", "model_path")
+HEALTH_URL = LOCAL_ENDPOINT.removesuffix("/v1") + "/health"
+
+
+def _repo_path(value: str) -> Path:
+    path = Path(value).expanduser()
+    return path if path.is_absolute() else REPO_ROOT / path
 
 
 def default_server_factory(config: RewriteConfig) -> LocalRewriteServer:
-    command = LocalRewriteServer.wsl_command(REPO_ROOT, config.wsl_distro, config.environment, config.adapter)
-    return LocalRewriteServer(command, LOCAL_ENDPOINT + "/models", REPO_ROOT / "training" / "rewrite" / "runs" / "serve.log")
+    command = LocalRewriteServer.llama_command(_repo_path(config.server_path), _repo_path(config.model_path))
+    return LocalRewriteServer(command, HEALTH_URL, REPO_ROOT / "runtime" / "llama-server.log")
 
 
 class SmartEditor(QObject):
@@ -37,7 +43,7 @@ class SmartEditor(QObject):
         self.window = window
         self.transcript = window.transcript
         self._fixed_client = client
-        # Tests inject a client without a server; the app uses the WSL server for the local provider.
+        # Tests inject a client without a server; the app launches llama-server for the local provider.
         self._server_factory = server_factory if server_factory is not None else (
             None if client is not None else default_server_factory)
         self.executor = ThreadPoolExecutor(max_workers=1, thread_name_prefix="rewrite")

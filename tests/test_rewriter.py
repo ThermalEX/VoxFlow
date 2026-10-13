@@ -125,8 +125,9 @@ def test_config_round_trip_and_local_defaults(tmp_path):
     default = rewriter.RewriteConfig.from_settings(settings)
     assert not default.enabled and default.provider == "local"
     assert default.base_url == rewriter.LOCAL_ENDPOINT and default.model_name == rewriter.LOCAL_MODEL
+    assert default.server_path.endswith("llama-server.exe") and default.model_path.endswith(".gguf")
     custom = rewriter.RewriteConfig(enabled=True, provider="custom", endpoint="http://host:1234/v1/",
-                                    model="qwen", api_key="k")
+                                    model="qwen", api_key="k", model_path="D:/models/other.gguf")
     custom.save(settings)
     loaded = rewriter.RewriteConfig.from_settings(settings)
     assert loaded == custom
