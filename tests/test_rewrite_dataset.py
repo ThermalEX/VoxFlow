@@ -282,3 +282,48 @@ def test_coverage_warns_below_plan_and_flags_near_duplicates(tmp_path):
     assert any("instr_translate" in warning for warning in report.warnings)
     assert any("near-duplicate" in warning and "case-dup" in warning for warning in report.warnings)
     assert any(line.startswith("filler") for line in report.coverage)
+
+
+def test_english_repetition_keeps_the_word_as_spoken():
+    assert augment.inject_repetition("I need eggs.", random.Random(0)) == "I I need eggs."
+    assert augment.inject_repetition("OK.", random.Random(0)) == "OK OK."
+
+
+def test_english_filler_at_start_lowercases_the_next_word():
+    for seed in range(10):
+        noisy = augment.inject_fillers("The meeting is at 3.", random.Random(seed))
+        assert noisy.endswith(", the meeting is at 3.")
+        kept = augment.inject_fillers("I think so.", random.Random(seed))
+        assert kept.endswith(", I think so.")
+
+
+def test_english_dominant_mixed_text_gets_english_noise():
+    for seed in range(20):
+        noisy = augment.inject_fillers("Mom said we're having 饺子 for dinner.", random.Random(seed))
+        assert not any(filler in noisy for filler in augment.ZH_FILLERS)
+        assert "饺子" in noisy
+
+
+def test_correction_ignores_numbers_that_are_not_clock_hours():
+    for seed in range(10):
+        rng = random.Random(seed)
+        assert augment.inject_correction("Let's meet at 10:30 am.", rng) is None
+        assert augment.inject_correction("积分有100点。", rng) is None
+        assert augment.inject_correction("每周一次例会。", rng) is None
+
+
+def test_build_rejects_missing_seed_files(tmp_path):
+    with pytest.raises(build_dataset.DatasetError) as caught:
+        build_dataset.build(tmp_path / "nowhere", tmp_path / "out")
+    assert any("missing seed file" in error for error in caught.value.errors)
+    assert not (tmp_path / "out").exists()
+
+
+def test_build_reports_lines_that_are_not_objects(tmp_path):
+    cases, tips = sample_seeds(2)
+    write_seeds(tmp_path / "seeds", cases, tips)
+    with (tmp_path / "seeds" / "clean_cases.jsonl").open("a", encoding="utf-8") as handle:
+        handle.write("[1, 2]\n")
+    with pytest.raises(build_dataset.DatasetError) as caught:
+        build_dataset.build(tmp_path / "seeds", tmp_path / "out")
+    assert any("JSON object" in error for error in caught.value.errors)

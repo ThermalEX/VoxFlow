@@ -3,8 +3,6 @@
 import random
 import re
 
-from .schema import detect_lang
-
 
 ZH_FILLERS = ("额", "嗯", "呃", "啊", "那个", "就是", "然后")
 EN_FILLERS = ("um", "uh", "like", "you know")
@@ -12,9 +10,26 @@ ZH_CORRECTION_MARKERS = ("不对", "不是", "哦不", "说错了")
 EN_CORRECTION_MARKERS = ("no wait", "sorry", "I mean")
 _ZH_DIGITS = "一二三四五六日"
 _EN_WEEKDAYS = ("Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday")
-_ZH_TARGET = re.compile(r"(周|星期)([一二三四五六日天])|(\d{1,2})点")
-_EN_TARGET = re.compile(r"\b(" + "|".join(_EN_WEEKDAYS) + r")\b|\b(\d{1,2})(?=\s?(?:am|pm)\b)")
+# Only weekdays and whole clock hours are corrected; "每周一次", "100点" and "10:30 am" are left alone.
+_ZH_TARGET = re.compile(r"(周|星期)([一二三四五六日天])(?![次末])|(?<![\d.:])(\d{1,2})点")
+_EN_TARGET = re.compile(r"\b(" + "|".join(_EN_WEEKDAYS) + r")\b|(?<![\d:.])\b(\d{1,2})(?=\s?(?:am|pm)\b)")
 _CJK_CHAR = re.compile(r"[㐀-鿿]")
+_LATIN_WORD = re.compile(r"[A-Za-z']+")
+
+
+def _is_english(text: str) -> bool:
+    # Mixed text takes the noise of whichever language dominates it.
+    return len(_LATIN_WORD.findall(text)) > len(_CJK_CHAR.findall(text))
+
+
+def _sentence_case_after_filler(rest: str) -> str:
+    match = _LATIN_WORD.match(rest)
+    if not match:
+        return rest
+    word = match.group(0)
+    if word == "I" or word.startswith("I'") or (len(word) > 1 and word.isupper()):
+        return rest
+    return rest[0].lower() + rest[1:]
 
 
 def _clause_starts(text: str, separator: str) -> list[int]:
@@ -31,11 +46,12 @@ def _clause_starts(text: str, separator: str) -> list[int]:
 def inject_fillers(text: str, rng: random.Random) -> str | None:
     if "\n" in text:
         return None
-    if detect_lang(text) == "en":
-        starts = _clause_starts(text, ", ")
-        position = rng.choice(starts)
+    if _is_english(text):
+        position = rng.choice(_clause_starts(text, ", "))
         filler = rng.choice(EN_FILLERS)
-        insert = f"{filler.capitalize()}, " if position == 0 else f"{filler}, "
+        if position == 0:
+            return f"{filler.capitalize()}, " + _sentence_case_after_filler(text)
+        insert = f"{filler}, "
     else:
         starts = _clause_starts(text, "，")
         position = rng.choice(starts)
@@ -46,13 +62,12 @@ def inject_fillers(text: str, rng: random.Random) -> str | None:
 def inject_repetition(text: str, rng: random.Random) -> str | None:
     if "\n" in text:
         return None
-    if detect_lang(text) == "en":
+    if _is_english(text):
         position = rng.choice(_clause_starts(text, ", "))
-        match = re.match(r"[A-Za-z']+", text[position:])
+        match = _LATIN_WORD.match(text, position)
         if not match:
             return None
-        word = match.group(0)
-        return text[:position] + word + " " + word.lower() + text[position + len(word):]
+        return text[:position] + match.group(0) + " " + text[position:]
     candidates = [start for start in _clause_starts(text, "，") if _CJK_CHAR.match(text, start)]
     if not candidates:
         return None
@@ -65,7 +80,7 @@ def inject_repetition(text: str, rng: random.Random) -> str | None:
 def inject_correction(text: str, rng: random.Random) -> str | None:
     if "\n" in text:
         return None
-    if detect_lang(text) == "en":
+    if _is_english(text):
         matches = list(_EN_TARGET.finditer(text))
         if not matches:
             return None

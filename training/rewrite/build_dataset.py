@@ -78,7 +78,11 @@ def _example(system: str, user: str, assistant: str, meta: dict) -> dict:
 
 
 def _validate(cases: list[dict], tips: list[dict]) -> list[str]:
-    errors = []
+    errors = [f"{name} line {index}: each line must be a JSON object"
+              for name, records in (("clean_cases", cases), ("suggestions", tips))
+              for index, record in enumerate(records, 1) if not isinstance(record, dict)]
+    if errors:
+        return errors
     for record in cases:
         errors += [f"clean_cases {record.get('id')!r}: {error}" for error in validate_clean_case(record)]
     for record in tips:
@@ -126,6 +130,9 @@ def _coverage(cases: list[dict], tips: list[dict]) -> tuple[list[str], list[str]
 
 
 def build(seeds_dir: Path = SEEDS_DIR, out_dir: Path = BUILD_DIR) -> BuildReport:
+    missing = [name for name in ("clean_cases.jsonl", "suggestions.jsonl") if not (seeds_dir / name).is_file()]
+    if missing:
+        raise DatasetError([f"missing seed file: {seeds_dir / name}" for name in missing])
     cases = load_jsonl(seeds_dir / "clean_cases.jsonl")
     tips = load_jsonl(seeds_dir / "suggestions.jsonl")
     errors = _validate(cases, tips)
