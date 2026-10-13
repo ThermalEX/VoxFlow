@@ -44,3 +44,26 @@ def test_labels_explain_size_and_purpose():
         assert label(q4) == "Q4 · 1.2 GB · 更省显存"
     finally:
         i18n.set_language("en")
+
+
+def test_archived_runs_are_listed_after_current_ones_with_their_name(tmp_path):
+    make_gguf(tmp_path / "training/rewrite/runs/archive/qwen3.5-2b-v1/gguf/voxflow-rewrite-q8_0.gguf")
+    current = make_gguf(tmp_path / "training/rewrite/runs/qwen3.5-2b/gguf/voxflow-rewrite-q4_k_m.gguf")
+    models = discover_models(tmp_path)
+    assert models[0].path == current and models[0].run == ""
+    assert models[1].run == "qwen3.5-2b-v1"
+    assert label(models[1]) == f"Q8 · {format_size(64)} · archived qwen3.5-2b-v1"
+
+
+def test_a_missing_saved_model_is_replaced_by_the_best_one_found(tmp_path):
+    from PySide6.QtCore import QSettings
+    from voxflow.model_catalog import replace_missing_model
+    from voxflow.rewriter import RewriteConfig
+
+    settings = QSettings(str(tmp_path / "s.ini"), QSettings.Format.IniFormat)
+    RewriteConfig(model_path="training/rewrite/runs/qwen3.5-2b/gguf/voxflow-rewrite-q8_0.gguf").save(settings)
+    assert replace_missing_model(settings, tmp_path) is None  # nothing to switch to
+    archived = make_gguf(tmp_path / "training/rewrite/runs/archive/v1/gguf/voxflow-rewrite-q8_0.gguf")
+    assert replace_missing_model(settings, tmp_path) == archived
+    assert RewriteConfig.from_settings(settings).model_path == "training/rewrite/runs/archive/v1/gguf/voxflow-rewrite-q8_0.gguf"
+    assert replace_missing_model(settings, tmp_path) is None  # already usable

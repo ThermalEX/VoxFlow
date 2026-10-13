@@ -456,3 +456,31 @@ def test_continue_is_offered_even_without_smart_editing(tmp_path):
     assert not window.smart.continue_button.isVisibleTo(window)
     assert window._continuation == ""
     window.close()
+
+
+def test_continue_keeps_the_text_while_nothing_new_is_heard(tmp_path):
+    app, window, _output = make_window(tmp_path, FakeClient(), enabled=False)
+    window.apply_transcript("final", "已经写好的一句话。")
+    window._start_recording = lambda continuation=False: None
+    window.continue_recording()
+    window._set_mode("recording")
+    window.apply_transcript("partial", "")
+    assert window.transcript.toPlainText() == "已经写好的一句话。"
+    window.close()
+
+
+def test_continued_text_gets_suggestions_again(tmp_path):
+    client = FakeClient(clean="你好，我叫李四。他叫王五。", suggestions=[{"label": "译成英文", "text": "Hi, I'm Si Li."}])
+    app, window, _output = make_window(tmp_path, client)
+    window.smart.suggest_delay_ms = 0
+    window.apply_transcript("final", "你好，我叫李四。")
+    window._start_recording = lambda continuation=False: None
+    window.continue_recording()
+    window._set_mode("recording")
+    window.apply_transcript("final", "他叫王五")
+    animation = window.smart.animation
+    settle(app, window, lambda: animation.state() == animation.State.Running)
+    animation.setCurrentTime(animation.duration())
+    settle(app, window, lambda: not window.smart.suggestion_buttons[0].isHidden())
+    assert window.smart.suggestion_buttons[0].text() == "译成英文"
+    window.close()

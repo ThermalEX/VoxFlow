@@ -213,6 +213,7 @@ STRINGS: dict[str, tuple[str, str]] = {
     "model.choice.q4": ("Q4 · {size} · Less GPU memory", "Q4 · {size} · 更省显存"),
     "model.choice.bf16": ("BF16 · {size} · Full precision", "BF16 · {size} · 全精度"),
     "model.choice.other": ("{name} · {size}", "{name} · {size}"),
+    "model.choice.archived": ("{quant} · {size} · archived {run}", "{quant} · {size} · 旧版 {run}"),
     "model.choice.missing": ("{name} (not found)", "{name}（未找到）"),
     "model.browse": ("Browse…", "浏览…"),
     # Errors shown to the user
