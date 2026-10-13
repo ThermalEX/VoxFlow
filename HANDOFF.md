@@ -41,6 +41,8 @@ py -3.12 -m venv .venv
 
 **智能改写数据集（尚未训练、未接入软件）**：`training/rewrite/` 存放口语改写模型的数据集，设计见 `docs/superpowers/specs/2026-10-13-rewrite-dataset-design.md`。两个任务共用 `prompts.py` 里的系统提示：任务 1 清理并执行语音内联指令（口气词、改口与回头编辑、口述格式、翻译、语气改写），任务 2 生成 0–3 条自由改写建议。手写种子在 `seeds/*.jsonl`（约 830 条清理、约 400 条建议），`.\.venv\Scripts\python.exe -m training.rewrite.build_dataset` 校验种子、注入口语噪声并按种子哈希划分，输出到已忽略的 `training/rewrite/build/{train,valid,test}.jsonl`（chat messages 格式），同时打印覆盖报告。模型候选：智能编辑 Qwen3.5 2B / 4B，语音识别 Qwen3-ASR 0.6B / 1.7B（替换 SenseVoice 前先用真实录音评估）。本机 6 GB 显存微调上限约 4B。
 
+**首次训练结果（2026-10-13，Qwen3.5-2B，bf16 LoRA，2 轮，RTX 3060 6 GB 上约 32 分钟，峰值显存 4.4 GB）**：训练在 WSL 环境 `~/voxflow-train`（`bash training/rewrite/setup_wsl.sh` 创建）中用 `python -m training.rewrite.train` 运行，`python -m training.rewrite.evaluate` 评估；适配器与报告在已忽略的 `training/rewrite/runs/`。测试集（88 条清理、44 条建议）上微调前→后：清理完全一致率 21.6%→54.5%，字符错误率 0.74→0.21，指令残留 31.9%→0%，反例保留 81%→87.5%（目标 95% 未达），翻译 chrF 39.5→60.2，建议条数与参考一致 18%→82%、规则合规 93%→100%，短句延迟中位数 1.14 s（HF generate，未量化）。已知错误：时间推算（“两点到三点半”→“14:00到13:30”）、个别带理由修正、混说里的中文词被翻译、“然后”被当作口气词删除。风格改写与翻译的完全一致率不代表质量，需人工评审。
+
 ## 4. 验证与操作边界
 
 ```powershell
