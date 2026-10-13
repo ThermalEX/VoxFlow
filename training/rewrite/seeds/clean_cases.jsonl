@@ -238,3 +238,53 @@
 {"id": "implicit-0028", "categories": ["implicit_reason"], "scene": "customer_service", "raw": "我选顺丰到付，哦顺丰到不了我们村，那就选邮政。", "output": "我选邮政。"}
 {"id": "implicit-0029", "categories": ["implicit_reason"], "scene": "social_media", "raw": "周末去看樱花，听说花已经谢了，那改去看海。", "output": "周末去看海。"}
 {"id": "implicit-0030", "categories": ["implicit_reason", "edit_delete"], "scene": "daily", "raw": "Buy flowers and chocolate for Mom, she's on a diet, skip the chocolate.", "output": "Buy flowers for Mom."}
+{"id": "edit-del-0031", "categories": ["edit_delete", "edit_replace"], "scene": "work_chat", "raw": "通知一下，下周一全员大会，地点在一楼大厅，要穿正装，正装那条去掉，地点换成三楼报告厅。", "output": "通知一下，下周一全员大会，地点在三楼报告厅。"}
+{"id": "edit-rep-0031", "categories": ["edit_replace", "immediate_correction"], "scene": "schedule", "raw": "帮我约周四，不对周五下午，跟李总吃饭，时间定六点，六点太早了，七点吧。", "output": "帮我约周五下午七点跟李总吃饭。"}
+{"id": "edit-ins-0031", "categories": ["edit_insert", "edit_delete"], "scene": "shopping", "raw": "买排骨、玉米、胡萝卜，玉米不要了，加个山药。", "output": "买排骨、胡萝卜和山药。"}
+{"id": "edit-rep-0032", "categories": ["edit_replace"], "scene": "tech", "raw": "我们用三台服务器，每台八核十六G，内存不够，换成三十二G的。", "output": "我们用三台服务器，每台八核三十二G。"}
+{"id": "implicit-0031", "categories": ["implicit_reason", "edit_replace"], "scene": "family_friends", "raw": "下周带爸妈去三亚，机票买周六的，周六爸要值班，改周日的，酒店也顺延一天。", "output": "下周带爸妈去三亚，机票买周日的，酒店也顺延一天。"}
+{"id": "edit-del-0032", "categories": ["edit_delete"], "scene": "email", "raw": "Dear Ms. Lee, thank you for meeting with us, we really enjoyed lunch, scratch the lunch part, we look forward to working together.", "output": "Dear Ms. Lee, thank you for meeting with us. We look forward to working together."}
+{"id": "edit-rep-0033", "categories": ["edit_replace"], "scene": "customer_service", "raw": "我想把套餐从五十九的换成三十九的，算了还是换成二十九的。", "output": "我想把套餐从五十九的换成二十九的。", "keeps_instruction_words": true}
+{"id": "edit-ins-0032", "categories": ["edit_insert"], "scene": "school", "raw": "毕业论文的结构是引言、方法、结论，方法后面要有实验结果。", "output": "毕业论文的结构是引言、方法、实验结果、结论。"}
+{"id": "implicit-0032", "categories": ["implicit_reason"], "scene": "social_media", "raw": "今天本来想去看展，结果没约到票，就在家追剧了，前面看展那段不要。", "output": "今天在家追剧了。"}
+{"id": "edit-rep-0034", "categories": ["edit_replace"], "scene": "daily", "raw": "Set the oven to 180, actually 200 degrees, for 25 minutes, make it 30.", "output": "Set the oven to 200 degrees for 30 minutes."}
+{"id": "edit-rep-0035", "categories": ["edit_replace"], "scene": "schedule", "raw": "会议从两点开始，开两个小时，往后推半小时开始。", "output": "会议从两点半开始，开两个小时。"}
+{"id": "edit-rep-0036", "categories": ["edit_replace"], "scene": "shopping", "raw": "苹果要三斤，再多要两斤。", "output": "苹果要五斤。"}
+{"id": "edit-rep-0037", "categories": ["edit_replace"], "scene": "work_chat", "raw": "这周要招两个前端一个后端，前端少招一个。", "output": "这周要招一个前端、一个后端。"}
+{"id": "edit-rep-0038", "categories": ["edit_replace"], "scene": "family_friends", "raw": "晚饭订五个人的位置，我姐也来，加一个人。", "output": "晚饭订六个人的位置。"}
+{"id": "edit-rep-0039", "categories": ["edit_replace"], "scene": "tech", "raw": "缓存过期时间设为十分钟，翻一倍。", "output": "缓存过期时间设为二十分钟。"}
+{"id": "edit-rep-0040", "categories": ["edit_replace"], "scene": "school", "raw": "Read chapters one through four, actually just one through three.", "output": "Read chapters one through three."}
+{"id": "edit-rep-0041", "categories": ["edit_replace"], "scene": "customer_service", "raw": "我要订两晚的房间，十号入住，多住一晚。", "output": "我要订三晚的房间，十号入住。"}
+{"id": "edit-rep-0042", "categories": ["edit_replace"], "scene": "email", "raw": "截止日期是本月15号，再宽限三天。", "output": "截止日期是本月18号。"}
+{"id": "edit-rep-0043", "categories": ["edit_replace"], "scene": "social_media", "raw": "今天走了八千步，加上晚上散步又走了两千，一共一万步。", "output": "今天走了一万步。"}
+{"id": "edit-rep-0044", "categories": ["edit_replace"], "scene": "daily", "raw": "闹钟定在七点，提前十五分钟。", "output": "闹钟定在六点四十五。"}
+{"id": "corr-0031", "categories": ["immediate_correction"], "scene": "tech", "raw": "这个API返回的是XML，不对，是JSON格式。", "output": "这个API返回的是JSON格式。"}
+{"id": "corr-0032", "categories": ["immediate_correction"], "scene": "work_chat", "raw": "明天的standup改到十点，哦不，十点半。", "output": "明天的standup改到十点半。", "keeps_instruction_words": true}
+{"id": "corr-0033", "categories": ["immediate_correction"], "scene": "email", "raw": "附件是V2版本，不对，是V3版本的设计稿。", "output": "附件是V3版本的设计稿。"}
+{"id": "corr-0034", "categories": ["immediate_correction"], "scene": "shopping", "raw": "帮我在淘宝，不对，京东上买个充电宝。", "output": "帮我在京东上买个充电宝。"}
+{"id": "corr-0035", "categories": ["immediate_correction"], "scene": "school", "raw": "The essay is due on the 12th, wait no, the 14th.", "output": "The essay is due on the 14th."}
+{"id": "corr-0036", "categories": ["immediate_correction"], "scene": "family_friends", "raw": "我在星巴克，不对，在瑞幸等你。", "output": "我在瑞幸等你。"}
+{"id": "corr-0037", "categories": ["immediate_correction"], "scene": "schedule", "raw": "下个月去成都出差，啊不是成都，是重庆。", "output": "下个月去重庆出差。"}
+{"id": "corr-0038", "categories": ["immediate_correction"], "scene": "customer_service", "raw": "我住在海淀区，哦说错了，是昌平区。", "output": "我住在昌平区。"}
+{"id": "corr-0039", "categories": ["immediate_correction"], "scene": "social_media", "raw": "看了三遍，不对，是第四遍了，还是会哭。", "output": "看了第四遍了，还是会哭。"}
+{"id": "corr-0040", "categories": ["immediate_correction"], "scene": "daily", "raw": "车停在B2，不对，B3的C区。", "output": "车停在B3的C区。"}
+{"id": "edit-del-0033", "categories": ["edit_delete"], "scene": "work_chat", "raw": "各位，项目延期了，原因是需求变更，具体原因不用说了，大家注意新的时间节点。", "output": "各位，项目延期了，大家注意新的时间节点。"}
+{"id": "edit-del-0034", "categories": ["edit_delete"], "scene": "family_friends", "raw": "妈，我下个月回家，顺便带女朋友，带女朋友那个先别说。", "output": "妈，我下个月回家。"}
+{"id": "edit-del-0035", "categories": ["edit_delete"], "scene": "tech", "raw": "This PR fixes the crash on startup and also refactors the config loader, never mind the refactor part.", "output": "This PR fixes the crash on startup."}
+{"id": "edit-del-0036", "categories": ["edit_delete"], "scene": "email", "raw": "您好，合同已签字盖章，原件已快递，快递单号我晚点发，最后那句删掉。", "output": "您好，合同已签字盖章，原件已快递。"}
+{"id": "edit-del-0037", "categories": ["edit_delete"], "scene": "shopping", "raw": "老板，这个西瓜帮我切开，再装个袋子，切开就不用了。", "output": "老板，这个西瓜帮我装个袋子。"}
+{"id": "edit-del-0038", "categories": ["edit_delete"], "scene": "schedule", "raw": "Tomorrow: dentist at 9, gym at 6, and drinks at 8, cancel drinks.", "output": "Tomorrow: dentist at 9, gym at 6."}
+{"id": "edit-del-0039", "categories": ["edit_delete"], "scene": "school", "raw": "老师您好，我是三班的张明，想请教一个问题，三班那个不用说，老师知道我。", "output": "老师您好，我是张明，想请教一个问题。"}
+{"id": "edit-del-0040", "categories": ["edit_delete"], "scene": "customer_service", "raw": "你们的服务太差了，我要退款，第一句太冲了，删了。", "output": "我要退款。"}
+{"id": "edit-del-0041", "categories": ["edit_delete"], "scene": "social_media", "raw": "新买的相机到了，花了一万二，价格就别发了。", "output": "新买的相机到了。"}
+{"id": "edit-del-0042", "categories": ["edit_delete"], "scene": "daily", "raw": "今天好累啊，加班到十点，还被老板骂了，被骂那句不要。", "output": "今天好累啊，加班到十点。"}
+{"id": "implicit-0033", "categories": ["implicit_reason"], "scene": "work_chat", "raw": "这个bug先交给测试复现，测试今天都在开会，那我自己先看看。", "output": "这个bug我自己先看看。"}
+{"id": "implicit-0034", "categories": ["implicit_reason"], "scene": "tech", "raw": "前端用Vue写，团队都熟React，还是用React。", "output": "前端用React写。"}
+{"id": "implicit-0035", "categories": ["implicit_reason"], "scene": "email", "raw": "We can ship by air, though that's too expensive for this order, let's go with sea freight.", "output": "Let's go with sea freight for this order."}
+{"id": "implicit-0036", "categories": ["implicit_reason"], "scene": "shopping", "raw": "买一台扫地机器人，家里地毯多，扫地机器人不好用，还是买吸尘器。", "output": "买一台吸尘器。"}
+{"id": "implicit-0037", "categories": ["implicit_reason"], "scene": "family_friends", "raw": "给侄子买个乐高，他已经有好多了，那买套绘本吧。", "output": "给侄子买套绘本吧。"}
+{"id": "implicit-0038", "categories": ["implicit_reason"], "scene": "schedule", "raw": "周日上午去健身房，周日上午要陪孩子上课，那就周日晚上去。", "output": "周日晚上去健身房。"}
+{"id": "implicit-0039", "categories": ["implicit_reason"], "scene": "school", "raw": "选修课选日语，日语课在周三，跟专业课冲突，换成韩语。", "output": "选修课选韩语。"}
+{"id": "implicit-0040", "categories": ["implicit_reason"], "scene": "customer_service", "raw": "I'd like a refund, oh it's past 30 days, then I'd like an exchange.", "output": "I'd like an exchange."}
+{"id": "implicit-0041", "categories": ["implicit_reason"], "scene": "social_media", "raw": "今天要去海边拍日出，结果睡过头了，只拍到了日落，就写拍到了日落。", "output": "今天拍到了日落。"}
+{"id": "implicit-0042", "categories": ["implicit_reason", "edit_delete"], "scene": "daily", "raw": "晚上喝点奶茶和咖啡，喝咖啡晚上睡不着，只喝奶茶。", "output": "晚上喝点奶茶。"}
