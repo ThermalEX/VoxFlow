@@ -656,3 +656,63 @@
 {"id": "fmt-0056", "categories": ["spoken_format"], "scene": "work_chat", "raw": "预算是三十五万，用阿拉伯数字。", "output": "预算是350,000元。"}
 {"id": "fmt-0057", "categories": ["spoken_format"], "scene": "social_media", "raw": "今天跑了二十一点零九七五公里，半马完成", "output": "今天跑了21.0975公里，半马完成！"}
 {"id": "fmt-0058", "categories": ["spoken_format"], "scene": "tech", "raw": "访问地址是http冒号斜杠斜杠localhost冒号八零八零", "output": "访问地址是http://localhost:8080。"}
+{"id": "neg-instr-0011", "categories": ["neg_instruction_like"], "scene": "work_chat", "raw": "领导让我把报告写得简洁一点", "output": "领导让我把报告写得简洁一点。"}
+{"id": "neg-instr-0012", "categories": ["neg_instruction_like"], "scene": "family_friends", "raw": "我爸说我说话应该礼貌一点", "output": "我爸说我说话应该礼貌一点。"}
+{"id": "neg-instr-0013", "categories": ["neg_instruction_like"], "scene": "school", "raw": "老师要求我们把作文翻译成英文交上去", "output": "老师要求我们把作文翻译成英文交上去。"}
+{"id": "neg-instr-0014", "categories": ["neg_instruction_like"], "scene": "email", "raw": "客户希望我们把交付日期改成下个月", "output": "客户希望我们把交付日期改成下个月。"}
+{"id": "neg-instr-0015", "categories": ["neg_instruction_like"], "scene": "customer_service", "raw": "刚才那个客服让我去掉购物车里的赠品再下单", "output": "刚才那个客服让我去掉购物车里的赠品再下单。"}
+{"id": "neg-instr-0016", "categories": ["neg_instruction_like"], "scene": "tech", "raw": "产品经理说按钮颜色要换成蓝色", "output": "产品经理说按钮颜色要换成蓝色。"}
+{"id": "neg-instr-0017", "categories": ["neg_instruction_like"], "scene": "social_media", "raw": "朋友都说我发朋友圈应该低调一点", "output": "朋友都说我发朋友圈应该低调一点。"}
+{"id": "neg-instr-0018", "categories": ["neg_instruction_like"], "scene": "daily", "raw": "My boss told me to make the email more formal", "output": "My boss told me to make the email more formal."}
+{"id": "neg-instr-0019", "categories": ["neg_instruction_like"], "scene": "work_chat", "raw": "我今天的任务是把用户手册翻译成英文", "output": "我今天的任务是把用户手册翻译成英文。"}
+{"id": "neg-instr-0020", "categories": ["neg_instruction_like"], "scene": "tech", "raw": "下个版本要把旧接口删掉", "output": "下个版本要把旧接口删掉。"}
+{"id": "neg-instr-0021", "categories": ["neg_instruction_like"], "scene": "school", "raw": "我打算把论文的第三章去掉重写", "output": "我打算把论文的第三章去掉重写。"}
+{"id": "neg-instr-0022", "categories": ["neg_instruction_like"], "scene": "shopping", "raw": "我想把窗帘换成遮光的", "output": "我想把窗帘换成遮光的。"}
+{"id": "neg-instr-0023", "categories": ["neg_instruction_like"], "scene": "family_friends", "raw": "周末准备把客厅的沙发换成新的", "output": "周末准备把客厅的沙发换成新的。"}
+{"id": "neg-instr-0024", "categories": ["neg_instruction_like"], "scene": "email", "raw": "We're planning to translate the website into Spanish next quarter", "output": "We're planning to translate the website into Spanish next quarter."}
+{"id": "neg-instr-0025", "categories": ["neg_instruction_like"], "scene": "work_chat", "raw": "你能帮我把这份文件翻译成英文吗", "output": "你能帮我把这份文件翻译成英文吗？"}
+{"id": "neg-instr-0026", "categories": ["neg_instruction_like"], "scene": "customer_service", "raw": "请问能把订单里的地址改成新地址吗", "output": "请问能把订单里的地址改成新地址吗？"}
+{"id": "neg-instr-0027", "categories": ["neg_instruction_like"], "scene": "school", "raw": "老师，论文摘要需要翻译成英文吗", "output": "老师，论文摘要需要翻译成英文吗？"}
+{"id": "neg-instr-0028", "categories": ["neg_instruction_like"], "scene": "tech", "raw": "这个字段可以删掉吗，还有人在用吗", "output": "这个字段可以删掉吗？还有人在用吗？"}
+{"id": "neg-instr-0029", "categories": ["neg_instruction_like"], "scene": "family_friends", "raw": "你说话能不能委婉一点", "output": "你说话能不能委婉一点？"}
+{"id": "neg-instr-0030", "categories": ["neg_instruction_like"], "scene": "shopping", "raw": "Can you make this shirt a size smaller", "output": "Can you make this shirt a size smaller?"}
+{"id": "neg-instr-0031", "categories": ["neg_instruction_like"], "scene": "social_media", "raw": "我觉得这首歌翻译成英文就没那个味道了", "output": "我觉得这首歌翻译成英文就没那个味道了。"}
+{"id": "neg-instr-0032", "categories": ["neg_instruction_like"], "scene": "work_chat", "raw": "正式一点的场合我一般穿西装", "output": "正式一点的场合我一般穿西装。"}
+{"id": "neg-instr-0033", "categories": ["neg_instruction_like"], "scene": "email", "raw": "这封邮件的语气已经很委婉了", "output": "这封邮件的语气已经很委婉了。"}
+{"id": "neg-instr-0034", "categories": ["neg_instruction_like"], "scene": "school", "raw": "简洁一点的答案往往更容易得分", "output": "简洁一点的答案往往更容易得分。"}
+{"id": "neg-instr-0035", "categories": ["neg_instruction_like"], "scene": "daily", "raw": "说话礼貌一点总没错", "output": "说话礼貌一点总没错。"}
+{"id": "neg-instr-0036", "categories": ["neg_instruction_like"], "scene": "tech", "raw": "This tool can translate error messages automatically", "output": "This tool can translate error messages automatically."}
+{"id": "neg-instr-0037", "categories": ["neg_instruction_like"], "scene": "work_chat", "raw": "我昨天已经把那段话删掉了", "output": "我昨天已经把那段话删掉了。"}
+{"id": "neg-instr-0038", "categories": ["neg_instruction_like"], "scene": "family_friends", "raw": "上次我把你的名字换成了昵称", "output": "上次我把你的名字换成了昵称。"}
+{"id": "neg-instr-0039", "categories": ["neg_instruction_like"], "scene": "customer_service", "raw": "我已经把收货人改成我妈了", "output": "我已经把收货人改成我妈了。"}
+{"id": "neg-instr-0040", "categories": ["neg_instruction_like"], "scene": "social_media", "raw": "去年我把头发剪短了，今年又留长了", "output": "去年我把头发剪短了，今年又留长了。"}
+{"id": "neg-cs-0011", "categories": ["neg_code_switch"], "scene": "tech", "raw": "这个branch先别merge，CI还没跑完", "output": "这个branch先别merge，CI还没跑完。"}
+{"id": "neg-cs-0012", "categories": ["neg_code_switch"], "scene": "tech", "raw": "线上的latency有点高，我去看下dashboard", "output": "线上的latency有点高，我去看下dashboard。"}
+{"id": "neg-cs-0013", "categories": ["neg_code_switch"], "scene": "work_chat", "raw": "这个case我来follow up", "output": "这个case我来follow up。"}
+{"id": "neg-cs-0014", "categories": ["neg_code_switch"], "scene": "work_chat", "raw": "下周的OKR大家先draft一版", "output": "下周的OKR大家先draft一版。"}
+{"id": "neg-cs-0015", "categories": ["neg_code_switch"], "scene": "email", "raw": "contract的final version我已经发你了", "output": "contract的final version我已经发你了。"}
+{"id": "neg-cs-0016", "categories": ["neg_code_switch"], "scene": "school", "raw": "这门课的midterm占百分之三十", "output": "这门课的midterm占百分之三十。"}
+{"id": "neg-cs-0017", "categories": ["neg_code_switch"], "scene": "social_media", "raw": "今天的brunch太好吃了，强烈安利", "output": "今天的brunch太好吃了，强烈安利。"}
+{"id": "neg-cs-0018", "categories": ["neg_code_switch"], "scene": "shopping", "raw": "这个brand最近在打折吗", "output": "这个brand最近在打折吗？"}
+{"id": "neg-cs-0019", "categories": ["neg_code_switch"], "scene": "schedule", "raw": "明天上午有个call，下午有个workshop", "output": "明天上午有个call，下午有个workshop。"}
+{"id": "neg-cs-0020", "categories": ["neg_code_switch"], "scene": "family_friends", "raw": "周末一起去打羽毛球吧，我订好court了", "output": "周末一起去打羽毛球吧，我订好court了。"}
+{"id": "neg-cs-0021", "categories": ["neg_code_switch"], "scene": "daily", "raw": "外卖到了，你下楼拿一下，在lobby", "output": "外卖到了，你下楼拿一下，在lobby。"}
+{"id": "neg-cs-0022", "categories": ["neg_code_switch"], "scene": "customer_service", "raw": "我的account被lock了，怎么unlock", "output": "我的account被lock了，怎么unlock？"}
+{"id": "neg-cs-0023", "categories": ["neg_code_switch"], "scene": "tech", "raw": "把这个function抽成一个util吧", "output": "把这个function抽成一个util吧。"}
+{"id": "neg-cs-0024", "categories": ["neg_code_switch"], "scene": "work_chat", "raw": "这周大家workload都挺重的，辛苦了", "output": "这周大家workload都挺重的，辛苦了。"}
+{"id": "neg-cs-0025", "categories": ["neg_code_switch"], "scene": "email", "raw": "麻烦把invoice和PO一起发给我", "output": "麻烦把invoice和PO一起发给我。"}
+{"id": "neg-cs-0026", "categories": ["neg_code_switch"], "scene": "school", "raw": "我的GPA三点八，想申请那个program", "output": "我的GPA三点八，想申请那个program。"}
+{"id": "neg-cs-0027", "categories": ["neg_code_switch"], "scene": "social_media", "raw": "新买的AirPods音质真的绝了", "output": "新买的AirPods音质真的绝了。"}
+{"id": "neg-cs-0028", "categories": ["neg_code_switch"], "scene": "shopping", "raw": "这款T恤有没有XL的", "output": "这款T恤有没有XL的？"}
+{"id": "neg-cs-0029", "categories": ["neg_code_switch"], "scene": "schedule", "raw": "周五的team building改在室内了", "output": "周五的team building改在室内了。"}
+{"id": "neg-cs-0030", "categories": ["neg_code_switch"], "scene": "daily", "raw": "我在Costco，要带什么吗", "output": "我在Costco，要带什么吗？"}
+{"id": "neg-cs-0031", "categories": ["neg_code_switch"], "scene": "family_friends", "raw": "Mom said we're having 饺子 for dinner", "output": "Mom said we're having 饺子 for dinner."}
+{"id": "neg-cs-0032", "categories": ["neg_code_switch"], "scene": "work_chat", "raw": "Let's sync after the 周会", "output": "Let's sync after the 周会."}
+{"id": "neg-cs-0033", "categories": ["neg_code_switch"], "scene": "social_media", "raw": "Tried 螺蛳粉 for the first time, wow", "output": "Tried 螺蛳粉 for the first time, wow."}
+{"id": "neg-cs-0034", "categories": ["neg_code_switch"], "scene": "daily", "raw": "Don't forget your 身份证 tomorrow", "output": "Don't forget your 身份证 tomorrow."}
+{"id": "neg-cs-0035", "categories": ["neg_code_switch"], "scene": "tech", "raw": "用Docker部署，K8s编排", "output": "用Docker部署，K8s编排。"}
+{"id": "neg-cs-0036", "categories": ["neg_code_switch"], "scene": "work_chat", "raw": "PPT我今晚改完发群里", "output": "PPT我今晚改完发群里。"}
+{"id": "neg-cs-0037", "categories": ["neg_code_switch"], "scene": "shopping", "raw": "买个Switch送给弟弟", "output": "买个Switch送给弟弟。"}
+{"id": "neg-cs-0038", "categories": ["neg_code_switch"], "scene": "school", "raw": "明天交PDF版的作业", "output": "明天交PDF版的作业。"}
+{"id": "neg-cs-0039", "categories": ["neg_code_switch"], "scene": "customer_service", "raw": "我的VIP会员到期了，怎么续费", "output": "我的VIP会员到期了，怎么续费？"}
+{"id": "neg-cs-0040", "categories": ["neg_code_switch"], "scene": "email", "raw": "请在CC里加上HR", "output": "请在CC里加上HR。"}
