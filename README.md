@@ -27,6 +27,15 @@ py -3.12 -m venv .venv
 
 测试：`.\.venv\Scripts\python.exe -m pytest -q`。
 
+## 智能编辑（试用）
+
+在设置的 Smart editing 页勾选启用后，停录得到的最终文字会交给改写模型整理：去掉口气词、按改口和“去掉……/换成……”修改前文，执行“翻译成英文”“正式一点”等语音指令。整理结果以一次修改动画替换原文；鼠标悬停 “Undo edits” 可预览原文，点击撤回或恢复；下方还会浮动 0–3 个改写建议，点击即采用。确认或回车只上屏当前文字。模型出错、超时或未就绪时保留原文，不影响正常使用。
+
+- **VoxFlow local model**：使用本仓库训练的 Qwen3.5-2B 适配器，由 VoxFlow 在 WSL 中自动启动本地服务（首次加载约 1 分钟），需要先按 `training/rewrite/setup_wsl.sh` 建好训练环境并完成训练，适配器默认在 `training/rewrite/runs/qwen3.5-2b/adapter`。
+- **Custom OpenAI-compatible endpoint**：填写地址、模型名和可选 API Key，可接 LM Studio、Ollama、llama.cpp server 或云端服务。API Key 以明文保存在本机设置中。
+
+“Test connection” 可检查当前配置。实时草稿不做改写。
+
 ## 当前模型
 
 使用 [SenseVoiceSmall](https://github.com/QwenAudio/SenseVoice) 的 [sherpa-onnx INT8 转换版本](https://github.com/k2-fsa/sherpa-onnx/releases/tag/asr-models)，本地 CPU 推理；模型约 240 MB，首次单独下载，文件不会进入 Git。该模型是离线整段识别；窗口将长录音按约 20 秒分段，缓存已完成片段，只反复识别当前片段来更新临时草稿，并非模型原生流式输出。中英混说质量尚需真实语料评测。模型权重遵循其[模型卡中的许可条款](https://huggingface.co/FunAudioLLM/SenseVoiceSmall)。

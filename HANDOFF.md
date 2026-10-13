@@ -36,12 +36,18 @@ py -3.12 -m venv .venv
 | `voxflow/settings_window.py`, `voxflow/appearance.py` | 独立设置窗口、字体/字号/对齐/颜色与持久化。设置由 `QSettings("VoxFlow", "VoxFlow")` 存在用户环境中，不在仓库里。 |
 | `voxflow/overlay_widgets.py`, `voxflow/particles.py` | 胶囊波面、操作按钮、粒子运动。 |
 | `voxflow/ui_icons.py`, `voxflow/assets/icons/` | 离线打包的 Google Material Symbols SVG；保留同目录 `LICENSE` 和来源说明。 |
+| `voxflow/smart_editing.py` | 智能编辑控制：最终文字提交改写、修改动画、撤回/悬停预览、建议按钮、过期结果丢弃、本地服务启停。 |
+| `voxflow/rewriter.py`, `voxflow/rewrite_prompts.py` | OpenAI 兼容接口客户端与 `rewrite/*` 设置；两个任务的系统提示（训练与服务共用）。 |
+| `voxflow/local_server.py`, `training/rewrite/serve.py` | 经 `wsl.exe` 无窗口启动 WSL 中的模型服务；服务读到 stdin EOF 即退出。 |
+| `voxflow/edit_diff.py` | 原文与改写结果的按字/按词差异及动画帧 HTML。 |
 
 `sounddevice` 的回调把音频写入 `AudioBuffer`。主窗口通过 `RecognitionScheduler` 约每 1.2 秒提交一次任务，由单独的 `ProcessPoolExecutor` 加载并运行 ASR；识别器把长录音按约 6–10 秒的安静边界分段，已完成片段缓存，临时结果可能修订。停录后请求最终结果并保留可编辑预览。若最终识别为空但已有临时草稿，`apply_transcript()` 会保留草稿供用户确认。
 
 **智能改写数据集（尚未训练、未接入软件）**：`training/rewrite/` 存放口语改写模型的数据集，设计见 `docs/superpowers/specs/2026-10-13-rewrite-dataset-design.md`。两个任务共用 `prompts.py` 里的系统提示：任务 1 清理并执行语音内联指令（口气词、改口与回头编辑、口述格式、翻译、语气改写），任务 2 生成 0–3 条自由改写建议。手写种子在 `seeds/*.jsonl`（约 830 条清理、约 400 条建议），`.\.venv\Scripts\python.exe -m training.rewrite.build_dataset` 校验种子、注入口语噪声并按种子哈希划分，输出到已忽略的 `training/rewrite/build/{train,valid,test}.jsonl`（chat messages 格式），同时打印覆盖报告。模型候选：智能编辑 Qwen3.5 2B / 4B，语音识别 Qwen3-ASR 0.6B / 1.7B（替换 SenseVoice 前先用真实录音评估）。本机 6 GB 显存微调上限约 4B。
 
 **首次训练结果（2026-10-13，Qwen3.5-2B，bf16 LoRA，2 轮，RTX 3060 6 GB 上约 32 分钟，峰值显存 4.4 GB）**：训练在 WSL 环境 `~/voxflow-train`（`bash training/rewrite/setup_wsl.sh` 创建）中用 `python -m training.rewrite.train` 运行，`python -m training.rewrite.evaluate` 评估；适配器与报告在已忽略的 `training/rewrite/runs/`。测试集（88 条清理、44 条建议）上微调前→后：清理完全一致率 21.6%→54.5%，字符错误率 0.74→0.21，指令残留 31.9%→0%，反例保留 81%→87.5%（目标 95% 未达），翻译 chrF 39.5→60.2，建议条数与参考一致 18%→82%、规则合规 93%→100%，短句延迟中位数 1.14 s（HF generate，未量化）。已知错误：时间推算（“两点到三点半”→“14:00到13:30”）、个别带理由修正、混说里的中文词被翻译、“然后”被当作口气词删除。风格改写与翻译的完全一致率不代表质量，需人工评审。
+
+**智能编辑数据流**：`apply_transcript("final")` 调用 `SmartEditor.begin()`；启用且接口就绪时，单线程 `ThreadPoolExecutor` 调用 `RewriteClient.clean()`，由 `_poll` → `SmartEditor.poll()` 收取。只有会话号一致、仍在结果模式且用户未编辑时才应用：播放约 0.8 s 修改动画后显示整理结果，再请求 `suggest()` 显示建议。本地模型服务就绪前（约 50 s）结果会排队等待；服务异常退出时状态栏提示并保留原文。2026-10-13 端到端（注入文字、未用麦克风）：清理 1.0–1.8 s，建议在其后 4–6 s 出现。已知问题：默认字体 Segoe UI 无中文字形，本机回退为宋体（与智能编辑无关，可在设置中换字体）；模型偶有补充原文没有的理由。
 
 ## 4. 验证与操作边界
 
