@@ -38,10 +38,16 @@ DARK = Theme("dark", window="#212121", sidebar="#181818", card="#2A2A2A", border
              icon="#B4B4B4", icon_active="#FFFFFF")
 
 
-def current_theme() -> Theme:
+THEME_CHOICES = (("system", "theme.system"), ("light", "theme.light"), ("dark", "theme.dark"))
+
+
+def current_theme(choice: str = "system") -> Theme:
+    """The chosen palette, or the Windows scheme for "system" (VOXFLOW_THEME overrides both for screenshots)."""
     override = os.environ.get("VOXFLOW_THEME", "")
     if override in ("light", "dark"):
-        return DARK if override == "dark" else LIGHT
+        choice = override
+    if choice in ("light", "dark"):
+        return DARK if choice == "dark" else LIGHT
     app = QGuiApplication.instance()
     scheme = app.styleHints().colorScheme() if app is not None else Qt.ColorScheme.Unknown
     return DARK if scheme == Qt.ColorScheme.Dark else LIGHT

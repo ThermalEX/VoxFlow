@@ -113,3 +113,26 @@ def test_new_pages_switch_language(tmp_path):
     assert window.update_channel.itemText(1) == "测试版（含正式版）"
     window.language_box.setCurrentIndex(window.language_box.findData("en"))
     window.close()
+
+
+def test_appearance_page_picks_light_dark_or_system(tmp_path, monkeypatch):
+    monkeypatch.delenv("VOXFLOW_THEME", raising=False)
+    window, settings = make(tmp_path)
+    box = window.theme_box
+    assert [box.itemData(i) for i in range(box.count())] == ["system", "light", "dark"]
+    assert box.currentData() == "system"
+    box.setCurrentIndex(box.findData("dark"))
+    assert window.theme.name == "dark" and settings.value("ui/theme") == "dark"
+    box.setCurrentIndex(box.findData("light"))
+    assert window.theme.name == "light"
+    reopened = SettingsWindow(settings)
+    assert reopened.theme.name == "light" and reopened.theme_box.currentData() == "light"
+    reopened.close()
+    window.close()
+
+
+def test_about_icon_is_vertically_centered(tmp_path):
+    window, _settings = make(tmp_path)
+    layout = window.about_icon.parentWidget().layout()
+    assert layout.itemAt(layout.indexOf(window.about_icon)).alignment() == Qt.AlignmentFlag.AlignVCenter
+    window.close()

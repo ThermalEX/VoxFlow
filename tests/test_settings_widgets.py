@@ -54,3 +54,10 @@ def test_color_dialog_controls_match_the_theme():
     sheet = settings_theme.stylesheet(settings_theme.DARK)
     assert "QColorDialog QSpinBox::up-button" in sheet
     assert "QColorDialog QPushButton:default" in sheet
+
+
+def test_a_chosen_theme_beats_the_system_scheme(monkeypatch):
+    monkeypatch.delenv("VOXFLOW_THEME", raising=False)
+    assert settings_theme.current_theme("dark") is settings_theme.DARK
+    assert settings_theme.current_theme("light") is settings_theme.LIGHT
+    assert settings_theme.current_theme("system") in (settings_theme.LIGHT, settings_theme.DARK)

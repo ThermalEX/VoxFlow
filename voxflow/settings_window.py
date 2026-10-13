@@ -17,7 +17,7 @@ from .appearance import DEFAULT_BACKGROUND, DEFAULT_CAPSULE, DEFAULT_FONT, DEFAU
 from .i18n import LANGUAGE_CHOICES, describe_error, resolve, set_language, tr
 from .model_catalog import LocalModel, describe as describe_model, discover_models, quant_of
 from .rewriter import RewriteConfig
-from .settings_theme import Theme, current_theme, stylesheet
+from .settings_theme import THEME_CHOICES, Theme, current_theme, stylesheet
 from .settings_widgets import (
     HotkeyButton, SettingRow, SettingsCard, SettingsComboBox, SettingsFontComboBox, ToggleSwitch,
 )
@@ -76,7 +76,7 @@ class SettingsWindow(QWidget):
         self._hotkey_applier = None
         self._hotkey_message: tuple[str, dict] = ("hotkey.help", {})
         self._cards: list[SettingsCard] = []
-        self.theme = current_theme()
+        self.theme = current_theme(self._theme_choice())
         # File pickers go through this hook so tests can answer them.
         self.choose_file = lambda title, start, file_filter: QFileDialog.getOpenFileName(
             self, title, start, file_filter)[0]
@@ -131,7 +131,8 @@ class SettingsWindow(QWidget):
         self.categories.currentRowChanged.connect(self._switch_category)
         self.categories.setCurrentRow(0)
         self.apply_theme(self.theme)
-        QGuiApplication.styleHints().colorSchemeChanged.connect(lambda _scheme: self.apply_theme(current_theme()))
+        QGuiApplication.styleHints().colorSchemeChanged.connect(
+            lambda _scheme: self.apply_theme(current_theme(self._theme_choice())))
 
     # Window behavior ---------------------------------------------------------------------------
 
@@ -161,6 +162,14 @@ class SettingsWindow(QWidget):
         for button in (self.restore_button, self.hotkey_restore_button):
             button.setIcon(line_icon("restore", theme.text))
         self._paint_category_icons(self.categories.currentRow())
+
+    def _theme_choice(self) -> str:
+        return str(self.settings.value("ui/theme", "system"))
+
+    def _set_theme(self, _index: int) -> None:
+        choice = str(self.theme_box.currentData())
+        self.settings.setValue("ui/theme", choice)
+        self.apply_theme(current_theme(choice))
 
     def _paint_category_icons(self, row: int) -> None:
         for index, (icon, _key) in enumerate(CATEGORIES):
@@ -200,6 +209,8 @@ class SettingsWindow(QWidget):
         for index, key in enumerate(("align.left", "align.center", "align.right")):
             self.alignment_box.setItemText(index, tr(key))
         self.language_box.setItemText(0, tr("language.system"))
+        for index, (_value, key) in enumerate(THEME_CHOICES):
+            self.theme_box.setItemText(index, tr(key))
         for key, fallback in (("background", DEFAULT_BACKGROUND), ("capsule", DEFAULT_CAPSULE)):
             button = self.background_button if key == "background" else self.capsule_button
             self._show_color(button, saved_color(self.settings.value(f"appearance/{key}_color", fallback), fallback))
@@ -319,6 +330,14 @@ class SettingsWindow(QWidget):
 
     def _build_appearance(self) -> QWidget:
         page, layout = self._page("category.appearance")
+        self.theme_box = SettingsComboBox()
+        for value, key in THEME_CHOICES:
+            self.theme_box.addItem(tr(key), value)
+        self.theme_box.setCurrentIndex(max(0, self.theme_box.findData(self._theme_choice())))
+        self.theme_box.currentIndexChanged.connect(self._set_theme)
+        card = self._section(layout, "section.theme")
+        self._row(card, "field.theme", "desc.theme", self._sized(self.theme_box, 220))
+
         self.font_box = SettingsFontComboBox()
         self.font_box.setCurrentFont(QFont(str(self.settings.value("appearance/font", DEFAULT_FONT))))
         self.font_box.currentFontChanged.connect(self._set_font)
@@ -449,9 +468,9 @@ class SettingsWindow(QWidget):
         hero_layout = QHBoxLayout(hero)
         hero_layout.setContentsMargins(20, 20, 20, 20)
         hero_layout.setSpacing(18)
-        icon = QLabel()
-        icon.setPixmap(app_icon().pixmap(64, 64))
-        hero_layout.addWidget(icon, 0, Qt.AlignmentFlag.AlignTop)
+        self.about_icon = QLabel()
+        self.about_icon.setPixmap(app_icon().pixmap(64, 64))
+        hero_layout.addWidget(self.about_icon, 0, Qt.AlignmentFlag.AlignVCenter)
         column = QVBoxLayout()
         column.setSpacing(3)
         self.about_name = QLabel("VoxFlow")
