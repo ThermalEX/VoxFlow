@@ -18,3 +18,51 @@
 {"id": "sug-0018", "scene": "tech", "input": "服务器又挂了，赶紧看一下。", "suggestions": [{"label": "更冷静", "text": "服务器又出现故障了，麻烦尽快排查一下。"}, {"label": "改成告警", "text": "【故障】服务器再次宕机，请值班同学尽快处理。"}]}
 {"id": "sug-0019", "scene": "email", "input": "下周二我请假，有事找小李。", "suggestions": [{"label": "更正式", "text": "下周二我请假一天，期间如有事务请联系小李，谢谢。"}, {"label": "译成英文", "text": "I'll be off next Tuesday. Please contact Xiao Li if anything comes up."}]}
 {"id": "sug-0020", "scene": "family_friends", "input": "周末一起吃饭吗？", "suggestions": [{"label": "更热情", "text": "周末有空吗？一起吃个饭呀！"}, {"label": "译成英文", "text": "Want to grab a meal this weekend?"}]}
+{"id": "sug-0021", "scene": "work_chat", "input": "这个需求我今天做不完，明天给你。", "suggestions": [{"label": "更礼貌", "text": "不好意思，这个需求今天可能做不完，明天给你可以吗？"}, {"label": "更正式", "text": "该需求预计无法于今日完成，将于明日交付。"}]}
+{"id": "sug-0022", "scene": "work_chat", "input": "周会改到周四下午了。", "suggestions": [{"label": "改成通知", "text": "【通知】本周周会调整至周四下午，请大家留意时间。"}, {"label": "译成英文", "text": "The weekly meeting has been moved to Thursday afternoon."}]}
+{"id": "sug-0023", "scene": "work_chat", "input": "谁有空帮我看一下这个问题？", "suggestions": [{"label": "更客气", "text": "请问哪位同事有空帮忙看一下这个问题？多谢！"}, {"label": "更具体", "text": "谁有空帮我看一下这个问题？我把相关信息整理好发群里。"}]}
+{"id": "sug-0024", "scene": "work_chat", "input": "辛苦大家了。", "suggestions": [{"label": "更走心", "text": "这段时间大家真的辛苦了，感谢每一位的付出！"}]}
+{"id": "sug-0025", "scene": "work_chat", "input": "我下午请假，有事打我电话。", "suggestions": [{"label": "更正式", "text": "我今天下午请假，如有紧急事务请电话联系我。"}, {"label": "译成英文", "text": "I'm taking the afternoon off. Call me if anything urgent comes up."}]}
+{"id": "sug-0026", "scene": "email", "input": "合同已经签好了，原件明天寄出。", "suggestions": [{"label": "更正式", "text": "合同已签署完毕，原件将于明日寄出，请注意查收。"}, {"label": "译成英文", "text": "The contract has been signed, and the original will be mailed tomorrow."}]}
+{"id": "sug-0027", "scene": "email", "input": "不好意思回复晚了。", "suggestions": [{"label": "更正式", "text": "抱歉回复迟了，望见谅。"}, {"label": "译成英文", "text": "Sorry for the late reply."}]}
+{"id": "sug-0028", "scene": "email", "input": "价格能不能再低一点？", "suggestions": [{"label": "更委婉", "text": "请问价格方面是否还有一定的调整空间？"}, {"label": "更商务", "text": "希望贵方能在价格上再给予一些优惠，以便我们尽快推进合作。"}]}
+{"id": "sug-0029", "scene": "email", "input": "请查收附件。", "suggestions": [{"label": "更完整", "text": "您好，相关文件已添加在附件中，请查收，如有问题请随时联系。"}]}
+{"id": "sug-0030", "scene": "family_friends", "input": "我到家了。", "suggestions": [{"label": "更贴心", "text": "我到家了，放心吧，你也早点休息。"}]}
+{"id": "sug-0031", "scene": "family_friends", "input": "妈，周末我不回去了，要加班。", "suggestions": [{"label": "更体贴", "text": "妈，这周末要加班，回不去了，你们照顾好自己。"}, {"label": "更简短", "text": "妈，周末加班，不回了。"}]}
+{"id": "sug-0032", "scene": "family_friends", "input": "你明天几点到？", "suggestions": [{"label": "更热情", "text": "你明天几点到呀？我去接你！"}, {"label": "译成英文", "text": "What time are you arriving tomorrow?"}]}
+{"id": "sug-0033", "scene": "family_friends", "input": "这周末有空吗，一起爬山？", "suggestions": [{"label": "更热情", "text": "这周末有空吗？一起去爬山吧，天气正好！"}, {"label": "给个选择", "text": "这周末有空吗？想约你爬山，周六或周日都行。"}]}
+{"id": "sug-0034", "scene": "customer_service", "input": "我买的东西坏了，怎么办？", "suggestions": [{"label": "更礼貌", "text": "您好，我收到的商品有损坏，请问应该怎么处理？"}, {"label": "更完整", "text": "您好，我收到的商品有损坏，想申请退换货，请问需要提供什么材料？"}]}
+{"id": "sug-0035", "scene": "customer_service", "input": "什么时候能发货？", "suggestions": [{"label": "更礼貌", "text": "您好，请问我的订单大概什么时候能发货？"}]}
+{"id": "sug-0036", "scene": "customer_service", "input": "你们这服务也太慢了。", "suggestions": [{"label": "更克制", "text": "处理进度有点慢，希望能尽快帮我解决，谢谢。"}, {"label": "更正式", "text": "目前的处理时效未达到预期，请尽快跟进。"}]}
+{"id": "sug-0037", "scene": "shopping", "input": "这个有别的颜色吗？", "suggestions": [{"label": "更礼貌", "text": "您好，请问这款还有其他颜色吗？"}, {"label": "译成英文", "text": "Does this come in other colors?"}]}
+{"id": "sug-0038", "scene": "shopping", "input": "帮我包起来，送人的。", "suggestions": [{"label": "更客气", "text": "麻烦帮我包装一下，是要送人的，谢谢。"}]}
+{"id": "sug-0039", "scene": "shopping", "input": "我要退这件衣服，尺码不合适。", "suggestions": [{"label": "更礼貌", "text": "您好，这件衣服尺码不太合适，想办理一下退货。"}, {"label": "改成换货", "text": "您好，这件衣服尺码不太合适，想换个尺码，可以吗？"}]}
+{"id": "sug-0040", "scene": "tech", "input": "测试环境挂了，谁动了配置？", "suggestions": [{"label": "更冷静", "text": "测试环境出问题了，最近有同学改过配置吗？麻烦看一下。"}, {"label": "译成英文", "text": "The test environment is down. Did anyone change the config?"}]}
+{"id": "sug-0041", "scene": "tech", "input": "代码我提了，帮忙review。", "suggestions": [{"label": "更客气", "text": "代码已提交，麻烦有空帮忙review一下，谢谢！"}, {"label": "译成英文", "text": "I've pushed the code. Could you review it when you have a moment?"}]}
+{"id": "sug-0042", "scene": "tech", "input": "这个接口返回太慢了。", "suggestions": [{"label": "更专业", "text": "该接口响应时间偏长，需要排查性能瓶颈。"}, {"label": "改成提问", "text": "这个接口返回比较慢，大家知道可能是什么原因吗？"}]}
+{"id": "sug-0043", "scene": "schedule", "input": "明天的会推迟到下午三点。", "suggestions": [{"label": "改成通知", "text": "【通知】明天的会议推迟至下午三点，请大家调整安排。"}, {"label": "译成英文", "text": "Tomorrow's meeting is pushed back to 3 pm."}]}
+{"id": "sug-0044", "scene": "schedule", "input": "我周三不行，换个时间吧。", "suggestions": [{"label": "更礼貌", "text": "不好意思，周三我时间上不太方便，能否换个时间？"}, {"label": "给出备选", "text": "周三我不太方便，周四或周五可以吗？"}]}
+{"id": "sug-0045", "scene": "schedule", "input": "下午见。", "suggestions": [{"label": "译成英文", "text": "See you this afternoon."}]}
+{"id": "sug-0046", "scene": "school", "input": "老师，这道题我不会。", "suggestions": [{"label": "更礼貌", "text": "老师您好，这道题我不太会，能请您讲解一下吗？"}]}
+{"id": "sug-0047", "scene": "school", "input": "小组作业谁来写结论？", "suggestions": [{"label": "更客气", "text": "小组作业的结论部分，有哪位同学愿意负责吗？"}, {"label": "给出方案", "text": "小组作业的结论部分谁来写？没人认领的话我可以先写个初稿。"}]}
+{"id": "sug-0048", "scene": "school", "input": "下周一考试，大家好好复习。", "suggestions": [{"label": "更鼓励", "text": "下周一就要考试啦，大家好好复习，一起加油！"}, {"label": "改成通知", "text": "【通知】下周一进行考试，请同学们认真复习。"}]}
+{"id": "sug-0049", "scene": "social_media", "input": "今天做了一桌菜。", "suggestions": [{"label": "更有画面感", "text": "今天亲手做了一桌菜，满满的烟火气！"}, {"label": "译成英文", "text": "Cooked a whole spread today!"}]}
+{"id": "sug-0050", "scene": "social_media", "input": "终于毕业了。", "suggestions": [{"label": "更有感触", "text": "终于毕业了！感谢这几年遇到的每一个人。"}, {"label": "译成英文", "text": "Finally graduated!"}]}
+{"id": "sug-0051", "scene": "social_media", "input": "新年快乐。", "suggestions": [{"label": "更有祝福", "text": "新年快乐！愿新的一年万事顺意、平安喜乐。"}, {"label": "译成英文", "text": "Happy New Year!"}]}
+{"id": "sug-0052", "scene": "daily", "input": "出门记得关灯。", "suggestions": [{"label": "更温和", "text": "出门的时候记得顺手关灯哦。"}]}
+{"id": "sug-0053", "scene": "daily", "input": "我晚点回来，不用等我吃饭。", "suggestions": [{"label": "更体贴", "text": "我晚点回来，你们先吃，不用等我啦。"}, {"label": "译成英文", "text": "I'll be back late, don't wait for me for dinner."}]}
+{"id": "sug-0054", "scene": "daily", "input": "快递帮我拿一下。", "suggestions": [{"label": "更客气", "text": "方便的话帮我拿一下快递，谢谢啦！"}]}
+{"id": "sug-0055", "scene": "work_chat", "input": "I'll handle it.", "suggestions": [{"label": "More detailed", "text": "I'll take care of it and keep you posted."}, {"label": "In Chinese", "text": "这个我来处理。"}]}
+{"id": "sug-0056", "scene": "email", "input": "Thanks for the quick reply.", "suggestions": [{"label": "More formal", "text": "Thank you for your prompt response."}, {"label": "In Chinese", "text": "感谢您的及时回复。"}]}
+{"id": "sug-0057", "scene": "family_friends", "input": "Miss you!", "suggestions": [{"label": "Warmer", "text": "Miss you so much! Can't wait to see you again."}, {"label": "In Chinese", "text": "想你啦！"}]}
+{"id": "sug-0058", "scene": "customer_service", "input": "My order is wrong.", "suggestions": [{"label": "More polite", "text": "Hi, it looks like there's an issue with my order. Could you help me sort it out?"}, {"label": "In Chinese", "text": "你好，我的订单有问题。"}]}
+{"id": "sug-0059", "scene": "schedule", "input": "Running late, sorry.", "suggestions": [{"label": "More detailed", "text": "Sorry, I'm running a bit late. I'll be there as soon as I can."}, {"label": "In Chinese", "text": "抱歉，我要晚一点到。"}]}
+{"id": "sug-0060", "scene": "tech", "input": "The build is broken again.", "suggestions": [{"label": "Calmer", "text": "Looks like the build is failing again. Could someone take a look?"}, {"label": "In Chinese", "text": "构建又失败了。"}]}
+{"id": "sug-0061", "scene": "social_media", "input": "Best weekend ever.", "suggestions": [{"label": "More vivid", "text": "Best weekend ever, good food, great friends, and zero alarms!"}, {"label": "In Chinese", "text": "史上最棒的周末！"}]}
+{"id": "sug-0062", "scene": "school", "input": "Can I borrow your notes?", "suggestions": [{"label": "More polite", "text": "Would you mind if I borrowed your notes? Thanks so much!"}, {"label": "In Chinese", "text": "能借一下你的笔记吗？"}]}
+{"id": "sug-0063", "scene": "work_chat", "input": "好。", "suggestions": []}
+{"id": "sug-0064", "scene": "family_friends", "input": "嗯嗯。", "suggestions": []}
+{"id": "sug-0065", "scene": "daily", "input": "OK.", "suggestions": []}
+{"id": "sug-0066", "scene": "work_chat", "input": "收到。", "suggestions": [{"label": "更完整", "text": "收到，我马上处理。"}]}
+{"id": "sug-0067", "scene": "family_friends", "input": "晚安。", "suggestions": [{"label": "更温暖", "text": "晚安，好梦～"}]}
+{"id": "sug-0068", "scene": "social_media", "input": "哈哈哈。", "suggestions": []}
