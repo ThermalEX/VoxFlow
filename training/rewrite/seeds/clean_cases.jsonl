@@ -333,3 +333,40 @@
 {"id": "edit-rep-0050", "categories": ["edit_replace"], "scene": "tech", "raw": "Use Python 3.10 for the build, bump it to 3.12.", "output": "Use Python 3.12 for the build."}
 {"id": "edit-rep-0051", "categories": ["edit_replace"], "scene": "school", "raw": "实习报告写两千字，老师说要更详细，写三千字。", "output": "实习报告写三千字。"}
 {"id": "edit-rep-0052", "categories": ["edit_replace"], "scene": "customer_service", "raw": "麻烦帮我改签到明天上午的车，上午的没票了，就下午吧。", "output": "麻烦帮我改签到明天下午的车。"}
+{"id": "tr-0011", "categories": ["instr_translate"], "scene": "work_chat", "raw": "翻译成英文，这个需求我们下周排期。", "output": "We'll schedule this requirement for next week.", "instr_position": "prefix"}
+{"id": "tr-0012", "categories": ["instr_translate"], "scene": "email", "raw": "帮我翻成英文：附件是修改后的合同，请您确认。", "output": "Attached is the revised contract. Please review and confirm.", "instr_position": "prefix"}
+{"id": "tr-0013", "categories": ["instr_translate"], "scene": "tech", "raw": "用英文说，服务器重启以后问题就解决了。", "output": "The issue was resolved after the server restarted.", "instr_position": "prefix"}
+{"id": "tr-0014", "categories": ["instr_translate"], "scene": "shopping", "raw": "英文怎么说，请问可以刷卡吗？", "output": "Can I pay by card?", "instr_position": "prefix"}
+{"id": "tr-0015", "categories": ["instr_translate"], "scene": "family_friends", "raw": "翻译成英文：生日快乐，祝你天天开心。", "output": "Happy birthday! Wishing you happiness every day.", "instr_position": "prefix"}
+{"id": "tr-0016", "categories": ["instr_translate"], "scene": "schedule", "raw": "转成英文，我们约在周四下午三点。", "output": "Let's meet on Thursday at 3 pm.", "instr_position": "prefix"}
+{"id": "tr-0017", "categories": ["instr_translate"], "scene": "school", "raw": "翻成英文，老师，我可以晚一天交作业吗？", "output": "Professor, may I submit my assignment one day late?", "instr_position": "prefix"}
+{"id": "tr-0018", "categories": ["instr_translate"], "scene": "customer_service", "raw": "译成英文：非常抱歉给您带来不便，我们会为您补发一件新的。", "output": "We sincerely apologize for the inconvenience. We'll send you a replacement.", "instr_position": "prefix"}
+{"id": "tr-0019", "categories": ["instr_translate"], "scene": "social_media", "raw": "翻译成英文，今天第一次看到了极光，太震撼了。", "output": "Saw the northern lights for the first time today. Absolutely breathtaking!", "instr_position": "prefix"}
+{"id": "tr-0020", "categories": ["instr_translate"], "scene": "daily", "raw": "用英文说一下，我在楼下等你。", "output": "I'm waiting for you downstairs.", "instr_position": "prefix"}
+{"id": "tr-0021", "categories": ["instr_translate"], "scene": "work_chat", "raw": "翻译成英文：大家辛苦了，这个版本按时上线了。", "output": "Great work, everyone. This release shipped on time.", "instr_position": "prefix"}
+{"id": "tr-0022", "categories": ["instr_translate"], "scene": "email", "raw": "帮我翻译成英文，很高兴认识您，期待后续合作。", "output": "It was a pleasure meeting you, and I look forward to working together.", "instr_position": "prefix"}
+{"id": "tr-0023", "categories": ["instr_translate"], "scene": "tech", "raw": "这个函数在并发调用时会出现死锁，翻译成英文", "output": "This function can deadlock when called concurrently.", "instr_position": "suffix"}
+{"id": "tr-0024", "categories": ["instr_translate"], "scene": "shopping", "raw": "我想退掉这件，换一件小一号的，帮我翻成英文", "output": "I'd like to return this and exchange it for one size smaller.", "instr_position": "suffix"}
+{"id": "tr-0025", "categories": ["instr_translate"], "scene": "family_friends", "raw": "我们这周末去露营，你要不要一起，翻译成英文", "output": "We're going camping this weekend. Want to join us?", "instr_position": "suffix"}
+{"id": "tr-0026", "categories": ["instr_translate"], "scene": "schedule", "raw": "航班延误了两个小时，晚上十点才能到，用英文说", "output": "My flight is delayed by two hours, so I won't arrive until 10 pm.", "instr_position": "suffix"}
+{"id": "tr-0027", "categories": ["instr_translate"], "scene": "school", "raw": "这篇论文的主要贡献是提出了一种新的数据增强方法，译成英文", "output": "The main contribution of this paper is a new data augmentation method.", "instr_position": "suffix"}
+{"id": "tr-0028", "categories": ["instr_translate"], "scene": "customer_service", "raw": "请提供一下您的订单号，我帮您查询，转成英文", "output": "Could you please provide your order number? I'll look it up for you.", "instr_position": "suffix"}
+{"id": "tr-0029", "categories": ["instr_translate"], "scene": "social_media", "raw": "终于把这本书读完了，强烈推荐，翻译成英文", "output": "Finally finished this book. Highly recommend it!", "instr_position": "suffix"}
+{"id": "tr-0030", "categories": ["instr_translate"], "scene": "daily", "raw": "外面在下雨，记得带伞，翻成英文", "output": "It's raining outside, don't forget your umbrella.", "instr_position": "suffix"}
+{"id": "tr-0031", "categories": ["instr_translate"], "scene": "work_chat", "raw": "下午两点在三楼会议室开评审会，请准时参加，帮我翻译成英文", "output": "There's a review meeting at 2 pm in the third-floor conference room. Please be on time.", "instr_position": "suffix"}
+{"id": "tr-0032", "categories": ["instr_translate"], "scene": "email", "raw": "感谢您的耐心，我们正在加急处理，英文怎么说", "output": "Thank you for your patience. We're expediting this for you.", "instr_position": "suffix"}
+{"id": "tr-0033", "categories": ["instr_translate"], "scene": "work_chat", "raw": "帮我把我今天居家办公这句翻成英文", "output": "I'm working from home today.", "instr_position": "infix"}
+{"id": "tr-0034", "categories": ["instr_translate"], "scene": "family_friends", "raw": "把晚饭做好了快回来这句话用英文说", "output": "Dinner's ready, come home soon.", "instr_position": "infix"}
+{"id": "tr-0035", "categories": ["instr_translate"], "scene": "shopping", "raw": "我想问店员这个有没有折扣，帮我把这句翻译成英文", "output": "Is there a discount on this?", "instr_position": "infix"}
+{"id": "tr-0036", "categories": ["instr_translate"], "scene": "tech", "raw": "请把代码已经合并到主分支翻成英文", "output": "The code has been merged into the main branch.", "instr_position": "infix"}
+{"id": "tr-0037", "categories": ["instr_translate"], "scene": "email", "raw": "Translate into Chinese: we have received your payment, thank you.", "output": "我们已收到您的付款，谢谢。", "instr_position": "prefix"}
+{"id": "tr-0038", "categories": ["instr_translate"], "scene": "work_chat", "raw": "In Chinese please, the deadline has been moved to next Monday.", "output": "截止日期已推迟到下周一。", "instr_position": "prefix"}
+{"id": "tr-0039", "categories": ["instr_translate"], "scene": "tech", "raw": "Say it in Chinese, the build failed because of a missing dependency.", "output": "构建失败了，原因是缺少一个依赖。", "instr_position": "prefix"}
+{"id": "tr-0040", "categories": ["instr_translate"], "scene": "social_media", "raw": "Translate to Chinese, coffee first, then everything else.", "output": "先喝咖啡，其他的再说。", "instr_position": "prefix"}
+{"id": "tr-0041", "categories": ["instr_translate"], "scene": "customer_service", "raw": "Your package will arrive between 2 and 4 pm, translate to Chinese", "output": "您的包裹将在下午2点到4点之间送达。", "instr_position": "suffix"}
+{"id": "tr-0042", "categories": ["instr_translate"], "scene": "school", "raw": "Please read chapter five before Thursday's class, in Chinese", "output": "请在周四上课前读完第五章。", "instr_position": "suffix"}
+{"id": "tr-0043", "categories": ["instr_translate"], "scene": "schedule", "raw": "The restaurant is fully booked on Friday, can we do Saturday, translate this into Chinese", "output": "周五餐厅订满了，我们改周六可以吗？", "instr_position": "suffix"}
+{"id": "tr-0044", "categories": ["instr_translate"], "scene": "daily", "raw": "Don't forget to water the plants, say that in Chinese", "output": "别忘了给植物浇水。", "instr_position": "suffix"}
+{"id": "tr-0045", "categories": ["instr_translate"], "scene": "family_friends", "raw": "把 I miss you guys so much 翻成中文", "output": "我好想你们。", "instr_position": "infix"}
+{"id": "tr-0046", "categories": ["instr_translate"], "scene": "shopping", "raw": "Translate to Chinese, is this available in other colors?", "output": "这个还有其他颜色吗？", "instr_position": "prefix"}
+{"id": "tr-0047", "categories": ["instr_translate"], "scene": "work_chat", "raw": "Thanks for jumping on this so quickly, translate into Chinese", "output": "谢谢你这么快就处理了这件事。", "instr_position": "suffix"}
