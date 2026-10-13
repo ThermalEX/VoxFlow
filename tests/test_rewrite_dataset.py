@@ -123,3 +123,59 @@ def test_suggestion_errors():
 def test_duplicate_ids_across_files():
     assert schema.duplicate_ids([clean_case()], [suggestion()]) == []
     assert schema.duplicate_ids([clean_case()], [suggestion(id="edit-del-0001")]) == ["edit-del-0001"]
+
+
+import random
+
+from training.rewrite import augment
+
+
+def test_chinese_fillers_are_inserted_at_clause_starts():
+    rng = random.Random(1)
+    noisy = augment.inject_fillers("我明天请个假，下午的会帮我请个假。", rng)
+    assert noisy is not None and noisy != "我明天请个假，下午的会帮我请个假。"
+    assert any(filler + "，" in noisy for filler in augment.ZH_FILLERS)
+    assert noisy.replace("，", "").replace("。", "").endswith("下午的会帮我请个假")
+
+
+def test_english_text_gets_english_fillers_on_word_boundaries():
+    for seed in range(20):
+        noisy = augment.inject_fillers("I will send it today, after the meeting.", random.Random(seed))
+        assert noisy is not None
+        assert not any(filler in noisy for filler in augment.ZH_FILLERS)
+        words = noisy.replace(",", " ").replace(".", " ").lower().split()
+        original = {"i", "will", "send", "it", "today", "after", "the", "meeting"}
+        fillers = {word for filler in augment.EN_FILLERS for word in filler.split()}
+        assert set(words) <= original | fillers
+
+
+def test_repetition_doubles_a_clause_start():
+    noisy = augment.inject_repetition("我觉得这个方案可以。", random.Random(3))
+    assert noisy is not None
+    assert noisy.startswith("我我") or noisy.startswith("我觉我觉") or noisy.startswith("我我我")
+    assert augment.inject_repetition("Sounds good.", random.Random(3)).lower().startswith("sounds sounds")
+
+
+def test_correction_needs_a_weekday_or_time():
+    rng = random.Random(5)
+    noisy = augment.inject_correction("周六下午三点开会。", rng)
+    assert noisy is not None
+    assert any(marker in noisy for marker in augment.ZH_CORRECTION_MARKERS)
+    assert noisy.endswith("开会。")
+    assert augment.inject_correction("我们改天再聊吧。", rng) is None
+    english = augment.inject_correction("Let's meet on Friday.", random.Random(2))
+    assert english is not None and english.endswith("Friday.")
+    assert any(marker in english for marker in augment.EN_CORRECTION_MARKERS)
+
+
+def test_augment_never_returns_the_clean_text():
+    for text in ("好的。", "我们改天再聊吧。", "周六下午三点开会，记得带电脑。", "OK.", "第一，买菜\n第二，做饭"):
+        for seed in range(30):
+            for noisy, applied in augment.augment_text(text, random.Random(seed)):
+                assert noisy != text
+                assert applied and set(applied) <= {"filler", "repetition", "immediate_correction"}
+
+
+def test_augment_is_deterministic():
+    text = "周六下午三点开会，记得带电脑。"
+    assert augment.augment_text(text, random.Random(9)) == augment.augment_text(text, random.Random(9))
