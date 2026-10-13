@@ -28,3 +28,16 @@ def test_resolve_uses_explicit_choice_or_system(monkeypatch):
 def test_unknown_key_fails_loudly():
     with pytest.raises(KeyError):
         i18n.tr("no.such.key")
+
+
+def test_qt_dialogs_follow_the_interface_language():
+    from PySide6.QtCore import QCoreApplication
+    from PySide6.QtWidgets import QApplication
+
+    QApplication.instance() or QApplication([])
+    try:
+        assert i18n.apply_qt_language("zh")
+        assert QCoreApplication.translate("QPlatformTheme", "Cancel") == "取消"
+    finally:
+        i18n.apply_qt_language("en")
+    assert QCoreApplication.translate("QPlatformTheme", "Cancel") == "Cancel"

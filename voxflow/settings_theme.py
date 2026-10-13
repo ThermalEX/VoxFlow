@@ -89,5 +89,12 @@ def stylesheet(theme: Theme) -> str:
         QScrollBar:vertical {{ background: transparent; width: 8px; margin: 2px; }}
         QScrollBar::handle:vertical {{ background: {t.border}; border-radius: 3px; min-height: 30px; }}
         QScrollBar::add-line:vertical, QScrollBar::sub-line:vertical {{ height: 0; }}
+        QColorDialog {{ background: {t.window}; }}
+        QColorDialog QSpinBox, QColorDialog QLineEdit {{ padding: 3px 8px; min-height: 20px; }}
+        QColorDialog QSpinBox::up-button, QColorDialog QSpinBox::down-button {{ width: 0; border: none; }}
+        QColorDialog QPushButton {{ background: {t.field}; color: {t.text}; border: 1px solid {t.border};
+            border-radius: 8px; padding: 6px 18px; min-width: 64px; }}
+        QColorDialog QPushButton:hover {{ background: {t.hover}; }}
+        QColorDialog QPushButton:default {{ background: {t.accent}; color: #FFFFFF; border-color: {t.accent}; }}
         QToolTip {{ background: {t.popup}; color: {t.text}; border: 1px solid {t.border}; padding: 4px 6px; }}
     """

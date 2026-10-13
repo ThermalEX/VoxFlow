@@ -2,7 +2,7 @@
 
 import os
 
-from PySide6.QtCore import QLocale
+from PySide6.QtCore import QCoreApplication, QLibraryInfo, QLocale, QTranslator
 
 LANGUAGE_CHOICES = (("system", None), ("en", "English"), ("zh", "简体中文"))
 _current = "en"
@@ -190,10 +190,34 @@ def resolve(choice: str) -> str:
 def set_language(code: str) -> None:
     global _current
     _current = "zh" if code == "zh" else "en"
+    apply_qt_language(_current)
 
 
 def language() -> str:
     return _current
+
+
+_qt_translator: QTranslator | None = None
+
+
+def apply_qt_language(code: str) -> bool:
+    """Translate Qt's own dialogs (color picker, OK/Cancel) to match the interface language."""
+    global _qt_translator
+    app = QCoreApplication.instance()
+    if app is None:
+        return False
+    if _qt_translator is not None:
+        app.removeTranslator(_qt_translator)
+        _qt_translator = None
+    if code != "zh":
+        return False
+    translator = QTranslator(app)
+    folder = QLibraryInfo.path(QLibraryInfo.LibraryPath.TranslationsPath)
+    if not translator.load("qtbase_zh_CN", folder):
+        return False
+    app.installTranslator(translator)
+    _qt_translator = translator
+    return True
 
 
 def tr(key: str, **values) -> str:

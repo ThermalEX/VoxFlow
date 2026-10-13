@@ -48,3 +48,9 @@ def test_card_hides_dividers_next_to_hidden_rows():
     rows[0].hide()
     card.refresh()
     assert [divider.isVisibleTo(card) for divider in card.dividers] == [False, False]
+
+
+def test_color_dialog_controls_match_the_theme():
+    sheet = settings_theme.stylesheet(settings_theme.DARK)
+    assert "QColorDialog QSpinBox::up-button" in sheet
+    assert "QColorDialog QPushButton:default" in sheet
