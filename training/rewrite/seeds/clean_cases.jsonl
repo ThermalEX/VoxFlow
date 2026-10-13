@@ -771,3 +771,59 @@
 {"id": "neg-instr-0045", "categories": ["neg_instruction_like"], "scene": "email", "raw": "Our team will translate the manual by Friday", "output": "Our team will translate the manual by Friday."}
 {"id": "neg-cs-0041", "categories": ["neg_code_switch"], "scene": "work_chat", "raw": "这个KPI定得有点高", "output": "这个KPI定得有点高。"}
 {"id": "neg-cs-0042", "categories": ["neg_code_switch"], "scene": "tech", "raw": "这个bug在iOS上能复现，Android上不行", "output": "这个bug在iOS上能复现，Android上不行。"}
+{"id": "filler-0011", "categories": ["filler"], "scene": "work_chat", "raw": "就是说，那个，咱们这个项目呢，嗯，其实进度还是可以的，然后就是，测试那边可能还需要两天。", "output": "咱们这个项目进度还是可以的，测试那边可能还需要两天。"}
+{"id": "filler-0012", "categories": ["filler"], "scene": "family_friends", "raw": "怎么说呢，嗯，我觉得吧，周末还是在家休息比较好。", "output": "我觉得周末还是在家休息比较好。"}
+{"id": "filler-0013", "categories": ["filler"], "scene": "tech", "raw": "额，相当于就是，我们把这个，呃，缓存层加上之后，响应时间降了一半。", "output": "我们把缓存层加上之后，响应时间降了一半。"}
+{"id": "filler-0014", "categories": ["filler"], "scene": "school", "raw": "然后，嗯，这个实验呢，就是，我们做了三次，结果都差不多。", "output": "这个实验我们做了三次，结果都差不多。"}
+{"id": "filler-0015", "categories": ["filler"], "scene": "customer_service", "raw": "就是，你好啊，那个，我想问一下，额，你们几点下班。", "output": "你好，我想问一下你们几点下班。"}
+{"id": "filler-0016", "categories": ["filler"], "scene": "shopping", "raw": "嗯，那个，老板，就是这个，这个榴莲，呃，帮我挑个熟一点的。", "output": "老板，这个榴莲帮我挑个熟一点的。"}
+{"id": "filler-0017", "categories": ["filler"], "scene": "schedule", "raw": "呃，那个，下周，就是下周二吧，我们，嗯，约个时间聊一下。", "output": "下周二吧，我们约个时间聊一下。"}
+{"id": "filler-0018", "categories": ["filler"], "scene": "social_media", "raw": "啊，今天，嗯，就是终于见到了偶像，那个，太激动了。", "output": "今天终于见到了偶像，太激动了。"}
+{"id": "filler-0019", "categories": ["filler"], "scene": "email", "raw": "嗯，王总您好，那个，关于合同的事情，就是，我们这边没问题了。", "output": "王总您好，关于合同的事情，我们这边没问题了。"}
+{"id": "filler-0020", "categories": ["filler"], "scene": "daily", "raw": "那个，你，你知道吧，就是楼下那家面馆，嗯，关门了。", "output": "楼下那家面馆关门了。"}
+{"id": "filler-0021", "categories": ["filler"], "scene": "work_chat", "raw": "对，然后呢，额，这个需求我们，就是下周再看。", "output": "这个需求我们下周再看。"}
+{"id": "filler-0022", "categories": ["filler"], "scene": "family_friends", "raw": "反正，嗯，你到了就给我打电话啊。", "output": "你到了就给我打电话。"}
+{"id": "filler-0023", "categories": ["filler"], "scene": "tech", "raw": "嗯嗯，那个，日志我看了，呃，没有报错。", "output": "日志我看了，没有报错。"}
+{"id": "filler-0024", "categories": ["filler"], "scene": "shopping", "raw": "额，就是，这个奶粉，那个，有没有大罐的呢。", "output": "这个奶粉有没有大罐的呢？"}
+{"id": "filler-0025", "categories": ["filler"], "scene": "school", "raw": "嗯，老师，就是，那个，我想换个座位。", "output": "老师，我想换个座位。"}
+{"id": "filler-0026", "categories": ["filler"], "scene": "work_chat", "raw": "So, um, basically the launch is, like, pushed to next week.", "output": "The launch is pushed to next week."}
+{"id": "filler-0027", "categories": ["filler"], "scene": "family_friends", "raw": "Uh, I mean, we could, you know, just order pizza tonight.", "output": "We could just order pizza tonight."}
+{"id": "filler-0028", "categories": ["filler"], "scene": "tech", "raw": "Um, so, the API is, uh, returning a 500 error.", "output": "The API is returning a 500 error."}
+{"id": "filler-0029", "categories": ["filler"], "scene": "email", "raw": "Hi, um, I was, like, wondering if you had time to, uh, review the draft.", "output": "Hi, I was wondering if you had time to review the draft."}
+{"id": "filler-0030", "categories": ["filler"], "scene": "social_media", "raw": "Okay so, like, this cafe is, you know, literally the cutest place ever.", "output": "This cafe is literally the cutest place ever."}
+{"id": "filler-0031", "categories": ["filler"], "scene": "schedule", "raw": "Um, can we, uh, maybe do Thursday instead?", "output": "Can we maybe do Thursday instead?"}
+{"id": "filler-0032", "categories": ["filler"], "scene": "customer_service", "raw": "Uh, hi, so, my package, um, never arrived.", "output": "Hi, my package never arrived."}
+{"id": "filler-0033", "categories": ["filler"], "scene": "shopping", "raw": "So, uh, do you, like, have this in a medium?", "output": "Do you have this in a medium?"}
+{"id": "filler-0034", "categories": ["filler"], "scene": "school", "raw": "Um, professor, I, uh, have a question about the homework.", "output": "Professor, I have a question about the homework."}
+{"id": "filler-0035", "categories": ["filler"], "scene": "daily", "raw": "Like, can you, um, grab the mail on your way in?", "output": "Can you grab the mail on your way in?"}
+{"id": "filler-0036", "categories": ["filler"], "scene": "tech", "raw": "那个，这个PR，额，我已经approve了，然后，你merge一下。", "output": "这个PR我已经approve了，你merge一下。"}
+{"id": "filler-0037", "categories": ["filler"], "scene": "work_chat", "raw": "嗯，就是那个deadline，呃，可能要往后推。", "output": "那个deadline可能要往后推。"}
+{"id": "filler-0038", "categories": ["filler"], "scene": "social_media", "raw": "额，今天的outfit，就是，还挺满意的。", "output": "今天的outfit还挺满意的。"}
+{"id": "rep-0011", "categories": ["repetition"], "scene": "work_chat", "raw": "我们我们先把需求过一遍，再再排期。", "output": "我们先把需求过一遍，再排期。"}
+{"id": "rep-0012", "categories": ["repetition"], "scene": "tech", "raw": "这个这个这个函数有问题，返回值返回值不对。", "output": "这个函数有问题，返回值不对。"}
+{"id": "rep-0013", "categories": ["repetition"], "scene": "family_friends", "raw": "你你你怎么又又忘带钥匙了。", "output": "你怎么又忘带钥匙了。"}
+{"id": "rep-0014", "categories": ["repetition"], "scene": "school", "raw": "老师老师，我我能出去一下吗？", "output": "老师，我能出去一下吗？"}
+{"id": "rep-0015", "categories": ["repetition"], "scene": "customer_service", "raw": "我的我的快递显示显示已签收，但是我没收到。", "output": "我的快递显示已签收，但是我没收到。"}
+{"id": "rep-0016", "categories": ["repetition"], "scene": "shopping", "raw": "这个这个多少钱，太太贵了。", "output": "这个多少钱，太贵了。"}
+{"id": "rep-0017", "categories": ["repetition"], "scene": "schedule", "raw": "明天明天下午我我有个会。", "output": "明天下午我有个会。"}
+{"id": "rep-0018", "categories": ["repetition"], "scene": "social_media", "raw": "今天今天是我们我们结婚五周年。", "output": "今天是我们结婚五周年。"}
+{"id": "rep-0019", "categories": ["repetition"], "scene": "email", "raw": "We we need to to finalize the budget by Friday.", "output": "We need to finalize the budget by Friday."}
+{"id": "rep-0020", "categories": ["repetition"], "scene": "daily", "raw": "Can can you you turn down the music?", "output": "Can you turn down the music?"}
+{"id": "rep-0021", "categories": ["filler", "repetition"], "scene": "work_chat", "raw": "额，我我觉得，那个，这个这个方案还可以再改改。", "output": "我觉得这个方案还可以再改改。"}
+{"id": "rep-0022", "categories": ["filler", "repetition"], "scene": "family_friends", "raw": "嗯，妈妈妈，就是，我我周末回去。", "output": "妈，我周末回去。"}
+{"id": "rep-0023", "categories": ["filler", "repetition"], "scene": "tech", "raw": "呃，服务服务器，那个，又又挂了。", "output": "服务器又挂了。"}
+{"id": "rep-0024", "categories": ["filler", "repetition"], "scene": "customer_service", "raw": "那个，我我想，额，退退款。", "output": "我想退款。"}
+{"id": "rep-0025", "categories": ["filler", "repetition"], "scene": "school", "raw": "Um, I I think the the answer is, uh, B.", "output": "I think the answer is B."}
+{"id": "rep-0026", "categories": ["filler", "repetition"], "scene": "social_media", "raw": "啊，太太太好看了，就是，这个这个电影。", "output": "这个电影太好看了。"}
+{"id": "rep-0027", "categories": ["filler", "repetition"], "scene": "shopping", "raw": "嗯，我要我要，那个，两两杯奶茶。", "output": "我要两杯奶茶。"}
+{"id": "rep-0028", "categories": ["filler", "repetition"], "scene": "schedule", "raw": "So, um, the the meeting is is at 3.", "output": "The meeting is at 3."}
+{"id": "rep-0029", "categories": ["filler", "repetition"], "scene": "daily", "raw": "额，你你，就是，记得记得关门。", "output": "你记得关门。"}
+{"id": "rep-0030", "categories": ["filler", "repetition"], "scene": "email", "raw": "嗯，附件附件是，那个，最新的最新的报价。", "output": "附件是最新的报价。"}
+{"id": "rep-0031", "categories": ["filler", "repetition"], "scene": "work_chat", "raw": "那个，大家大家，额，明天早点到。", "output": "大家明天早点到。"}
+{"id": "rep-0032", "categories": ["filler", "repetition"], "scene": "family_friends", "raw": "呃，你你吃了吗，就是，晚饭。", "output": "你晚饭吃了吗？"}
+{"id": "neg-clean-0059", "categories": ["neg_clean"], "scene": "work_chat", "raw": "然后我们就决定改用新方案了", "output": "然后我们就决定改用新方案了。"}
+{"id": "neg-clean-0060", "categories": ["neg_clean"], "scene": "family_friends", "raw": "好的，我知道了，马上下来", "output": "好的，我知道了，马上下来。"}
+{"id": "neg-clean-0061", "categories": ["neg_clean"], "scene": "school", "raw": "就是因为没复习，所以才没考好", "output": "就是因为没复习，所以才没考好。"}
+{"id": "neg-clean-0062", "categories": ["neg_clean"], "scene": "social_media", "raw": "Like this post if you agree", "output": "Like this post if you agree."}
+{"id": "neg-instr-0046", "categories": ["neg_instruction_like"], "scene": "customer_service", "raw": "你们的说明书能不能写得简洁一点", "output": "你们的说明书能不能写得简洁一点？"}
+{"id": "neg-cs-0043", "categories": ["neg_code_switch"], "scene": "daily", "raw": "我把WiFi密码贴在冰箱上了", "output": "我把WiFi密码贴在冰箱上了。"}
