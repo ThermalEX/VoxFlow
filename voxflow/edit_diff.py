@@ -61,3 +61,13 @@ def same_text(first: str, second: str) -> bool:
         return "".join(ch for ch in text if not ch.isspace() and not unicodedata.category(ch).startswith("P"))
 
     return key(first) == key(second)
+
+
+def join_continuation(prefix: str, addition: str) -> str:
+    """Append newly dictated text: Chinese joins directly, text after Latin script gets a space."""
+    prefix, addition = prefix.rstrip(), addition.strip()
+    if not addition:
+        return prefix
+    if not prefix:
+        return addition
+    return prefix + (" " if prefix[-1].isascii() else "") + addition

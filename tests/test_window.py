@@ -190,7 +190,8 @@ def test_result_height_tracks_text_lines_and_edited_content(tmp_path):
     window._result_animation.setCurrentTime(260)
     app.processEvents()
     short_height = window.height()
-    assert short_height == window_module.COMPACT_HEIGHT
+    assert window.smart.continue_button.isVisibleTo(window)
+    assert short_height == window_module.COMPACT_HEIGHT + window._edit_bar_height()
 
     window.transcript.setPlainText("First line\nSecond line\nThird line")
     window._result_animation.setCurrentTime(260)

@@ -82,6 +82,9 @@ class SmartEditor(QObject):
         bar_layout.setContentsMargins(0, 0, 0, 0)
         bar_layout.setSpacing(8)
         bar_layout.addStretch(1)
+        self.continue_button = PillButton(tr("button.continue"))
+        self.continue_button.clicked.connect(lambda: self.window.continue_recording())
+        bar_layout.addWidget(self.continue_button)
         self.undo_button = PillButton(tr("button.undo_edits"))
         self.undo_button.hovered.connect(self._preview_other_version)
         self.undo_button.clicked.connect(self._toggle_undo)
@@ -158,6 +161,7 @@ class SmartEditor(QObject):
         return ("model.ready", {}) if self.server.ready() else ("model.starting", {})
 
     def retranslate(self) -> None:
+        self.continue_button.setText(tr("button.continue"))
         self.undo_button.setText(tr("button.restore_edits" if self.showing_original else "button.undo_edits"))
 
     def shutdown(self) -> None:
@@ -173,6 +177,7 @@ class SmartEditor(QObject):
         self.reset()
         self.session = session
         self.original_text = self.edited_text = text
+        self._sync_bar()
         if not self.active:
             return
         if self.ready():
@@ -346,7 +351,10 @@ class SmartEditor(QObject):
                 button.show()
             else:
                 button.hide()
-        visible = show_undo or any(not button.isHidden() for button in self.suggestion_buttons)
+        show_continue = (self.session is not None and self.window.mode == "result"
+                         and self.animation.state() != QVariantAnimation.State.Running)
+        self.continue_button.setVisible(show_continue)
+        visible = show_continue or show_undo or any(not button.isHidden() for button in self.suggestion_buttons)
         if visible != (not self.bar.isHidden()):
             self.bar.setVisible(visible)
             if self.window.mode == "result":

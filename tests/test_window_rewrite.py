@@ -148,7 +148,7 @@ def test_rewrite_failure_keeps_original(tmp_path):
     window.apply_transcript("final", ORIGINAL)
     settle(app, window, lambda: "unavailable" in window.status_label.text())
     assert window.transcript.toPlainText() == ORIGINAL
-    assert not window.smart.bar.isVisibleTo(window)
+    assert not window.smart.undo_button.isVisibleTo(window)
     window.confirm_button.click()
     assert output.calls == [ORIGINAL]
     window.close()
@@ -192,7 +192,7 @@ def test_disabled_smart_editing_changes_nothing(tmp_path):
         app.processEvents()
     assert client.calls == []
     assert window.transcript.toPlainText() == ORIGINAL
-    assert not window.smart.bar.isVisibleTo(window)
+    assert not window.smart.undo_button.isVisibleTo(window)
     window.close()
 
 
@@ -404,4 +404,55 @@ def test_switching_language_updates_overlay_and_settings(tmp_path):
     settings.language_box.setCurrentIndex(settings.language_box.findData("en"))
     assert window.smart.undo_button.text() == "Undo edits"
     assert settings.categories.item(2).text() == "Smart editing"
+    window.close()
+
+
+def test_continue_appends_to_the_current_text_and_polishes_the_whole(tmp_path):
+    client = FakeClient(clean="你好，我叫李四。")
+    app, window, _output = make_window(tmp_path, client)
+    window.apply_transcript("final", "你好，我叫王不是我叫李四")
+    animation = window.smart.animation
+    settle(app, window, lambda: animation.state() == animation.State.Running)
+    animation.setCurrentTime(animation.duration())
+    app.processEvents()
+    assert window.smart.continue_button.isVisibleTo(window)
+    started = []
+    window._start_recording = lambda continuation=False: started.append(continuation)
+    window.smart.continue_button.click()
+    assert started == [True]
+    window._set_mode("recording")
+    window.apply_transcript("partial", "他叫王五")
+    assert window.transcript.toPlainText() == "你好，我叫李四。他叫王五"
+    client.clean_result = "Hello, my name is Si Li. His name is Wu Wang."
+    window.apply_transcript("final", "他叫王五，翻译成英文")
+    settle(app, window, lambda: animation.state() == animation.State.Running)
+    assert client.calls[-1] == ("clean", "你好，我叫李四。他叫王五，翻译成英文")
+    animation.setCurrentTime(animation.duration())
+    app.processEvents()
+    assert window.transcript.toPlainText() == "Hello, my name is Si Li. His name is Wu Wang."
+    window.smart.undo_button.click()
+    assert window.transcript.toPlainText() == "你好，我叫李四。他叫王五，翻译成英文"
+    window.close()
+
+
+def test_continue_with_nothing_new_keeps_the_text(tmp_path):
+    app, window, _output = make_window(tmp_path, FakeClient(), enabled=False)
+    window.apply_transcript("final", "已经写好的一句话。")
+    window._start_recording = lambda continuation=False: None
+    window.continue_recording()
+    window._set_mode("recording")
+    window.apply_transcript("final", "")
+    assert window.transcript.toPlainText() == "已经写好的一句话。"
+    window.close()
+
+
+def test_continue_is_offered_even_without_smart_editing(tmp_path):
+    app, window, _output = make_window(tmp_path, FakeClient(), enabled=False)
+    window.apply_transcript("final", ORIGINAL)
+    assert window.smart.continue_button.isVisibleTo(window)
+    assert not window.smart.undo_button.isVisibleTo(window)
+    window.hide_overlay()
+    window.reveal()
+    assert not window.smart.continue_button.isVisibleTo(window)
+    assert window._continuation == ""
     window.close()

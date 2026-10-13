@@ -21,6 +21,7 @@ from PySide6.QtWidgets import (
 )
 
 from .audio import AudioBuffer
+from .edit_diff import join_continuation
 from .i18n import resolve, set_language, tr
 from .appearance import DEFAULT_BACKGROUND, DEFAULT_CAPSULE, DEFAULT_FONT, DEFAULT_TEXT_SIZE, saved_color, tint
 from .input_target import WindowsPasteTarget
@@ -51,6 +52,7 @@ class VoxFlowWindow(QWidget):
         migrate_settings(self.settings)
         self._status: tuple[str, dict, str] = ("status.loading", {}, "")
         self._record_text_key = "button.start_recording"
+        self._continuation = ""  # text already on screen that a "continue" recording appends to
         self.text_output = text_output if text_output is not None else WindowsPasteTarget()
         self.audio = AudioBuffer(max_seconds=MAX_RECORDING_SECONDS)
         self._recording_serial = 0
@@ -584,6 +586,7 @@ class VoxFlowWindow(QWidget):
         # Closing the overlay drops the current recording and transcript; a late ASR result is
         # ignored because the scheduler that would accept it is gone.
         self.smart.reset()
+        self._continuation = ""
         if self.stream is not None:
             self.stream.stop()
             self.stream.close()
@@ -681,7 +684,17 @@ class VoxFlowWindow(QWidget):
         else:
             self._start_recording()
 
-    def _start_recording(self) -> None:
+    def continue_recording(self) -> None:
+        """Dictate more after the current text; a second press stops, like the record button."""
+        if self.stream is not None:
+            self._stop_recording()
+            return
+        self._continuation = self.smart.current_text().strip() if self.mode == "result" else ""
+        self._start_recording(continuation=bool(self._continuation))
+
+    def _start_recording(self, continuation: bool = False) -> None:
+        if not continuation:
+            self._continuation = ""
         if not self.model_ready or self.device_box.currentData() is None:
             return
         if self.result_future is not None or (self.scheduler and self.scheduler.state == "finalizing"):
@@ -699,7 +712,10 @@ class VoxFlowWindow(QWidget):
             self.capture_warning = ""
             self.limit_reached = False
             self.transcript.setReadOnly(True)
-            self.transcript.clear()
+            if continuation:
+                self.transcript.setPlainText(self._continuation)
+            else:
+                self.transcript.clear()
             self.confirm_button.setEnabled(False)
             self.device_box.setEnabled(False)
             self.capsule.reset()
@@ -714,8 +730,9 @@ class VoxFlowWindow(QWidget):
             self._recording_serial += 1
             self._set_mode("recording")
             self._set_record_text("button.stop_recording")
-            self.show_status("status.listening")
+            self.show_status("status.continuing" if continuation else "status.listening")
         except Exception as exc:
+            self._continuation = ""
             if self.stream is not None:
                 self.stream.close()
                 self.stream = None
@@ -820,6 +837,13 @@ class VoxFlowWindow(QWidget):
     def apply_transcript(self, kind: str, text: str) -> None:
         if kind not in {"partial", "final"}:
             raise ValueError(f"Unknown transcript kind: {kind}")
+        continuation = self._continuation
+        if kind == "final":
+            self._continuation = ""
+        if continuation and text.strip():
+            text = join_continuation(continuation, text)
+        elif continuation and kind == "final":
+            text = self.transcript.toPlainText().strip() or continuation  # nothing new was said
         recovered_draft = kind == "final" and not text.strip() and bool(self.transcript.toPlainText().strip())
         if recovered_draft:
             text = self.transcript.toPlainText()

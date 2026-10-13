@@ -16,6 +16,7 @@ STRINGS: dict[str, tuple[str, str]] = {
                            "缺少语音模型，请运行：python scripts/download_model.py"),
     "status.asr_start_failed": ("Could not start recognition: {error}", "无法启动识别：{error}"),
     "status.listening": ("Listening · live transcription", "正在聆听 · 实时转写"),
+    "status.continuing": ("Listening · continuing your text", "正在聆听 · 接着已有文字继续"),
     "status.mic_start_failed": ("Could not start microphone: {error}", "无法启动麦克风：{error}"),
     "status.finalizing": ("Finalizing transcript…", "正在生成最终文字…"),
     "status.too_short": ("Recording was too short. Try again.", "录音太短，请再试一次。"),
@@ -40,6 +41,7 @@ STRINGS: dict[str, tuple[str, str]] = {
     "status.suggestion_applied": ("Suggestion applied · Undo edits returns to the original",
                                   "已采用建议 · “撤回修改”可回到原文"),
     # Overlay buttons and tooltips
+    "button.continue": ("Continue", "继续说"),
     "button.undo_edits": ("Undo edits", "撤回修改"),
     "button.restore_edits": ("Restore edits", "恢复修改"),
     "button.start_recording": ("Start recording", "开始录音"),

@@ -42,3 +42,12 @@ def test_same_text_ignores_punctuation_space_and_case():
     assert edit_diff.same_text("我明天请个假", "我明天请个假。")
     assert edit_diff.same_text("See you", "see you!")
     assert not edit_diff.same_text("额，我请假", "我请假")
+
+
+def test_continuation_joins_chinese_directly_and_english_with_a_space():
+    assert edit_diff.join_continuation("你好，我叫李四。", "他叫王五") == "你好，我叫李四。他叫王五"
+    assert edit_diff.join_continuation("我叫李四", "他叫王五") == "我叫李四他叫王五"
+    assert edit_diff.join_continuation("Hello, I'm Si Li.", "his name is Wu Wang") == "Hello, I'm Si Li. his name is Wu Wang"
+    assert edit_diff.join_continuation("我在开会", "PR 晚点看") == "我在开会PR 晚点看"
+    assert edit_diff.join_continuation("", "新的一句") == "新的一句"
+    assert edit_diff.join_continuation("已有文字", "  ") == "已有文字"
