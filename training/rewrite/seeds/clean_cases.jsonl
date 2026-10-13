@@ -827,3 +827,34 @@
 {"id": "neg-clean-0062", "categories": ["neg_clean"], "scene": "social_media", "raw": "Like this post if you agree", "output": "Like this post if you agree."}
 {"id": "neg-instr-0046", "categories": ["neg_instruction_like"], "scene": "customer_service", "raw": "你们的说明书能不能写得简洁一点", "output": "你们的说明书能不能写得简洁一点？"}
 {"id": "neg-cs-0043", "categories": ["neg_code_switch"], "scene": "daily", "raw": "我把WiFi密码贴在冰箱上了", "output": "我把WiFi密码贴在冰箱上了。"}
+{"id": "tr-0122", "categories": ["instr_translate"], "scene": "daily", "raw": "你好我叫王书涵，翻译成英文", "output": "Hello, my name is Shuhan Wang.", "instr_position": "suffix"}
+{"id": "tr-0123", "categories": ["instr_translate"], "scene": "work_chat", "raw": "翻译成英文：大家好，我是新来的产品经理李明。", "output": "Hi everyone, I'm Ming Li, the new product manager.", "instr_position": "prefix"}
+{"id": "tr-0124", "categories": ["instr_translate"], "scene": "email", "raw": "这份合同请交给张伟签字，翻成英文", "output": "Please have Wei Zhang sign this contract.", "instr_position": "suffix"}
+{"id": "tr-0125", "categories": ["instr_translate"], "scene": "school", "raw": "用英文说，我们的导师是陈晓梅教授。", "output": "Our advisor is Professor Xiaomei Chen.", "instr_position": "prefix"}
+{"id": "tr-0126", "categories": ["instr_translate"], "scene": "family_friends", "raw": "这是我妹妹刘思琪，翻译成英文", "output": "This is my sister, Siqi Liu.", "instr_position": "suffix"}
+{"id": "tr-0127", "categories": ["instr_translate"], "scene": "customer_service", "raw": "翻译成英文，您好，我是客服周婷，很高兴为您服务。", "output": "Hello, I'm Ting Zhou from customer service. Happy to help.", "instr_position": "prefix"}
+{"id": "tr-0128", "categories": ["instr_translate"], "scene": "social_media", "raw": "恭喜我的好朋友赵子豪拿到冠军，翻成英文", "output": "Congrats to my good friend Zihao Zhao on winning the championship!", "instr_position": "suffix"}
+{"id": "tr-0129", "categories": ["instr_translate"], "scene": "email", "raw": "翻译成英文：此致，敬礼，黄嘉怡", "output": "Best regards,\nJiayi Huang", "instr_position": "prefix"}
+{"id": "tr-0130", "categories": ["instr_translate"], "scene": "tech", "raw": "这个模块是孙浩写的，有问题找他，翻译成英文", "output": "Hao Sun wrote this module, so ask him if you have questions.", "instr_position": "suffix"}
+{"id": "tr-0131", "categories": ["instr_translate"], "scene": "schedule", "raw": "用英文说，下午三点和杨雨轩开会。", "output": "Meeting with Yuxuan Yang at 3 pm.", "instr_position": "prefix"}
+{"id": "tr-0132", "categories": ["instr_translate"], "scene": "work_chat", "raw": "翻成英文，欧阳娜娜下周加入我们团队。", "output": "Nana Ouyang is joining our team next week.", "instr_position": "prefix"}
+{"id": "tr-0133", "categories": ["instr_translate"], "scene": "email", "raw": "我是来自北京的林志远，翻译成英文", "output": "I'm Zhiyuan Lin from Beijing.", "instr_position": "suffix"}
+{"id": "tr-0134", "categories": ["instr_translate"], "scene": "school", "raw": "翻译成英文：这篇论文的作者是何静和吴磊。", "output": "The authors of this paper are Jing He and Lei Wu.", "instr_position": "prefix"}
+{"id": "tr-0135", "categories": ["instr_translate"], "scene": "family_friends", "raw": "我爸叫王建国，我妈叫李秀英，翻成英文", "output": "My dad is Jianguo Wang and my mom is Xiuying Li.", "instr_position": "suffix"}
+{"id": "tr-0136", "categories": ["instr_translate"], "scene": "customer_service", "raw": "翻译成英文，快递员郭强会在下午送货。", "output": "The courier, Qiang Guo, will deliver this afternoon.", "instr_position": "prefix"}
+{"id": "tr-0137", "categories": ["instr_translate"], "scene": "social_media", "raw": "今天碰到了老同学吴佳琪，翻译成英文", "output": "Ran into my old classmate Jiaqi Wu today!", "instr_position": "suffix"}
+{"id": "tr-0138", "categories": ["instr_translate"], "scene": "work_chat", "raw": "把我是王书涵，负责这个项目翻译成英文", "output": "I'm Shuhan Wang, and I'm in charge of this project.", "instr_position": "infix"}
+{"id": "tr-0139", "categories": ["instr_translate"], "scene": "email", "raw": "翻译成英文：请联系我们的销售经理马丽，电话见附件。", "output": "Please contact our sales manager, Li Ma. Her phone number is in the attachment.", "instr_position": "prefix"}
+{"id": "tr-0140", "categories": ["instr_translate"], "scene": "schedule", "raw": "明天上午九点面试候选人徐子涵，翻成英文", "output": "Interviewing candidate Zihan Xu tomorrow at 9 am.", "instr_position": "suffix"}
+{"id": "tr-0141", "categories": ["instr_translate"], "scene": "tech", "raw": "用英文说，代码审查由郑凯负责。", "output": "Kai Zheng is responsible for code review.", "instr_position": "prefix"}
+{"id": "tr-0142", "categories": ["instr_translate"], "scene": "work_chat", "raw": "这个问题问一下小李，翻译成英文", "output": "Ask Xiao Li about this.", "instr_position": "suffix"}
+{"id": "tr-0143", "categories": ["instr_translate"], "scene": "family_friends", "raw": "翻译成英文：老王周末请我们吃饭。", "output": "Lao Wang is treating us to dinner this weekend.", "instr_position": "prefix"}
+{"id": "tr-0144", "categories": ["instr_translate"], "scene": "email", "raw": "王总明天到上海，翻成英文", "output": "Mr. Wang will arrive in Shanghai tomorrow.", "instr_position": "suffix"}
+{"id": "tr-0145", "categories": ["instr_translate"], "scene": "school", "raw": "翻译成英文，张老师让我们周五交作业。", "output": "Teacher Zhang asked us to hand in the homework on Friday.", "instr_position": "prefix"}
+{"id": "tr-0146", "categories": ["instr_translate"], "scene": "work_chat", "raw": "陈经理和小刘都同意了，翻成英文", "output": "Manager Chen and Xiao Liu both agreed.", "instr_position": "suffix"}
+{"id": "tr-0147", "categories": ["instr_translate", "filler"], "scene": "work_chat", "raw": "额，翻译成英文，那个，我叫王书涵，是设计师。", "output": "My name is Shuhan Wang, and I'm a designer.", "instr_position": "prefix"}
+{"id": "combo-0043", "categories": ["instr_combo", "immediate_correction"], "scene": "email", "raw": "请转交给李明，不对，李敏，翻译成英文", "output": "Please pass this on to Min Li.", "instr_position": "suffix"}
+{"id": "combo-0044", "categories": ["instr_combo", "edit_replace"], "scene": "work_chat", "raw": "明天由张伟主持会议，张伟换成刘洋，翻成英文", "output": "Yang Liu will host tomorrow's meeting.", "instr_position": "suffix"}
+{"id": "combo-0045", "categories": ["instr_combo"], "scene": "email", "raw": "翻译成英文，正式一点，我是王书涵，想咨询一下合作的事。", "output": "My name is Shuhan Wang, and I would like to inquire about a potential collaboration.", "instr_position": "prefix"}
+{"id": "neg-clean-0063", "categories": ["neg_clean"], "scene": "daily", "raw": "你好我叫王书涵", "output": "你好，我叫王书涵。"}
+{"id": "neg-cs-0044", "categories": ["neg_code_switch"], "scene": "work_chat", "raw": "这个PR是Shuhan Wang提的", "output": "这个PR是Shuhan Wang提的。"}

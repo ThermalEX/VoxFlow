@@ -399,3 +399,11 @@
 {"id": "sug-0399", "scene": "daily", "input": "Movie tonight?", "suggestions": [{"label": "More complete", "text": "Want to watch a movie tonight?"}, {"label": "In Chinese", "text": "今晚看电影吗？"}]}
 {"id": "sug-0400", "scene": "work_chat", "input": "我请假这几天，有事找小王。", "suggestions": [{"label": "改成交接", "text": "我休假期间，工作事项请联系小王，谢谢！"}, {"label": "译成英文", "text": "While I'm on leave, please reach out to Xiao Wang."}]}
 {"id": "sug-0401", "scene": "daily", "input": "好嘞。", "suggestions": []}
+{"id": "sug-0402", "scene": "daily", "input": "你好，我叫王书涵。", "suggestions": [{"label": "译成英文", "text": "Hello, my name is Shuhan Wang."}, {"label": "更正式", "text": "您好，我是王书涵。"}]}
+{"id": "sug-0403", "scene": "work_chat", "input": "大家好，我是新同事李明。", "suggestions": [{"label": "更热情", "text": "大家好！我是新同事李明，以后请多多关照！"}, {"label": "译成英文", "text": "Hi everyone, I'm Ming Li, the new team member."}]}
+{"id": "sug-0404", "scene": "email", "input": "附件是张伟整理的会议纪要。", "suggestions": [{"label": "更正式", "text": "附件为张伟整理的会议纪要，请查收。"}, {"label": "译成英文", "text": "Attached are the meeting notes prepared by Wei Zhang."}]}
+{"id": "sug-0405", "scene": "school", "input": "我的导师是陈晓梅老师。", "suggestions": [{"label": "译成英文", "text": "My advisor is Professor Xiaomei Chen."}]}
+{"id": "sug-0406", "scene": "social_media", "input": "生日快乐，刘思琪！", "suggestions": [{"label": "更温暖", "text": "生日快乐，刘思琪！愿你每天都开开心心！"}, {"label": "译成英文", "text": "Happy birthday, Siqi Liu!"}]}
+{"id": "sug-0407", "scene": "customer_service", "input": "您好，我是客服周婷。", "suggestions": [{"label": "更亲切", "text": "您好～我是客服周婷，很高兴为您服务！"}, {"label": "译成英文", "text": "Hello, I'm Ting Zhou from customer service."}]}
+{"id": "sug-0408", "scene": "work_chat", "input": "这个问题找小李。", "suggestions": [{"label": "更客气", "text": "这个问题可以麻烦小李看一下。"}, {"label": "译成英文", "text": "Ask Xiao Li about this."}]}
+{"id": "sug-0409", "scene": "email", "input": "欧阳娜娜下周一入职。", "suggestions": [{"label": "改成通知", "text": "【入职通知】欧阳娜娜将于下周一入职。"}, {"label": "译成英文", "text": "Nana Ouyang starts next Monday."}]}
