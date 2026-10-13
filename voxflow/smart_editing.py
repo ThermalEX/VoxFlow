@@ -1,0 +1,305 @@
+"""Polish final transcripts with the rewrite model: one edit animation, undo with hover preview, suggestions."""
+
+import html
+from concurrent.futures import Future, ThreadPoolExecutor
+from pathlib import Path
+
+from PySide6.QtCore import QEasingCurve, QObject, QVariantAnimation
+from PySide6.QtWidgets import QHBoxLayout, QWidget
+
+from .edit_diff import frame_html, same_text
+from .local_server import LocalRewriteServer
+from .overlay_widgets import PillButton
+from .rewriter import LOCAL_ENDPOINT, RewriteClient, RewriteConfig, RewriteError
+
+REPO_ROOT = Path(__file__).resolve().parents[1]
+EDIT_ANIMATION_MS = 800
+MAX_SUGGESTIONS = 3
+TEXT_RGB = (243, 247, 255)
+REMOVED_RGB = (150, 162, 180)
+ADDED_RGB = (150, 200, 255)
+PREVIEW_COLOR = "#9AA6B6"
+SERVER_FIELDS = ("provider", "wsl_distro", "environment", "adapter")
+
+
+def default_server_factory(config: RewriteConfig) -> LocalRewriteServer:
+    command = LocalRewriteServer.wsl_command(REPO_ROOT, config.wsl_distro, config.environment, config.adapter)
+    return LocalRewriteServer(command, LOCAL_ENDPOINT + "/models", REPO_ROOT / "training" / "rewrite" / "runs" / "serve.log")
+
+
+class SmartEditor(QObject):
+    def __init__(self, window, client=None, server_factory=None) -> None:
+        super().__init__(window)
+        self.window = window
+        self.transcript = window.transcript
+        self._fixed_client = client
+        # Tests inject a client without a server; the app uses the WSL server for the local provider.
+        self._server_factory = server_factory if server_factory is not None else (
+            None if client is not None else default_server_factory)
+        self.executor = ThreadPoolExecutor(max_workers=1, thread_name_prefix="rewrite")
+        self.config = RewriteConfig()
+        self.client = None
+        self.server = None
+        self.future: Future | None = None
+        self._future_kind = ""
+        self._future_session = None
+        self.session = None
+        self.original_text = ""
+        self.edited_text = ""
+        self.showing_original = False
+        self._waiting = False
+        self._user_edited = False
+        self._hover_text: str | None = None
+        self._programmatic = False
+        self._suggestions: list[dict] = []
+
+        self.animation = QVariantAnimation(self)
+        self.animation.setDuration(EDIT_ANIMATION_MS)
+        self.animation.setStartValue(0.0)
+        self.animation.setEndValue(1.0)
+        self.animation.setEasingCurve(QEasingCurve.Type.InOutCubic)
+        self.animation.valueChanged.connect(self._render_frame)
+        self.animation.finished.connect(self._finish_animation)
+
+        self.bar = QWidget()
+        bar_layout = QHBoxLayout(self.bar)
+        bar_layout.setContentsMargins(0, 0, 0, 0)
+        bar_layout.setSpacing(8)
+        bar_layout.addStretch(1)
+        self.undo_button = PillButton("Undo edits")
+        self.undo_button.hovered.connect(self._preview_other_version)
+        self.undo_button.clicked.connect(self._toggle_undo)
+        bar_layout.addWidget(self.undo_button)
+        self.suggestion_buttons = []
+        for index in range(MAX_SUGGESTIONS):
+            button = PillButton()
+            button.clicked.connect(lambda _checked=False, i=index: self._apply_suggestion(i))
+            bar_layout.addWidget(button)
+            self.suggestion_buttons.append(button)
+        bar_layout.addStretch(1)
+        self.bar.hide()
+        self.transcript.textChanged.connect(self._on_text_changed)
+        self.reload()
+
+    # Configuration ---------------------------------------------------------------------------
+
+    @property
+    def active(self) -> bool:
+        return self.config.enabled and self.client is not None
+
+    def reload(self) -> None:
+        config = RewriteConfig.from_settings(self.window.settings)
+        if config == self.config and (self.client is not None or not config.enabled):
+            return
+        previous, self.config = self.config, config
+        server_changed = any(getattr(previous, name) != getattr(config, name) for name in SERVER_FIELDS)
+        if self.server is not None and (not config.enabled or server_changed):
+            self.server.stop()
+            self.server = None
+        if not config.enabled:
+            self.client = None
+            return
+        self.client = self._fixed_client or RewriteClient(config.base_url, config.model_name, config.api_key)
+        if config.provider == "local" and self.server is None and self._server_factory is not None:
+            self.server = self._server_factory(config)
+            self.server.start()
+
+    def ready(self) -> bool:
+        return self.active and (self.server is None or self.server.ready())
+
+    def test_connection(self, config: RewriteConfig) -> str:
+        if config.provider == "local" and self.server is not None and not self.server.ready():
+            raise RewriteError(self.server.failed or "the local model is still starting")
+        return RewriteClient(config.base_url, config.model_name, config.api_key).check()
+
+    def shutdown(self) -> None:
+        self.animation.stop()
+        self.executor.shutdown(wait=False, cancel_futures=True)
+        if self.server is not None:
+            self.server.stop()
+            self.server = None
+
+    # Session flow ----------------------------------------------------------------------------
+
+    def begin(self, text: str, session: int) -> None:
+        self.reset()
+        self.session = session
+        self.original_text = self.edited_text = text
+        if not self.active:
+            return
+        if self.ready():
+            self._submit("clean", text)
+        elif self.server is not None and self.server.failed:
+            self._set_status(f"{self.server.failed} · kept the original")
+        else:
+            self._waiting = True
+            self._set_status("Waiting for the local model · you can confirm the original now")
+
+    def reset(self) -> None:
+        self.animation.stop()
+        self.session = None
+        self._waiting = False
+        self._user_edited = False
+        self._hover_text = None
+        self.showing_original = False
+        self._suggestions = []
+        self.undo_button.setText("Undo edits")
+        self._sync_bar()
+
+    def _submit(self, kind: str, text: str) -> None:
+        call = self.client.clean if kind == "clean" else self.client.suggest
+        self.future = self.executor.submit(call, text)
+        self._future_kind = kind
+        self._future_session = self.session
+        if kind == "clean":
+            self._set_status("Polishing…")
+
+    def _still_current(self) -> bool:
+        return (self.session is not None and not self._user_edited and self.window.mode == "result")
+
+    def poll(self) -> None:
+        if self._waiting and self.session is not None:
+            if self.server is not None and self.server.failed:
+                self._waiting = False
+                self._set_status(f"{self.server.failed} · kept the original")
+            elif self.ready() and self._still_current():
+                self._waiting = False
+                self._submit("clean", self.original_text)
+        if self.future is None or not self.future.done():
+            return
+        future, kind, session = self.future, self._future_kind, self._future_session
+        self.future = None
+        if session != self.session or not self._still_current():
+            return
+        try:
+            result = future.result()
+        except Exception as exc:  # any backend failure keeps the original text
+            if kind == "clean":
+                detail = str(exc) if isinstance(exc, RewriteError) else type(exc).__name__
+                self._set_status(f"Smart editing unavailable · kept the original ({detail})")
+            return
+        if kind == "clean":
+            self._apply_clean(result)
+        else:
+            self._show_suggestions(result)
+
+    def _apply_clean(self, cleaned: str) -> None:
+        if self.transcript.toPlainText() != self.original_text:
+            return
+        if same_text(cleaned, self.original_text):
+            self._set_status("Transcript ready · no edits needed")
+            self._submit("suggest", self.original_text)
+            return
+        self.edited_text = cleaned
+        self.transcript.setReadOnly(True)
+        self.animation.start()
+
+    def _render_frame(self, value) -> None:
+        if self.animation.state() != QVariantAnimation.State.Running:
+            return
+        self._set_html(frame_html(self.original_text, self.edited_text, float(value), TEXT_RGB, REMOVED_RGB, ADDED_RGB))
+
+    def _finish_animation(self) -> None:
+        self._set_plain(self.edited_text)
+        self.transcript.setReadOnly(False)
+        self._sync_bar()
+        self.window._expand_for_result()
+        self._set_status("Polished · hover Undo edits to see the original")
+        self._submit("suggest", self.edited_text)
+
+    def _show_suggestions(self, suggestions: list[dict]) -> None:
+        self._suggestions = [item for item in suggestions if not same_text(item["text"], self.edited_text)]
+        self._suggestions = self._suggestions[:MAX_SUGGESTIONS]
+        self._sync_bar()
+
+    # Undo, preview and suggestions ------------------------------------------------------------
+
+    def _other_version(self) -> str:
+        return self.edited_text if self.showing_original else self.original_text
+
+    def _preview_other_version(self, hovering: bool) -> None:
+        if hovering and self._hover_text is None and self.undo_button.isVisible():
+            self._hover_text = self.transcript.toPlainText()
+            self.transcript.setReadOnly(True)
+            self._set_html(f'<div style="white-space: pre-wrap; color: {PREVIEW_COLOR};">'
+                           f"{html.escape(self._other_version())}</div>")
+        elif not hovering and self._hover_text is not None:
+            self._end_preview(self._hover_text)
+
+    def _end_preview(self, text: str) -> None:
+        self._hover_text = None
+        self._set_plain(text)
+        self.transcript.setReadOnly(False)
+
+    def _toggle_undo(self) -> None:
+        target = self._other_version()
+        self.showing_original = not self.showing_original
+        self.undo_button.setText("Restore edits" if self.showing_original else "Undo edits")
+        self._end_preview(target)
+        self.window._expand_for_result()
+
+    def _apply_suggestion(self, index: int) -> None:
+        if index >= len(self._suggestions):
+            return
+        self.edited_text = self._suggestions[index]["text"]
+        self.showing_original = False
+        self.undo_button.setText("Undo edits")
+        self._end_preview(self.edited_text)
+        self._sync_bar()
+        self._set_status("Suggestion applied · Undo edits returns to the original")
+        self.window._expand_for_result()
+
+    def current_text(self) -> str:
+        return self._hover_text if self._hover_text is not None else self.transcript.toPlainText()
+
+    def _on_text_changed(self) -> None:
+        if self._programmatic or self.session is None:
+            return
+        self._user_edited = True
+        self._waiting = False
+        if self.bar.isVisible():
+            self._suggestions = []
+            self.edited_text = self.original_text
+            self._sync_bar()
+
+    # Helpers ----------------------------------------------------------------------------------
+
+    def _sync_bar(self) -> None:
+        show_undo = (self.session is not None and not self._user_edited
+                     and self.animation.state() != QVariantAnimation.State.Running
+                     and not same_text(self.edited_text, self.original_text))
+        self.undo_button.setVisible(show_undo)
+        for index, button in enumerate(self.suggestion_buttons):
+            if index < len(self._suggestions) and self.session is not None and not self._user_edited:
+                button.setText(self._suggestions[index]["label"])
+                button.setToolTip(self._suggestions[index]["text"])
+                button.show()
+            else:
+                button.hide()
+        visible = show_undo or any(not button.isHidden() for button in self.suggestion_buttons)
+        if visible != (not self.bar.isHidden()):
+            self.bar.setVisible(visible)
+            if self.window.mode == "result":
+                self.window._expand_for_result()
+
+    def bar_height(self) -> int:
+        return 0 if self.bar.isHidden() else self.bar.sizeHint().height() + 10
+
+    def _set_status(self, text: str) -> None:
+        self.window.status_label.setText(text)
+
+    def _set_plain(self, text: str) -> None:
+        self._programmatic = True
+        try:
+            self.transcript.setPlainText(text)
+            self.window.set_transcript_alignment(self.window.transcript_alignment, persist=False)
+        finally:
+            self._programmatic = False
+
+    def _set_html(self, markup: str) -> None:
+        self._programmatic = True
+        try:
+            self.transcript.setHtml(markup)
+            self.window.set_transcript_alignment(self.window.transcript_alignment, persist=False)
+        finally:
+            self._programmatic = False

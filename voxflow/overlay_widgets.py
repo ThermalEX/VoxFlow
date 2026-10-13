@@ -2,7 +2,7 @@
 
 import math
 
-from PySide6.QtCore import QPointF, QRectF, Qt
+from PySide6.QtCore import QPointF, QRectF, Qt, Signal
 from PySide6.QtGui import QColor, QLinearGradient, QPainter, QPainterPath, QPen
 from PySide6.QtWidgets import QPushButton
 
@@ -160,3 +160,27 @@ class CircleIconButton(QPushButton):
             painter.drawRoundedRect(QRectF(17, 18, 20, 18), 4, 4)
             painter.drawLine(22, 41, 32, 41)
             painter.drawLine(27, 36, 27, 41)
+
+
+class PillButton(QPushButton):
+    """Compact rounded text button for the edit bar; reports hover so callers can preview."""
+
+    hovered = Signal(bool)
+
+    def __init__(self, text: str = "", parent=None) -> None:
+        super().__init__(text, parent)
+        self.setCursor(Qt.CursorShape.PointingHandCursor)
+        self.setFixedHeight(32)
+        self.setStyleSheet(
+            "QPushButton { background: rgba(29, 33, 43, 205); color: #EEF4FF; font-size: 13px;"
+            " border: 1px solid rgba(206, 225, 244, 46); border-radius: 16px; padding: 0 14px; }"
+            "QPushButton:hover { background: rgba(48, 58, 76, 230); }"
+        )
+
+    def enterEvent(self, event) -> None:
+        super().enterEvent(event)
+        self.hovered.emit(True)
+
+    def leaveEvent(self, event) -> None:
+        super().leaveEvent(event)
+        self.hovered.emit(False)

@@ -2,6 +2,7 @@
 
 import html
 import re
+import unicodedata
 from difflib import SequenceMatcher
 
 LARGE_CHANGE_SIMILARITY = 0.5
@@ -52,3 +53,11 @@ def frame_html(old: str, new: str, progress: float, text_rgb, removed_rgb, added
                 parts.append(_span(text, added_rgb, progress))
         body = "".join(parts)
     return f'<div style="white-space: pre-wrap;">{body}</div>'
+
+
+def same_text(first: str, second: str) -> bool:
+    def key(text: str) -> str:
+        text = unicodedata.normalize("NFKC", text).casefold()
+        return "".join(ch for ch in text if not ch.isspace() and not unicodedata.category(ch).startswith("P"))
+
+    return key(first) == key(second)

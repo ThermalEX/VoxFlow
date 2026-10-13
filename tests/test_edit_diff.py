@@ -36,3 +36,9 @@ def test_rewrite_frames_crossfade_and_escape_html():
 def test_frames_keep_line_breaks():
     html = edit_diff.frame_html("待办，第一，开会", "待办：\n1. 开会", 1.0, WHITE, GRAY, BLUE)
     assert "pre-wrap" in html and "\n" in html
+
+
+def test_same_text_ignores_punctuation_space_and_case():
+    assert edit_diff.same_text("我明天请个假", "我明天请个假。")
+    assert edit_diff.same_text("See you", "see you!")
+    assert not edit_diff.same_text("额，我请假", "我请假")

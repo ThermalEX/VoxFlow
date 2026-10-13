@@ -28,6 +28,7 @@ from .particles import ParticleField
 from .recognizer import initialize_worker, transcribe_in_worker, worker_ready
 from .scheduler import RecognitionJob, RecognitionScheduler
 from .settings_window import SettingsWindow
+from .smart_editing import SmartEditor
 from .ui_icons import app_icon
 
 
@@ -39,7 +40,8 @@ COMPACT_HEIGHT = 310
 
 class VoxFlowWindow(QWidget):
     def __init__(self, model_dir: str | Path, start_worker: bool = True,
-                 settings: QSettings | None = None, text_output: WindowsPasteTarget | None = None) -> None:
+                 settings: QSettings | None = None, text_output: WindowsPasteTarget | None = None,
+                 rewrite_client=None, local_server_factory=None) -> None:
         super().__init__()
         self.model_dir = Path(model_dir)
         self.settings = settings if settings is not None else QSettings("VoxFlow", "VoxFlow")
@@ -83,6 +85,10 @@ class VoxFlowWindow(QWidget):
         self.settings_window.text_size_changed.connect(lambda _size: self._apply_transcript_font())
         self.settings_window.background_color_changed.connect(self._set_background_color)
         self.settings_window.capsule_color_changed.connect(self.capsule.set_accent_color)
+        self.smart = SmartEditor(self, client=rewrite_client, server_factory=local_server_factory)
+        self.edit_bar_slot.addWidget(self.smart.bar)
+        self.settings_window.rewrite_changed.connect(self.smart.reload)
+        self.settings_window.set_rewrite_tester(self.smart.test_connection)
         self._apply_transcript_font()
         self._set_background_color(saved_color(self.settings.value("appearance/background_color", DEFAULT_BACKGROUND), DEFAULT_BACKGROUND))
         self.capsule.set_accent_color(saved_color(self.settings.value("appearance/capsule_color", DEFAULT_CAPSULE), DEFAULT_CAPSULE))
@@ -146,6 +152,9 @@ class VoxFlowWindow(QWidget):
         self.set_transcript_alignment(self.transcript_alignment)
         layout.addWidget(self.transcript)
         layout.setAlignment(self.transcript, Qt.AlignmentFlag.AlignHCenter)
+        self.edit_bar_slot = QVBoxLayout()
+        self.edit_bar_slot.setContentsMargins(0, 4, 0, 0)
+        layout.addLayout(self.edit_bar_slot)
         layout.addSpacing(18)
 
         controls = QHBoxLayout()
@@ -460,8 +469,12 @@ class VoxFlowWindow(QWidget):
         if self.height() != COMPACT_HEIGHT:
             self._set_overlay_height(COMPACT_HEIGHT)
 
+    def _edit_bar_height(self) -> int:
+        smart = getattr(self, "smart", None)
+        return smart.bar_height() if smart is not None else 0
+
     def _set_overlay_height(self, height: int) -> None:
-        self.transcript.setFixedHeight(max(24, 82 + height - COMPACT_HEIGHT))
+        self.transcript.setFixedHeight(max(24, 82 + height - COMPACT_HEIGHT - self._edit_bar_height()))
         self.setFixedHeight(height)
         self.particles.resize(self.width(), self.height())
         self._edge_mask = None
@@ -474,14 +487,12 @@ class VoxFlowWindow(QWidget):
         max_height = available_height // 2
         self.transcript.document().setTextWidth(max(200, self.transcript.viewport().width()))
         text_height = math.ceil(self.transcript.document().size().height()) + 24
-        target_height = min(max_height, COMPACT_HEIGHT + max(0, text_height - 82))
+        target_height = min(max_height, COMPACT_HEIGHT + max(0, text_height - 82) + self._edit_bar_height())
         if (self._result_animation.state() == QVariantAnimation.State.Running
                 and round(self._result_animation.endValue()) == target_height):
             return
         self._result_animation.stop()
-        if self.height() == target_height:
-            return
-        if not self.isVisible():
+        if self.height() == target_height or not self.isVisible():
             self._set_overlay_height(target_height)
             return
         self._result_animation.setDuration(260)
@@ -533,6 +544,7 @@ class VoxFlowWindow(QWidget):
     def _discard_session(self) -> None:
         # Closing the overlay drops the current recording and transcript; a late ASR result is
         # ignored because the scheduler that would accept it is gone.
+        self.smart.reset()
         if self.stream is not None:
             self.stream.stop()
             self.stream.close()
@@ -644,6 +656,7 @@ class VoxFlowWindow(QWidget):
             self.audio.start(sample_rate)
             self.scheduler = RecognitionScheduler(sample_rate)
             self.scheduler.start()
+            self.smart.reset()
             self.capture_warning = ""
             self.limit_reached = False
             self.transcript.setReadOnly(True)
@@ -763,6 +776,7 @@ class VoxFlowWindow(QWidget):
                     self._recording_serial,
                     job.kind == "final",
                 )
+        self.smart.poll()
 
     def apply_transcript(self, kind: str, text: str) -> None:
         if kind not in {"partial", "final"}:
@@ -800,12 +814,14 @@ class VoxFlowWindow(QWidget):
             self.record_button.setEnabled(self.model_ready)
             self.capsule.setEnabled(self.model_ready)
             self.confirm_button.setEnabled(bool(text.strip()))
+            if text.strip():
+                self.smart.begin(text, self._recording_serial)
         else:
             self._set_mode("recording")
             self.status_label.setText("Listening · draft may change")
 
     def _confirm_text(self) -> None:
-        text = self.transcript.toPlainText()
+        text = self.smart.current_text()
         if not text.strip():
             return
         if self.text_output.paste(text):
@@ -827,4 +843,5 @@ class VoxFlowWindow(QWidget):
             self.stream = None
         if self.executor is not None:
             self.executor.shutdown(wait=False, cancel_futures=True)
+        self.smart.shutdown()
         super().closeEvent(event)
