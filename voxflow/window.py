@@ -95,6 +95,7 @@ class VoxFlowWindow(QWidget):
         self.edit_bar_slot.addWidget(self.smart.bar)
         self.settings_window.rewrite_changed.connect(self.smart.reload)
         self.settings_window.set_rewrite_tester(self.smart.test_connection)
+        self.settings_window.set_model_lister(self.smart.list_models)
         self.settings_window.language_changed.connect(lambda _choice: self.retranslate())
         self._apply_transcript_font()
         self._set_background_color(saved_color(self.settings.value("appearance/background_color", DEFAULT_BACKGROUND), DEFAULT_BACKGROUND))

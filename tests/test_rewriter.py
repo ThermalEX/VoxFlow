@@ -194,3 +194,7 @@ def test_old_default_off_is_switched_on_once(tmp_path, monkeypatch):
     rewriter.RewriteConfig(enabled=False).save(settings)
     rewriter.migrate_settings(settings)
     assert not rewriter.RewriteConfig.from_settings(settings).enabled
+
+
+def test_list_models_returns_every_id(endpoint):
+    assert rewriter.RewriteClient(endpoint.base_url, "m").list_models() == ["voxflow-rewrite"]

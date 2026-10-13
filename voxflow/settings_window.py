@@ -1,77 +1,42 @@
-"""Standalone, light settings window for VoxFlow."""
+"""VoxFlow settings: sidebar navigation and pages of grouped rows, following the system light/dark scheme."""
 
-from PySide6.QtCore import QEasingCurve, QPropertyAnimation, QSettings, QSize, Qt, Signal, QVariantAnimation
-from PySide6.QtGui import QColor, QFont, QIcon, QPainter, QPixmap
+from pathlib import Path
+
+from PySide6.QtCore import QEasingCurve, QPropertyAnimation, QSettings, QSize, Qt, Signal
+from PySide6.QtGui import QColor, QFont, QGuiApplication, QIcon, QPainter, QPixmap
 from PySide6.QtWidgets import (
-    QAbstractSpinBox, QApplication, QCheckBox, QComboBox, QColorDialog, QFontComboBox, QFrame,
-    QGraphicsOpacityEffect, QHBoxLayout, QLabel, QLineEdit, QListWidget, QListWidgetItem,
-    QPushButton, QSpinBox, QStackedWidget, QVBoxLayout, QWidget,
+    QAbstractSpinBox, QApplication, QColorDialog, QFileDialog, QFrame, QGraphicsOpacityEffect, QHBoxLayout,
+    QLabel, QLineEdit, QListWidget, QListWidgetItem, QPushButton, QScrollArea, QSpinBox, QStackedWidget,
+    QVBoxLayout, QWidget,
 )
 
 from .appearance import DEFAULT_BACKGROUND, DEFAULT_CAPSULE, DEFAULT_FONT, DEFAULT_TEXT_SIZE, saved_color
 from .i18n import LANGUAGE_CHOICES, describe_error, resolve, set_language, tr
+from .model_catalog import LocalModel, describe as describe_model, discover_models, quant_of
 from .rewriter import RewriteConfig
-from .ui_icons import app_icon, line_icon, symbol_pixmap
+from .settings_theme import Theme, current_theme, stylesheet
+from .settings_widgets import SettingRow, SettingsCard, SettingsComboBox, SettingsFontComboBox, ToggleSwitch
+from .ui_icons import app_icon, line_icon
+
+REPO_ROOT = Path(__file__).resolve().parents[1]
+BROWSE = "__browse__"
+CATEGORIES = (("settings", "category.general"), ("personalize", "category.appearance"), ("smart", "category.smart"))
 
 
-class _Chevron(QWidget):
-    def __init__(self, parent: QWidget) -> None:
-        super().__init__(parent)
-        self.setFixedSize(18, 18)
-        self.setAttribute(Qt.WidgetAttribute.WA_TransparentForMouseEvents)
-        self.angle = 0.0
-        self._symbol = symbol_pixmap("keyboard_arrow_down", 18, "#56677A")
-
-    def set_angle(self, angle: float) -> None:
-        self.angle = angle
-        self.update()
-
-    def paintEvent(self, _event) -> None:
-        painter = QPainter(self)
-        painter.setRenderHint(QPainter.RenderHint.Antialiasing)
-        painter.translate(9, 9)
-        painter.rotate(self.angle)
-        painter.drawPixmap(-9, -9, self._symbol)
-        painter.end()
+def _repo_relative(path: str | Path) -> str:
+    resolved = Path(path).expanduser().resolve()
+    try:
+        return resolved.relative_to(REPO_ROOT).as_posix()
+    except ValueError:
+        return str(resolved)
 
 
-class _AnimatedCombo:
-    """Keep a consistent chevron while retaining Qt's keyboard and popup behavior."""
+def _same_path(first: str, second: str) -> bool:
+    def absolute(value: str) -> Path:
+        path = Path(value).expanduser()
+        return (path if path.is_absolute() else REPO_ROOT / path).resolve()
 
-    def __init__(self, *args, **kwargs) -> None:
-        super().__init__(*args, **kwargs)
-        self.chevron = _Chevron(self)
-        self._chevron_animation = QVariantAnimation(self)
-        self._chevron_animation.setDuration(150)
-        self._chevron_animation.setEasingCurve(QEasingCurve.Type.OutCubic)
-        self._chevron_animation.valueChanged.connect(self.chevron.set_angle)
-
-    def resizeEvent(self, event) -> None:
-        super().resizeEvent(event)
-        self.chevron.move(self.width() - 33, (self.height() - self.chevron.height()) // 2)
-        self.chevron.raise_()
-
-    def _rotate_chevron(self, angle: float) -> None:
-        self._chevron_animation.stop()
-        self._chevron_animation.setStartValue(self.chevron.angle)
-        self._chevron_animation.setEndValue(angle)
-        self._chevron_animation.start()
-
-    def showPopup(self) -> None:
-        super().showPopup()
-        self._rotate_chevron(180.0)
-
-    def hidePopup(self) -> None:
-        super().hidePopup()
-        self._rotate_chevron(0.0)
-
-
-class SettingsComboBox(_AnimatedCombo, QComboBox):
-    pass
-
-
-class SettingsFontComboBox(_AnimatedCombo, QFontComboBox):
-    pass
+    return bool(first) and bool(second) and absolute(first) == absolute(second)
 
 
 class SettingsWindow(QWidget):
@@ -89,81 +54,39 @@ class SettingsWindow(QWidget):
         self._texts: list[tuple] = []
         self._model_status: tuple[str, dict] | None = None
         self._test_result: tuple[str, dict] | None = None
+        self._rewrite_tester = None
+        self._model_lister = None
+        self._cards: list[SettingsCard] = []
+        self.theme = current_theme()
+        # File pickers go through this hook so tests can answer them.
+        self.choose_file = lambda title, start, file_filter: QFileDialog.getOpenFileName(
+            self, title, start, file_filter)[0]
         set_language(resolve(str(self.settings.value("ui/language", "system"))))
         self._bind(self.setWindowTitle, "settings.title")
         self.setWindowIcon(app_icon())
-        self.setMinimumSize(700, 560)
-        self.resize(760, 590)
+        self.setMinimumSize(780, 600)
+        self.resize(880, 660)
         self.setObjectName("settingsWindow")
-        self.setStyleSheet("""
-            QWidget#settingsWindow { background: #FFFFFF; color: #20242B; font-family: 'Segoe UI'; }
-            QFrame#sidebar { background: #F6F8FB; border-radius: 15px; }
-            QLabel { color: #20242B; font-size: 14px; background: transparent; }
-            QLabel#brand { font-size: 15px; font-weight: 650; color: #172B48; }
-            QLabel#eyebrow { color: #8693A3; font-size: 10px; font-weight: 600; }
-            QLabel#pageTitle { font-size: 24px; font-weight: 650; }
-            QLabel#description { color: #66717D; font-size: 13px; }
-            QLabel#fieldTitle { font-weight: 600; }
-            QListWidget { background: transparent; border: none;
-                          color: #3B4652; font-size: 14px; outline: none; }
-            QListWidget::item { padding: 12px 10px; margin: 3px 0; border-radius: 9px; }
-            QListWidget::item:selected { background: #E2ECFA; color: #153B75; }
-            QListWidget::item:hover:!selected { background: #ECF1F7; }
-            QComboBox, QFontComboBox, QSpinBox { background: #FFFFFF; color: #20242B;
-                border: 1px solid #CFD6DF; border-radius: 9px; padding: 6px 42px 6px 12px;
-                min-height: 29px; }
-            QComboBox:hover, QFontComboBox:hover, QSpinBox:hover { border-color: #9BAFC8; }
-            QComboBox:focus, QFontComboBox:focus, QSpinBox:focus { border: 2px solid #5C87C7; }
-            QComboBox::drop-down, QFontComboBox::drop-down { width: 34px; border: none;
-                background: transparent; }
-            QComboBox::down-arrow, QFontComboBox::down-arrow { image: none; width: 0px; height: 0px; }
-            QComboBox QAbstractItemView { background: #FFFFFF; color: #20242B;
-                border: 1px solid #CFD6DF; selection-background-color: #E2ECFA;
-                selection-color: #153B75; outline: none; }
-            QPushButton#colorButton { background: #FFFFFF; color: #20242B;
-                border: 1px solid #CFD6DF; border-radius: 9px; padding: 7px 12px;
-                text-align: left; min-height: 30px; }
-            QPushButton#colorButton:hover { background: #F3F6FA; }
-            QPushButton#resetButton { background: #FFFFFF; color: #2A5083;
-                border: 1px solid #CFD6DF; border-radius: 8px; padding: 8px 14px; }
-            QPushButton#resetButton:hover { background: #F3F6FA; }
-            QLineEdit { background: #FFFFFF; color: #20242B; border: 1px solid #CFD6DF;
-                border-radius: 9px; padding: 6px 12px; min-height: 29px; }
-            QLineEdit:hover { border-color: #9BAFC8; }
-            QLineEdit:focus { border: 2px solid #5C87C7; }
-            QCheckBox { color: #20242B; font-size: 14px; spacing: 9px; }
-        """)
 
         root = QHBoxLayout(self)
-        root.setContentsMargins(20, 20, 30, 20)
-        root.setSpacing(30)
+        root.setContentsMargins(0, 0, 0, 0)
+        root.setSpacing(0)
         sidebar = QFrame()
         sidebar.setObjectName("sidebar")
-        sidebar.setFixedWidth(204)
+        sidebar.setFixedWidth(232)
         sidebar_layout = QVBoxLayout(sidebar)
-        sidebar_layout.setContentsMargins(13, 18, 13, 12)
-        sidebar_layout.setSpacing(8)
-        brand_row = QHBoxLayout()
-        brand_row.setSpacing(9)
-        mark = QLabel()
-        mark.setPixmap(app_icon().pixmap(29, 29))
-        brand_row.addWidget(mark)
-        brand = QLabel("VoxFlow")
-        brand.setObjectName("brand")
-        brand_row.addWidget(brand)
-        brand_row.addStretch()
-        sidebar_layout.addLayout(brand_row)
-        eyebrow = QLabel()
-        self._bind(eyebrow.setText, "settings.eyebrow")
-        eyebrow.setObjectName("eyebrow")
-        sidebar_layout.addSpacing(24)
-        sidebar_layout.addWidget(eyebrow)
+        sidebar_layout.setContentsMargins(14, 20, 14, 14)
+        sidebar_layout.setSpacing(6)
+        heading = QLabel()
+        heading.setObjectName("sidebarTitle")
+        self._bind(heading.setText, "settings.heading")
+        sidebar_layout.addWidget(heading)
+        sidebar_layout.addSpacing(12)
         self.categories = QListWidget()
-        self.categories.setIconSize(QSize(20, 20))
+        self.categories.setIconSize(QSize(18, 18))
         self.categories.setHorizontalScrollBarPolicy(Qt.ScrollBarPolicy.ScrollBarAlwaysOff)
         self.categories.setVerticalScrollBarPolicy(Qt.ScrollBarPolicy.ScrollBarAlwaysOff)
-        for icon, key in (("personalize", "category.personalization"), ("settings", "category.app"),
-                          ("smart", "category.smart")):
+        for icon, key in CATEGORIES:
             item = QListWidgetItem(line_icon(icon), "")
             self.categories.addItem(item)
             self._bind(item.setText, key)
@@ -171,11 +94,11 @@ class SettingsWindow(QWidget):
         self.categories.viewport().setCursor(Qt.CursorShape.PointingHandCursor)
         sidebar_layout.addWidget(self.categories, 1)
         root.addWidget(sidebar)
+
         self.pages = QStackedWidget()
         root.addWidget(self.pages, 1)
-        self.pages.addWidget(self._build_personalization())
-        self.pages.addWidget(self._build_app_settings())
-        self.pages.addWidget(self._build_smart_editing())
+        for build in (self._build_general, self._build_appearance, self._build_smart_editing):
+            self.pages.addWidget(self._scrollable(build()))
         self._page_effects = []
         for index in range(self.pages.count()):
             effect = QGraphicsOpacityEffect(self.pages.widget(index))
@@ -187,6 +110,10 @@ class SettingsWindow(QWidget):
         self._entrance_animation.setEasingCurve(QEasingCurve.Type.OutCubic)
         self.categories.currentRowChanged.connect(self._switch_category)
         self.categories.setCurrentRow(0)
+        self.apply_theme(self.theme)
+        QGuiApplication.styleHints().colorSchemeChanged.connect(lambda _scheme: self.apply_theme(current_theme()))
+
+    # Window behavior ---------------------------------------------------------------------------
 
     def showEvent(self, event) -> None:
         super().showEvent(event)
@@ -205,15 +132,27 @@ class SettingsWindow(QWidget):
         else:
             super().keyPressEvent(event)
 
+    def apply_theme(self, theme: Theme) -> None:
+        self.theme = theme
+        self.setStyleSheet(stylesheet(theme))
+        for kind in (SettingsComboBox, SettingsFontComboBox, ToggleSwitch):
+            for widget in self.findChildren(kind):
+                widget.set_theme(theme)
+        self.restore_button.setIcon(line_icon("restore", theme.text))
+        self._paint_category_icons(self.categories.currentRow())
+
+    def _paint_category_icons(self, row: int) -> None:
+        for index, (icon, _key) in enumerate(CATEGORIES):
+            color = self.theme.icon_active if index == row else self.theme.icon
+            self.categories.item(index).setIcon(line_icon(icon, color))
+
     def _switch_category(self, row: int) -> None:
         if row < 0:
             return
         if self._page_animation is not None:
             self._page_animation.stop()
         self.pages.setCurrentIndex(row)
-        for index, name in enumerate(("personalize", "settings", "smart")):
-            color = "#285C9D" if index == row else "#657486"
-            self.categories.item(index).setIcon(line_icon(name, color))
+        self._paint_category_icons(row)
         effect = self._page_effects[row]
         if not self.isVisible():
             effect.setOpacity(1.0)
@@ -225,6 +164,8 @@ class SettingsWindow(QWidget):
         self._page_animation.setEndValue(1.0)
         self._page_animation.setEasingCurve(QEasingCurve.Type.OutCubic)
         self._page_animation.start()
+
+    # Language ---------------------------------------------------------------------------------
 
     def _bind(self, setter, key: str, **values) -> None:
         setter(tr(key, **values))
@@ -241,9 +182,11 @@ class SettingsWindow(QWidget):
         for key, fallback in (("background", DEFAULT_BACKGROUND), ("capsule", DEFAULT_CAPSULE)):
             button = self.background_button if key == "background" else self.capsule_button
             self._show_color(button, saved_color(self.settings.value(f"appearance/{key}_color", fallback), fallback))
+        self._populate_local_models(self._selected_model_path())
         if self._model_status is not None:
-            self.set_model_status(*self._model_status[:1], **self._model_status[1])
+            self.set_model_status(self._model_status[0], **self._model_status[1])
         self.rewrite_status.setText(tr(self._test_result[0], **self._test_result[1]) if self._test_result else "")
+        self.rewrite_status.setVisible(self._test_result is not None)
 
     def _set_language(self, _index: int) -> None:
         choice = str(self.language_box.currentData())
@@ -252,126 +195,282 @@ class SettingsWindow(QWidget):
         self.retranslate()
         self.language_changed.emit(choice)
 
-    def _page(self, title_key: str, description_key: str) -> tuple[QWidget, QVBoxLayout]:
+    # Layout helpers ---------------------------------------------------------------------------
+
+    @staticmethod
+    def _scrollable(page: QWidget) -> QScrollArea:
+        area = QScrollArea()
+        area.setWidgetResizable(True)
+        area.setFrameShape(QFrame.Shape.NoFrame)
+        area.setHorizontalScrollBarPolicy(Qt.ScrollBarPolicy.ScrollBarAlwaysOff)
+        area.setWidget(page)
+        return area
+
+    def _page(self, title_key: str) -> tuple[QWidget, QVBoxLayout]:
         page = QWidget()
+        page.setObjectName("page")
         layout = QVBoxLayout(page)
-        layout.setContentsMargins(0, 0, 0, 0)
-        layout.setSpacing(10)
-        heading = QLabel()
-        self._bind(heading.setText, title_key)
-        heading.setObjectName("pageTitle")
-        layout.addWidget(heading)
-        subtitle = QLabel()
-        self._bind(subtitle.setText, description_key)
-        subtitle.setObjectName("description")
-        subtitle.setWordWrap(True)
-        layout.addWidget(subtitle)
-        layout.addSpacing(13)
+        layout.setContentsMargins(40, 30, 40, 30)
+        layout.setSpacing(8)
+        title = QLabel()
+        title.setObjectName("pageTitle")
+        self._bind(title.setText, title_key)
+        layout.addWidget(title)
+        layout.addSpacing(10)
         return page, layout
 
-    def _field(self, layout: QVBoxLayout, title_key: str, control: QWidget) -> None:
-        label = QLabel()
-        self._bind(label.setText, title_key)
-        self._bind(control.setAccessibleName, title_key)
-        label.setObjectName("fieldTitle")
-        layout.addWidget(label)
-        layout.addWidget(control)
-        layout.addSpacing(9)
+    def _section(self, layout: QVBoxLayout, title_key: str | None = None) -> SettingsCard:
+        layout.addSpacing(10)
+        label = None
+        if title_key:
+            label = QLabel()
+            label.setObjectName("sectionTitle")
+            self._bind(label.setText, title_key)
+            layout.addWidget(label)
+            layout.addSpacing(2)
+        card = SettingsCard()
+        card.title_label = label
+        layout.addWidget(card)
+        self._cards.append(card)
+        return card
 
-    def _field_row(self, title_key: str, control: QWidget) -> QWidget:
-        row = QWidget()
-        layout = QVBoxLayout(row)
-        layout.setContentsMargins(0, 0, 0, 6)
-        layout.setSpacing(8)
-        label = QLabel()
-        self._bind(label.setText, title_key)
-        self._bind(control.setAccessibleName, title_key)
-        label.setObjectName("fieldTitle")
-        layout.addWidget(label)
-        layout.addWidget(control)
+    def _row(self, card: SettingsCard, title_key: str, desc_key: str | None, *controls: QWidget) -> SettingRow:
+        row = SettingRow()
+        self._bind(row.title.setText, title_key)
+        if desc_key:
+            self._bind(row.set_desc, desc_key)
+        for control in controls:
+            row.control_layout.addWidget(control, 0, Qt.AlignmentFlag.AlignVCenter)
+            if not isinstance(control, QPushButton):
+                self._bind(control.setAccessibleName, title_key)
+        card.add_row(row)
         return row
 
+    @staticmethod
+    def _sized(widget: QWidget, width: int) -> QWidget:
+        widget.setFixedWidth(width)
+        return widget
+
+    def _button(self, key: str, handler) -> QPushButton:
+        button = QPushButton()
+        button.setObjectName("secondary")
+        button.setCursor(Qt.CursorShape.PointingHandCursor)
+        self._bind(button.setText, key)
+        button.clicked.connect(handler)
+        return button
+
+    # Pages ------------------------------------------------------------------------------------
+
+    def _build_general(self) -> QWidget:
+        page, layout = self._page("category.general")
+        self.language_box = SettingsComboBox()
+        for code, name in LANGUAGE_CHOICES:
+            self.language_box.addItem(name or tr("language.system"), code)
+        saved_language = str(self.settings.value("ui/language", "system"))
+        self.language_box.setCurrentIndex(max(0, self.language_box.findData(saved_language)))
+        self.language_box.currentIndexChanged.connect(self._set_language)
+        card = self._section(layout, "section.language")
+        self._row(card, "field.language", "desc.language", self._sized(self.language_box, 220))
+
+        self.device_box = SettingsComboBox()
+        self.alignment_box = SettingsComboBox()
+        for key, value in (("align.left", "left"), ("align.center", "center"), ("align.right", "right")):
+            self.alignment_box.addItem(tr(key), value)
+        saved = str(self.settings.value("transcript/alignment", "left"))
+        self.alignment_box.setCurrentIndex(max(0, self.alignment_box.findData(saved)))
+        self.alignment_box.currentIndexChanged.connect(
+            lambda _index: self.alignment_changed.emit(str(self.alignment_box.currentData())))
+        card = self._section(layout, "section.input")
+        self._row(card, "field.microphone", "desc.microphone", self._sized(self.device_box, 300))
+        self._row(card, "field.alignment", "desc.alignment", self._sized(self.alignment_box, 220))
+        note = QLabel()
+        note.setObjectName("note")
+        note.setWordWrap(True)
+        self._bind(note.setText, "page.app.note")
+        layout.addSpacing(4)
+        layout.addWidget(note)
+        layout.addStretch()
+        return page
+
+    def _build_appearance(self) -> QWidget:
+        page, layout = self._page("category.appearance")
+        self.font_box = SettingsFontComboBox()
+        self.font_box.setCurrentFont(QFont(str(self.settings.value("appearance/font", DEFAULT_FONT))))
+        self.font_box.currentFontChanged.connect(self._set_font)
+        self.text_size_box = QSpinBox()
+        self.text_size_box.setRange(14, 48)
+        self.text_size_box.setButtonSymbols(QAbstractSpinBox.ButtonSymbols.NoButtons)
+        self.text_size_box.setSuffix(" px")
+        self.text_size_box.setAlignment(Qt.AlignmentFlag.AlignRight)
+        try:
+            saved_size = int(self.settings.value("appearance/text_size", DEFAULT_TEXT_SIZE))
+        except (TypeError, ValueError):
+            saved_size = DEFAULT_TEXT_SIZE
+        self.text_size_box.setValue(max(14, min(48, saved_size)))
+        self.text_size_box.valueChanged.connect(self._set_text_size)
+        card = self._section(layout, "section.text")
+        self._row(card, "field.font", "desc.font", self._sized(self.font_box, 240))
+        self._row(card, "field.text_size", "desc.text_size", self._sized(self.text_size_box, 100))
+
+        self.background_button = self._color_button("background", DEFAULT_BACKGROUND)
+        self.capsule_button = self._color_button("capsule", DEFAULT_CAPSULE)
+        card = self._section(layout, "section.glow")
+        self._row(card, "field.background", "desc.background", self._sized(self.background_button, 170))
+        self._row(card, "field.capsule", "desc.capsule", self._sized(self.capsule_button, 170))
+
+        self.restore_button = self._button("button.restore", self._reset_appearance)
+        self.restore_button.setIconSize(QSize(16, 16))
+        card = self._section(layout, "section.reset")
+        self._row(card, "field.restore", "desc.restore", self.restore_button)
+        layout.addStretch()
+        return page
+
     def _build_smart_editing(self) -> QWidget:
-        page, layout = self._page("category.smart", "page.smart.desc")
+        page, layout = self._page("category.smart")
         config = RewriteConfig.from_settings(self.settings)
-        self._rewrite_tester = None
-        self.rewrite_enabled = QCheckBox()
-        self._bind(self.rewrite_enabled.setText, "smart.enable")
+
+        self.rewrite_enabled = ToggleSwitch()
         self.rewrite_enabled.setChecked(config.enabled)
-        layout.addWidget(self.rewrite_enabled)
-        layout.addSpacing(6)
+        card = self._section(layout)
+        self._row(card, "field.smart_enable", "desc.smart_enable", self.rewrite_enabled)
+
         self.rewrite_provider = SettingsComboBox()
         self.rewrite_provider.addItem(tr("source.local"), "local")
         self.rewrite_provider.addItem(tr("source.custom"), "custom")
         self.rewrite_provider.setCurrentIndex(max(0, self.rewrite_provider.findData(config.provider)))
-        layout.addWidget(self._field_row("field.model_source", self.rewrite_provider))
+        self.rewrite_model_path = SettingsComboBox()
+        self._last_model_index = 0
+        self._populate_local_models(config.model_path)
+        self.rewrite_endpoint = self._line(config.endpoint, None, "http://localhost:1234/v1")
+        self.rewrite_model = SettingsComboBox()
+        self.rewrite_model.setEditable(True)
+        self.rewrite_model.setInsertPolicy(SettingsComboBox.InsertPolicy.NoInsert)
+        if config.model:
+            self.rewrite_model.addItem(config.model)
+        self.rewrite_model.setCurrentText(config.model)
+        self._bind(self.rewrite_model.lineEdit().setPlaceholderText, "placeholder.model")
+        self.rewrite_model.lineEdit().editingFinished.connect(self._save_rewrite)
+        self.rewrite_model.activated.connect(lambda _index: self._save_rewrite())
+        self.rewrite_api_key = self._line(config.api_key, "placeholder.optional", password=True)
+        refresh = self._button("button.refresh", self._refresh_models)
 
-        def line(value: str, placeholder: str, password: bool = False) -> QLineEdit:
-            edit = QLineEdit(value)
-            if placeholder.startswith("placeholder."):
-                self._bind(edit.setPlaceholderText, placeholder)
-            else:
-                edit.setPlaceholderText(placeholder)
-            if password:
-                edit.setEchoMode(QLineEdit.EchoMode.Password)
-            edit.editingFinished.connect(self._save_rewrite)
-            return edit
-
-        self.rewrite_endpoint = line(config.endpoint, "http://localhost:1234/v1")
-        self.rewrite_model = line(config.model, "placeholder.model")
-        self.rewrite_api_key = line(config.api_key, "placeholder.optional", password=True)
-        self.rewrite_server_path = line(config.server_path, RewriteConfig.server_path)
-        self.rewrite_model_path = line(config.model_path, RewriteConfig.model_path)
-        self.rewrite_endpoint_row = self._field_row("field.endpoint", self.rewrite_endpoint)
-        self.rewrite_model_row = self._field_row("field.model", self.rewrite_model)
-        self.rewrite_api_key_row = self._field_row("field.api_key", self.rewrite_api_key)
-        self.rewrite_server_path_row = self._field_row("field.server_path", self.rewrite_server_path)
-        self.rewrite_model_path_row = self._field_row("field.model_path", self.rewrite_model_path)
-        self.rewrite_model_status = QLabel("")
-        self.rewrite_model_status.setObjectName("description")
-        self.rewrite_model_status.setWordWrap(True)
-        self.rewrite_model_status_row = self._field_row("field.model_status", self.rewrite_model_status)
-        for row in (self.rewrite_endpoint_row, self.rewrite_model_row, self.rewrite_api_key_row,
-                    self.rewrite_server_path_row, self.rewrite_model_path_row, self.rewrite_model_status_row):
-            layout.addWidget(row)
-
-        test_row = QHBoxLayout()
-        self.rewrite_test_button = QPushButton()
-        self._bind(self.rewrite_test_button.setText, "button.test")
-        self.rewrite_test_button.setObjectName("resetButton")
-        self.rewrite_test_button.setCursor(Qt.CursorShape.PointingHandCursor)
-        self.rewrite_test_button.clicked.connect(self._test_rewrite)
-        test_row.addWidget(self.rewrite_test_button)
+        card = self._section(layout, "section.model")
+        self._model_card = card
+        self._row(card, "field.model_source", "desc.model_source", self._sized(self.rewrite_provider, 280))
+        self.rewrite_model_path_row = self._row(card, "field.local_model", "desc.local_model",
+                                                self._sized(self.rewrite_model_path, 280))
+        self.rewrite_endpoint_row = self._row(card, "field.endpoint", "desc.endpoint",
+                                              self._sized(self.rewrite_endpoint, 280))
+        self.rewrite_model_row = self._row(card, "field.model", "desc.custom_model",
+                                           self._sized(self.rewrite_model, 200), refresh)
+        self.rewrite_api_key_row = self._row(card, "field.api_key", "desc.api_key",
+                                             self._sized(self.rewrite_api_key, 280))
+        self.rewrite_test_button = self._button("button.test", self._test_rewrite)
+        self.rewrite_model_status_row = self._row(card, "field.model_status", None, self.rewrite_test_button)
+        self.rewrite_model_status = self.rewrite_model_status_row.desc
         self.rewrite_status = QLabel("")
-        self.rewrite_status.setObjectName("description")
+        self.rewrite_status.setObjectName("rowDesc")
         self.rewrite_status.setWordWrap(True)
-        test_row.addWidget(self.rewrite_status, 1)
-        layout.addLayout(test_row)
+        self.rewrite_status.hide()
+        self.rewrite_model_status_row.text_column.addWidget(self.rewrite_status)
+
+        self.rewrite_server_path = self._line(config.server_path, None, RewriteConfig.server_path)
+        browse = self._button("button.browse", self._browse_server)
+        self._advanced_card = self._section(layout, "section.advanced")
+        self.rewrite_server_path_row = self._row(self._advanced_card, "field.server_path", "desc.server_path",
+                                                 self._sized(self.rewrite_server_path, 220), browse)
         layout.addStretch()
 
         self.rewrite_enabled.toggled.connect(self._save_rewrite)
         self.rewrite_provider.currentIndexChanged.connect(self._sync_rewrite_rows)
         self.rewrite_provider.currentIndexChanged.connect(self._save_rewrite)
+        self.rewrite_model_path.currentIndexChanged.connect(self._local_model_chosen)
         self._sync_rewrite_rows()
         return page
+
+    def _line(self, value: str, placeholder_key: str | None, placeholder: str = "",
+              password: bool = False) -> QLineEdit:
+        edit = QLineEdit(value)
+        if placeholder_key:
+            self._bind(edit.setPlaceholderText, placeholder_key)
+        else:
+            edit.setPlaceholderText(placeholder)
+        if password:
+            edit.setEchoMode(QLineEdit.EchoMode.Password)
+        edit.setCursorPosition(0)  # long paths read from the start
+        edit.editingFinished.connect(self._save_rewrite)
+        return edit
+
+    # Smart editing ----------------------------------------------------------------------------
+
+    def _selected_model_path(self) -> str:
+        data = self.rewrite_model_path.currentData()
+        return str(data) if data and data != BROWSE else ""
+
+    def _populate_local_models(self, selected: str) -> None:
+        combo = self.rewrite_model_path
+        combo.blockSignals(True)
+        combo.clear()
+        for model in discover_models(REPO_ROOT):
+            key, values = describe_model(model)
+            combo.addItem(tr(key, **values), _repo_relative(model.path))
+            combo.setItemData(combo.count() - 1, str(model.path), Qt.ItemDataRole.ToolTipRole)
+        index = next((i for i in range(combo.count()) if _same_path(str(combo.itemData(i)), selected)), -1)
+        if index < 0 and selected:
+            path = Path(selected).expanduser()
+            path = path if path.is_absolute() else REPO_ROOT / path
+            if path.is_file():
+                key, values = describe_model(LocalModel(path, quant_of(path), path.stat().st_size))
+                combo.addItem(tr(key, **values), selected)
+            else:
+                combo.addItem(tr("model.choice.missing", name=path.name), selected)
+            index = combo.count() - 1
+        combo.addItem(tr("model.browse"), BROWSE)
+        combo.setCurrentIndex(max(0, index) if combo.count() > 1 else 0)
+        self._last_model_index = combo.currentIndex()
+        combo.blockSignals(False)
+
+    def _local_model_chosen(self, index: int) -> None:
+        if self.rewrite_model_path.itemData(index) != BROWSE:
+            self._last_model_index = index
+            self._save_rewrite()
+            return
+        chosen = self.choose_file(tr("dialog.choose_model"), str(REPO_ROOT), tr("filter.gguf"))
+        if chosen:
+            self._populate_local_models(_repo_relative(chosen))
+            self._save_rewrite()
+        else:
+            self.rewrite_model_path.blockSignals(True)
+            self.rewrite_model_path.setCurrentIndex(self._last_model_index)
+            self.rewrite_model_path.blockSignals(False)
+
+    def _browse_server(self) -> None:
+        chosen = self.choose_file(tr("dialog.choose_server"), str(REPO_ROOT), tr("filter.exe"))
+        if chosen:
+            self.rewrite_server_path.setText(_repo_relative(chosen))
+            self.rewrite_server_path.setCursorPosition(0)
+            self._save_rewrite()
 
     def rewrite_config(self) -> RewriteConfig:
         return RewriteConfig(
             enabled=self.rewrite_enabled.isChecked(),
             provider=str(self.rewrite_provider.currentData()),
             endpoint=self.rewrite_endpoint.text().strip(),
-            model=self.rewrite_model.text().strip(),
+            model=self.rewrite_model.currentText().strip(),
             api_key=self.rewrite_api_key.text().strip(),
             server_path=self.rewrite_server_path.text().strip() or RewriteConfig.server_path,
-            model_path=self.rewrite_model_path.text().strip() or RewriteConfig.model_path,
+            model_path=self._selected_model_path() or RewriteConfig.model_path,
         )
 
     def _sync_rewrite_rows(self) -> None:
         custom = self.rewrite_provider.currentData() == "custom"
         for row in (self.rewrite_endpoint_row, self.rewrite_model_row, self.rewrite_api_key_row):
             row.setVisible(custom)
-        for row in (self.rewrite_server_path_row, self.rewrite_model_path_row, self.rewrite_model_status_row):
-            row.setVisible(not custom)
+        self.rewrite_model_path_row.setVisible(not custom)
+        self._advanced_card.setVisible(not custom)
+        self._advanced_card.title_label.setVisible(not custom)
+        for card in self._cards:
+            card.refresh()
 
     def _save_rewrite(self) -> None:
         self.rewrite_config().save(self.settings)
@@ -380,19 +479,24 @@ class SettingsWindow(QWidget):
     def set_rewrite_tester(self, tester) -> None:
         self._rewrite_tester = tester
 
+    def set_model_lister(self, lister) -> None:
+        self._model_lister = lister
+
     def set_model_status(self, key: str, **values) -> None:
         self._model_status = (key, values)
-        self.rewrite_model_status.setText(tr(key, **values))
+        self.rewrite_model_status_row.set_desc(tr(key, **values))
 
     def _show_test_result(self, key: str, **values) -> None:
         self._test_result = (key, values)
         self.rewrite_status.setText(tr(key, **values))
+        self.rewrite_status.show()
 
     def _test_rewrite(self) -> None:
         if self._rewrite_tester is None:
             self._show_test_result("test.unavailable")
             return
         self.rewrite_status.setText(tr("test.testing"))
+        self.rewrite_status.show()
         self.rewrite_status.repaint()
         try:
             name = self._rewrite_tester(self.rewrite_config())
@@ -401,68 +505,22 @@ class SettingsWindow(QWidget):
         else:
             self._show_test_result("test.connected", model=name)
 
-    def _build_personalization(self) -> QWidget:
-        page, layout = self._page("category.personalization", "page.personalization.desc")
-        self.font_box = SettingsFontComboBox()
-        self.font_box.setCurrentFont(QFont(str(self.settings.value("appearance/font", DEFAULT_FONT))))
-        self.font_box.currentFontChanged.connect(self._set_font)
-        self._field(layout, "field.font", self.font_box)
-
-        self.text_size_box = QSpinBox()
-        self.text_size_box.setRange(14, 48)
-        self.text_size_box.setButtonSymbols(QAbstractSpinBox.ButtonSymbols.NoButtons)
-        self.text_size_box.setSuffix(" px")
+    def _refresh_models(self) -> None:
+        if self._model_lister is None:
+            return
         try:
-            saved_size = int(self.settings.value("appearance/text_size", DEFAULT_TEXT_SIZE))
-        except (TypeError, ValueError):
-            saved_size = DEFAULT_TEXT_SIZE
-        self.text_size_box.setValue(max(14, min(48, saved_size)))
-        self.text_size_box.valueChanged.connect(self._set_text_size)
-        self._field(layout, "field.text_size", self.text_size_box)
+            names = self._model_lister(self.rewrite_config())
+        except Exception as exc:  # explain any backend failure in the interface language
+            self._show_test_result("models.refresh_failed", reason=describe_error(exc))
+            return
+        current = self.rewrite_model.currentText().strip()
+        self.rewrite_model.clear()
+        self.rewrite_model.addItems(names)
+        self.rewrite_model.setCurrentText(current or (names[0] if names else ""))
+        self._show_test_result("models.refreshed", count=len(names))
+        self._save_rewrite()
 
-        self.background_button = self._color_button("background", DEFAULT_BACKGROUND)
-        self._field(layout, "field.background", self.background_button)
-        self.capsule_button = self._color_button("capsule", DEFAULT_CAPSULE)
-        self._field(layout, "field.capsule", self.capsule_button)
-
-        reset = QPushButton()
-        self._bind(reset.setText, "button.restore_appearance")
-        reset.setObjectName("resetButton")
-        reset.setIcon(line_icon("restore", "#285C9D"))
-        reset.setIconSize(QSize(18, 18))
-        reset.setCursor(Qt.CursorShape.PointingHandCursor)
-        reset.clicked.connect(self._reset_appearance)
-        layout.addWidget(reset, alignment=Qt.AlignmentFlag.AlignLeft)
-        layout.addStretch()
-        return page
-
-    def _build_app_settings(self) -> QWidget:
-        page, layout = self._page("category.app", "page.app.desc")
-        self.language_box = SettingsComboBox()
-        for code, name in LANGUAGE_CHOICES:
-            self.language_box.addItem(name or tr("language.system"), code)
-        saved_language = str(self.settings.value("ui/language", "system"))
-        self.language_box.setCurrentIndex(max(0, self.language_box.findData(saved_language)))
-        self.language_box.currentIndexChanged.connect(self._set_language)
-        self._field(layout, "field.language", self.language_box)
-        self.device_box = SettingsComboBox()
-        self._field(layout, "field.microphone", self.device_box)
-        self.alignment_box = SettingsComboBox()
-        for key, value in (("align.left", "left"), ("align.center", "center"), ("align.right", "right")):
-            self.alignment_box.addItem(tr(key), value)
-        saved = str(self.settings.value("transcript/alignment", "left"))
-        self.alignment_box.setCurrentIndex(max(0, self.alignment_box.findData(saved)))
-        self.alignment_box.currentIndexChanged.connect(
-            lambda _index: self.alignment_changed.emit(str(self.alignment_box.currentData()))
-        )
-        self._field(layout, "field.alignment", self.alignment_box)
-        note = QLabel()
-        self._bind(note.setText, "page.app.note")
-        note.setObjectName("description")
-        note.setWordWrap(True)
-        layout.addWidget(note)
-        layout.addStretch()
-        return page
+    # Appearance -------------------------------------------------------------------------------
 
     def _color_button(self, key: str, fallback: str) -> QPushButton:
         button = QPushButton()
@@ -477,9 +535,10 @@ class SettingsWindow(QWidget):
         swatch = QPixmap(20, 20)
         swatch.fill(Qt.GlobalColor.transparent)
         painter = QPainter(swatch)
-        painter.setPen(QColor("#AAB4BF"))
+        painter.setRenderHint(QPainter.RenderHint.Antialiasing)
+        painter.setPen(QColor("#9A9A9A"))
         painter.setBrush(color)
-        painter.drawRoundedRect(1, 1, 17, 17, 4, 4)
+        painter.drawRoundedRect(1, 1, 17, 17, 5, 5)
         painter.end()
         button.setIcon(QIcon(swatch))
         button.setText(tr("button.change_color", color=color.name().upper()))
@@ -487,7 +546,7 @@ class SettingsWindow(QWidget):
     def _choose_color(self, key: str) -> None:
         fallback = DEFAULT_BACKGROUND if key == "background" else DEFAULT_CAPSULE
         initial = saved_color(self.settings.value(f"appearance/{key}_color", fallback), fallback)
-        chosen = QColorDialog.getColor(initial, self, f"Choose {key} color")
+        chosen = QColorDialog.getColor(initial, self, tr("field.background" if key == "background" else "field.capsule"))
         if chosen.isValid():
             self.set_color(key, chosen)
 

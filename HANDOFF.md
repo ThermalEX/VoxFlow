@@ -52,6 +52,8 @@ py -3.12 -m venv .venv
 
 **界面语言与默认开启（2026-10-13）**：`voxflow/i18n.py` 维护中英文字符串表，`tr(key)` 取当前语言；设置项 `ui/language`（system/en/zh，默认跟随系统），切换后设置窗口、浮层状态、按钮和托盘菜单即时更新（浮层状态按 key 保存，`VoxFlowWindow.show_status`）。智能编辑默认开启并随应用启动本地模型；旧版本保存的“关闭”会被 `rewriter.migrate_settings` 一次性改为开启。设置页显示本地模型状态（启动中/已就绪/缺少文件/已停止），连接测试与错误提示按类型本地化。测试固定英文界面（`VOXFLOW_LANG=en`）且默认不开启智能编辑，避免启动真实 llama-server。
 
+**设置窗口（2026-10-13 重做）**：参照 ChatGPT 设置的布局——左侧导航（常规/外观/智能编辑），右侧页面由“小节标题 + 圆角卡片 + 行（左标题说明、右控件）”组成；组件在 `voxflow/settings_widgets.py`（`ToggleSwitch`、`SettingRow`、`SettingsCard`、带勾选标记与圆角弹出列表的下拉框），配色在 `voxflow/settings_theme.py`，跟随 Windows 深浅色并随系统切换实时更新（测试可用 `VOXFLOW_THEME` 覆盖）。本地模型用下拉列表选择，由 `voxflow/model_catalog.py` 扫描 `training/rewrite/runs/*/gguf/*.gguf` 与 `runtime/models/*.gguf`，Q8 排第一并标“推荐”，末项“浏览…”；自定义接口的模型名可点“刷新”从 `/models` 拉取。
+
 ## 4. 验证与操作边界
 
 ```powershell

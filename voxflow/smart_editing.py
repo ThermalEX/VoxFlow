@@ -139,6 +139,9 @@ class SmartEditor(QObject):
             raise RewriteError("the local model is still starting", kind="starting")
         return RewriteClient(config.base_url, config.model_name, config.api_key).check()
 
+    def list_models(self, config: RewriteConfig) -> list[str]:
+        return RewriteClient(config.base_url, config.model_name, config.api_key).list_models()
+
     def model_status(self) -> tuple[str, dict]:
         """The local model's state for the settings page, as an i18n key and its values."""
         if not self.config.enabled:

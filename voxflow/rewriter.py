@@ -149,6 +149,11 @@ class RewriteClient:
                 suggestions.append({"label": label.strip(), "text": body.strip()})
         return suggestions[:MAX_SUGGESTIONS]
 
+    def list_models(self, timeout: float = 5) -> list[str]:
+        reply = self._request("/models", None, timeout)
+        models = reply.get("data") if isinstance(reply, dict) else None
+        return [str(item["id"]) for item in models or [] if isinstance(item, dict) and item.get("id")]
+
     def check(self, timeout: float = 3) -> str:
         reply = self._request("/models", None, timeout)
         models = reply.get("data") if isinstance(reply, dict) else None
