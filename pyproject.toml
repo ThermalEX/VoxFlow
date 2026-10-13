@@ -23,3 +23,6 @@ include = ["voxflow*"]
 
 [tool.setuptools.package-data]
 voxflow = ["assets/icons/*.svg", "assets/icons/LICENSE", "assets/icons/README.md"]
+
+[tool.pytest.ini_options]
+pythonpath = ["."]
