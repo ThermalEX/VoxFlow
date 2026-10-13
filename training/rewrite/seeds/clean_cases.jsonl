@@ -188,3 +188,53 @@
 {"id": "implicit-0018", "categories": ["implicit_reason"], "scene": "customer_service", "raw": "我要寄到公司，等下周末公司没人，还是寄到家里。", "output": "我要寄到家里。"}
 {"id": "implicit-0019", "categories": ["implicit_reason"], "scene": "social_media", "raw": "Heading to the beach today, oh it's raining, so museum day instead.", "output": "Museum day today."}
 {"id": "implicit-0020", "categories": ["implicit_reason"], "scene": "daily", "raw": "晚上煮面条，哦面条吃完了，那就煮饺子。", "output": "晚上煮饺子。"}
+{"id": "corr-0021", "categories": ["immediate_correction"], "scene": "work_chat", "raw": "报销单交给财务的小周，哦不是小周，是小吴。", "output": "报销单交给财务的小吴。"}
+{"id": "corr-0022", "categories": ["immediate_correction"], "scene": "tech", "raw": "这个服务部署在北京区，不对，上海区。", "output": "这个服务部署在上海区。"}
+{"id": "corr-0023", "categories": ["immediate_correction"], "scene": "email", "raw": "Please find attached the Q2, sorry, the Q3 financial summary.", "output": "Please find attached the Q3 financial summary."}
+{"id": "corr-0024", "categories": ["immediate_correction"], "scene": "shopping", "raw": "给我拿两瓶，不对，三瓶矿泉水。", "output": "给我拿三瓶矿泉水。"}
+{"id": "corr-0025", "categories": ["immediate_correction"], "scene": "family_friends", "raw": "姥姥的生日是十月八号，不对，是十月十八号。", "output": "姥姥的生日是十月十八号。"}
+{"id": "corr-0026", "categories": ["immediate_correction"], "scene": "schedule", "raw": "高铁是早上8点10分的，啊不对，8点40分。", "output": "高铁是早上8点40分的。"}
+{"id": "corr-0027", "categories": ["immediate_correction"], "scene": "school", "raw": "下节课在A栋，不是A栋，是C栋302。", "output": "下节课在C栋302。"}
+{"id": "corr-0028", "categories": ["immediate_correction", "filler"], "scene": "customer_service", "raw": "嗯，我买的是黑色的，不对，深灰色的那款。", "output": "我买的是深灰色的那款。"}
+{"id": "corr-0029", "categories": ["immediate_correction"], "scene": "social_media", "raw": "第一次做蛋糕，烤了二十分钟，不对，四十分钟，终于成功了。", "output": "第一次做蛋糕，烤了四十分钟，终于成功了。"}
+{"id": "corr-0030", "categories": ["immediate_correction"], "scene": "daily", "raw": "Turn left at the second, no, the third light.", "output": "Turn left at the third light."}
+{"id": "edit-del-0021", "categories": ["edit_delete"], "scene": "work_chat", "raw": "周报里写上完成了登录模块、修了三个bug、还摸了半天鱼，最后那句当然不能写。", "output": "周报里写上完成了登录模块、修了三个bug。"}
+{"id": "edit-del-0022", "categories": ["edit_delete"], "scene": "email", "raw": "感谢您的回复，我们下周会寄出样品，另外价格还能再谈，价格那句先删掉。", "output": "感谢您的回复，我们下周会寄出样品。"}
+{"id": "edit-del-0023", "categories": ["edit_delete"], "scene": "tech", "raw": "Add logging, metrics, and tracing to the service, drop tracing for now.", "output": "Add logging and metrics to the service."}
+{"id": "edit-del-0024", "categories": ["edit_delete"], "scene": "shopping", "raw": "这次买一箱苹果、一袋橙子、两个榴莲，榴莲太贵了，不要了。", "output": "这次买一箱苹果、一袋橙子。"}
+{"id": "edit-del-0025", "categories": ["edit_delete", "implicit_reason"], "scene": "family_friends", "raw": "明天带爷爷去公园，再去超市，超市人太多，他会累，就只去公园。", "output": "明天带爷爷去公园。"}
+{"id": "edit-del-0026", "categories": ["edit_delete"], "scene": "schedule", "raw": "这周要交电费、水费、物业费，物业费已经交了，删掉。", "output": "这周要交电费和水费。"}
+{"id": "edit-del-0027", "categories": ["edit_delete"], "scene": "school", "raw": "我的爱好是读书、跑步和打游戏，打游戏就别写进简历了。", "output": "我的爱好是读书和跑步。"}
+{"id": "edit-del-0028", "categories": ["edit_delete"], "scene": "customer_service", "raw": "我想取消订单，然后重新下单，重新下单的事我自己弄，那句不用说。", "output": "我想取消订单。"}
+{"id": "edit-del-0029", "categories": ["edit_delete"], "scene": "social_media", "raw": "Best trip ever with Anna, Ben, and Chris, remove Chris, he wasn't there.", "output": "Best trip ever with Anna and Ben."}
+{"id": "edit-del-0030", "categories": ["edit_delete"], "scene": "daily", "raw": "今天的事，买菜、取快递、洗车，洗车明天再说，先划掉。", "output": "今天的事，买菜、取快递。"}
+{"id": "edit-rep-0021", "categories": ["edit_replace"], "scene": "work_chat", "raw": "请把合同发到我的QQ邮箱，QQ邮箱换成公司邮箱。", "output": "请把合同发到我的公司邮箱。"}
+{"id": "edit-rep-0022", "categories": ["edit_replace"], "scene": "tech", "raw": "用户名最少四个字符，四个太短了，最少六个。", "output": "用户名最少六个字符。"}
+{"id": "edit-rep-0023", "categories": ["edit_replace"], "scene": "email", "raw": "The kickoff is in Room 201, update the room to 305.", "output": "The kickoff is in Room 305."}
+{"id": "edit-rep-0024", "categories": ["edit_replace"], "scene": "shopping", "raw": "帮我订一个六寸的蛋糕，人多，要八寸的。", "output": "帮我订一个八寸的蛋糕。"}
+{"id": "edit-rep-0025", "categories": ["edit_replace"], "scene": "family_friends", "raw": "跟阿姨说我们五点到，路上堵车，晚半小时。", "output": "跟阿姨说我们五点半到。"}
+{"id": "edit-rep-0026", "categories": ["edit_replace"], "scene": "schedule", "raw": "年会定在12月20号，往后推一周。", "output": "年会定在12月27号。"}
+{"id": "edit-rep-0027", "categories": ["edit_replace"], "scene": "school", "raw": "班会主题是网络安全，网络安全上学期讲过了，换个题目，就讲时间管理。", "output": "班会主题是时间管理。"}
+{"id": "edit-rep-0028", "categories": ["edit_replace"], "scene": "customer_service", "raw": "麻烦把发票抬头开成个人，抬头要写公司名称，北京星河科技有限公司。", "output": "麻烦把发票抬头开成北京星河科技有限公司。"}
+{"id": "edit-rep-0029", "categories": ["edit_replace"], "scene": "social_media", "raw": "我家猫今年三岁了，记错了，是四岁。", "output": "我家猫今年四岁了。"}
+{"id": "edit-rep-0030", "categories": ["edit_replace"], "scene": "daily", "raw": "定一个晚上十点的提醒，提前一个小时。", "output": "定一个晚上九点的提醒。"}
+{"id": "edit-ins-0021", "categories": ["edit_insert"], "scene": "work_chat", "raw": "明天的会议议程，先过需求，再排期，最后补一个风险评估。", "output": "明天的会议议程，先过需求，再排期，最后做风险评估。"}
+{"id": "edit-ins-0022", "categories": ["edit_insert"], "scene": "tech", "raw": "Install the package and restart the server, and in between run the migrations.", "output": "Install the package, run the migrations, then restart the server."}
+{"id": "edit-ins-0023", "categories": ["edit_insert"], "scene": "email", "raw": "王经理您好，方案已发您邮箱，开头加一句好久不见。", "output": "王经理您好，好久不见，方案已发您邮箱。"}
+{"id": "edit-ins-0024", "categories": ["edit_insert"], "scene": "shopping", "raw": "要一份牛肉面，多加香菜，哦还要一个卤蛋。", "output": "要一份牛肉面，多加香菜，再要一个卤蛋。"}
+{"id": "edit-ins-0025", "categories": ["edit_insert"], "scene": "family_friends", "raw": "国庆回老家，记得带给爸的茶叶，妈的围巾也别忘了。", "output": "国庆回老家，记得带给爸的茶叶和妈的围巾。"}
+{"id": "edit-ins-0026", "categories": ["edit_insert"], "scene": "schedule", "raw": "周二上午例会，周四下午评审，周三也有一个，周三晚上培训。", "output": "周二上午例会，周三晚上培训，周四下午评审。"}
+{"id": "edit-ins-0027", "categories": ["edit_insert"], "scene": "school", "raw": "Bring your textbook and a calculator, and a pencil, add a pencil.", "output": "Bring your textbook, a calculator, and a pencil."}
+{"id": "edit-ins-0028", "categories": ["edit_insert"], "scene": "customer_service", "raw": "你好，我的路由器连不上网，指示灯一直闪红色，前面说一下是昨天开始的。", "output": "你好，我的路由器从昨天开始连不上网，指示灯一直闪红色。"}
+{"id": "edit-ins-0029", "categories": ["edit_insert"], "scene": "social_media", "raw": "终于考完了，在最后加一句，放假啦。", "output": "终于考完了，放假啦。"}
+{"id": "edit-ins-0030", "categories": ["edit_insert"], "scene": "daily", "raw": "垃圾记得扔，还有，阳台的衣服收一下。", "output": "垃圾记得扔，阳台的衣服也收一下。"}
+{"id": "implicit-0021", "categories": ["implicit_reason"], "scene": "work_chat", "raw": "这个周会大家线下开，哦有几个同事在外地，那就线上开吧。", "output": "这个周会大家线上开吧。"}
+{"id": "implicit-0022", "categories": ["implicit_reason"], "scene": "tech", "raw": "数据先存MongoDB，哦这个要做事务，还是用PostgreSQL。", "output": "数据存PostgreSQL。"}
+{"id": "implicit-0023", "categories": ["implicit_reason"], "scene": "email", "raw": "我们周一去贵司拜访，贵司周一有活动的话，我们改周二也可以。", "output": "我们周一去贵司拜访，如果贵司周一有活动，我们改周二也可以。"}
+{"id": "implicit-0024", "categories": ["implicit_reason", "edit_replace"], "scene": "shopping", "raw": "Order the large pizza, oh it's just the two of us, get a medium.", "output": "Order the medium pizza."}
+{"id": "implicit-0025", "categories": ["implicit_reason"], "scene": "family_friends", "raw": "爸生日送他一瓶酒，他最近在戒酒，那送个按摩仪吧。", "output": "爸生日送他一个按摩仪吧。"}
+{"id": "implicit-0026", "categories": ["implicit_reason"], "scene": "schedule", "raw": "下午三点去银行，银行下午四点半就关门，来得及，还是三点去。", "output": "下午三点去银行。"}
+{"id": "implicit-0027", "categories": ["implicit_reason"], "scene": "school", "raw": "这次作业用Python写，老师说只能用Java，那就用Java。", "output": "这次作业用Java写。"}
+{"id": "implicit-0028", "categories": ["implicit_reason"], "scene": "customer_service", "raw": "我选顺丰到付，哦顺丰到不了我们村，那就选邮政。", "output": "我选邮政。"}
+{"id": "implicit-0029", "categories": ["implicit_reason"], "scene": "social_media", "raw": "周末去看樱花，听说花已经谢了，那改去看海。", "output": "周末去看海。"}
+{"id": "implicit-0030", "categories": ["implicit_reason", "edit_delete"], "scene": "daily", "raw": "Buy flowers and chocolate for Mom, she's on a diet, skip the chocolate.", "output": "Buy flowers for Mom."}
