@@ -96,3 +96,27 @@ def test_instruction_residue_covers_style_and_translation_phrasings():
         row("clean", "make it shorter, see you soon", "See you soon.", "See you soon.", ["instr_style"]),
     ]
     assert metrics.clean_metrics(records)["instruction_residue"] == pytest.approx(3 / 4)
+
+
+def test_endpoint_generator_posts_the_rows_messages():
+    import io
+
+    from training.rewrite.evaluate import endpoint_generator
+
+    sent = []
+
+    class Reply(io.BytesIO):
+        def __enter__(self):
+            return self
+
+        def __exit__(self, *_args):
+            return False
+
+    def opener(request, timeout):
+        sent.append(json.loads(request.data))
+        return Reply(json.dumps({"choices": [{"message": {"content": "<think></think>\n\n整理后"}}]}).encode())
+
+    generate = endpoint_generator("http://127.0.0.1:8765/v1/", "voxflow-rewrite", opener=opener)
+    messages = [{"role": "system", "content": "S"}, {"role": "user", "content": "U"}]
+    assert generate(messages, 64) == "整理后"
+    assert sent[0]["messages"] == messages and sent[0]["max_tokens"] == 64 and sent[0]["temperature"] == 0
