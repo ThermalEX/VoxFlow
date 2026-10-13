@@ -11,3 +11,4 @@ __pycache__/
 .DS_Store
 Thumbs.db
 training/rewrite/build/
+training/rewrite/runs/
