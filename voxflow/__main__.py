@@ -54,19 +54,21 @@ def main() -> int:
     actions["tray.quit"] = menu.addAction("", quit_app)
 
     def retranslate_tray() -> None:
-        tray.setToolTip(tr("tray.tooltip"))
+        tray.setToolTip(tr("tray.tooltip", hotkey=window.hotkeys["record"].text))
         for key, action in actions.items():
             action.setText(tr(key))
 
     retranslate_tray()
     window.settings_window.language_changed.connect(lambda _choice: retranslate_tray())
+    window.hotkeys_changed.connect(retranslate_tray)
     tray.setContextMenu(menu)
     tray.activated.connect(lambda reason: window.reveal() if reason == QSystemTrayIcon.ActivationReason.Trigger else None)
     if QSystemTrayIcon.isSystemTrayAvailable():
         tray.show()
         if not window.register_hotkey():
-            window.show_status("status.shortcut_unavailable")
-            tray.showMessage(tr("tray.shortcut_title"), tr("tray.shortcut_body"))
+            window.show_shortcut_problem()
+            taken = " / ".join(window.hotkeys[action].text for action in window.hotkey_failures)
+            tray.showMessage(tr("tray.shortcut_title"), tr("tray.shortcut_body", hotkey=taken))
     else:
         app.setQuitOnLastWindowClosed(True)
         window.reveal()

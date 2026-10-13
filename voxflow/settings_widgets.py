@@ -1,12 +1,13 @@
-"""Building blocks for the settings window: rows grouped in cards, switches and themed dropdowns."""
+"""Building blocks for the settings window: rows grouped in cards, switches, themed dropdowns and a key recorder."""
 
-from PySide6.QtCore import QEasingCurve, QPointF, QRectF, QSize, Qt, QVariantAnimation
+from PySide6.QtCore import QEasingCurve, QPointF, QRectF, QSize, Qt, QVariantAnimation, Signal
 from PySide6.QtGui import QColor, QPainter, QPainterPath, QPen
 from PySide6.QtWidgets import (
-    QAbstractButton, QComboBox, QFontComboBox, QFrame, QHBoxLayout, QLabel, QListView, QStyle,
+    QAbstractButton, QComboBox, QFontComboBox, QFrame, QHBoxLayout, QLabel, QListView, QPushButton, QStyle,
     QStyledItemDelegate, QVBoxLayout, QWidget,
 )
 
+from .hotkeys import MODIFIER_KEYS, compose, held_modifiers, vk_from_qt
 from .settings_theme import LIGHT, Theme
 from .ui_icons import symbol_pixmap
 
@@ -241,3 +242,83 @@ class SettingsCard(QFrame):
             if index:
                 self.dividers[index - 1].setVisible(seen_visible and not row.isHidden())
             seen_visible = seen_visible or not row.isHidden()
+
+
+class HotkeyButton(QPushButton):
+    """Shows a shortcut; click it, then press new keys to record a replacement (Esc cancels)."""
+
+    captured = Signal(str)
+    capture_changed = Signal(bool)
+
+    def __init__(self, hotkey: str, parent: QWidget | None = None) -> None:
+        super().__init__(hotkey, parent)
+        self.setObjectName("hotkeyButton")
+        self.setCursor(Qt.CursorShape.PointingHandCursor)
+        self.setCheckable(True)
+        self.hotkey = hotkey
+        self.capturing = False
+        self.prompt = self.need_modifier = ""
+        self.clicked.connect(self.start_capture)
+
+    def set_texts(self, prompt: str, need_modifier: str) -> None:
+        self.prompt, self.need_modifier = prompt, need_modifier
+        if self.capturing:
+            self.setText(prompt)
+
+    def set_hotkey(self, hotkey: str) -> None:
+        self.hotkey = hotkey
+        if not self.capturing:
+            self.setText(hotkey)
+
+    def start_capture(self) -> None:
+        if self.capturing:
+            self.setChecked(True)  # a click while recording keeps recording
+            return
+        self.capturing = True
+        self.setChecked(True)
+        self.setText(self.prompt)
+        self.setFocus(Qt.FocusReason.OtherFocusReason)
+        self.grabKeyboard()
+        self.capture_changed.emit(True)
+
+    def stop_capture(self) -> None:
+        if not self.capturing:
+            return
+        self.capturing = False
+        self.releaseKeyboard()
+        self.setChecked(False)
+        self.setText(self.hotkey)
+        self.capture_changed.emit(False)
+
+    def keyPressEvent(self, event) -> None:
+        if not self.capturing:
+            super().keyPressEvent(event)
+            return
+        event.accept()
+        key, modifiers = event.key(), event.modifiers()
+        if key == Qt.Key.Key_Escape:
+            self.stop_capture()
+            return
+        if key in MODIFIER_KEYS:
+            held = held_modifiers(modifiers)
+            self.setText(held + "…" if held else self.prompt)
+            return
+        text = compose(modifiers, event.nativeVirtualKey() or vk_from_qt(key))
+        if text is None:
+            self.setText(self.need_modifier)
+            return
+        self.stop_capture()
+        self.captured.emit(text)
+
+    def keyReleaseEvent(self, event) -> None:
+        if self.capturing:
+            event.accept()
+            held = held_modifiers(event.modifiers())
+            if event.key() in MODIFIER_KEYS:
+                self.setText(held + "…" if held else self.prompt)
+        else:
+            super().keyReleaseEvent(event)
+
+    def focusOutEvent(self, event) -> None:
+        self.stop_capture()
+        super().focusOutEvent(event)

@@ -1,6 +1,5 @@
 """Bottom-screen overlay for local voice recognition."""
 
-import ctypes
 import math
 import sys
 import time
@@ -8,7 +7,7 @@ from concurrent.futures import Future, ProcessPoolExecutor
 from pathlib import Path
 
 import sounddevice as sd
-from PySide6.QtCore import QEasingCurve, QEvent, QPointF, QPropertyAnimation, QRectF, QSettings, Qt, QTimer, QVariantAnimation
+from PySide6.QtCore import QEasingCurve, QEvent, QPointF, QPropertyAnimation, QRectF, QSettings, Qt, QTimer, QVariantAnimation, Signal
 from PySide6.QtGui import QColor, QCloseEvent, QCursor, QFont, QImage, QKeyEvent, QLinearGradient, QPainter, QPainterPath, QRadialGradient, QRegion, QTextBlockFormat, QTextCursor
 from PySide6.QtWidgets import (
     QApplication,
@@ -22,6 +21,7 @@ from PySide6.QtWidgets import (
 
 from .audio import AudioBuffer
 from .edit_diff import join_continuation
+from .hotkeys import ACTIONS, HOTKEY_IDS, Win32Hotkeys, parse, saved as saved_hotkey
 from .i18n import resolve, set_language, tr
 from .appearance import DEFAULT_BACKGROUND, DEFAULT_CAPSULE, DEFAULT_FONT, DEFAULT_TEXT_SIZE, saved_color, tint
 from .input_target import WindowsPasteTarget
@@ -35,21 +35,27 @@ from .smart_editing import SmartEditor
 from .ui_icons import app_icon
 
 
-HOTKEY_ID = 0x564F
 WM_HOTKEY = 0x0312
 MAX_RECORDING_SECONDS = 300
 COMPACT_HEIGHT = 310
 
 
 class VoxFlowWindow(QWidget):
+    hotkeys_changed = Signal()
+
     def __init__(self, model_dir: str | Path, start_worker: bool = True,
                  settings: QSettings | None = None, text_output: WindowsPasteTarget | None = None,
-                 rewrite_client=None, local_server_factory=None) -> None:
+                 rewrite_client=None, local_server_factory=None, hotkey_api=None) -> None:
         super().__init__()
         self.model_dir = Path(model_dir)
         self.settings = settings if settings is not None else QSettings("VoxFlow", "VoxFlow")
         set_language(resolve(str(self.settings.value("ui/language", "system"))))
         migrate_settings(self.settings)
+        self.hotkey_api = hotkey_api if hotkey_api is not None else Win32Hotkeys()
+        self.hotkeys = {action: saved_hotkey(self.settings, action) for action in ACTIONS}
+        self.hotkey_failures: list[str] = []
+        self._registered_hotkeys: set[str] = set()
+        self._hotkeys_active = False  # set once the app asks for global shortcuts (tests and CLI never do)
         self._status: tuple[str, dict, str] = ("status.loading", {}, "")
         self._record_text_key = "button.start_recording"
         self._continuation = ""  # text already on screen that a "continue" recording appends to
@@ -65,7 +71,6 @@ class VoxFlowWindow(QWidget):
         self.model_ready = False
         self.capture_warning = ""
         self.limit_reached = False
-        self.hotkey_registered = False
         self._animation: QPropertyAnimation | None = None
         self._result_animation = QVariantAnimation(self)
         self._result_animation.valueChanged.connect(lambda value: self._set_overlay_height(round(value)))
@@ -99,6 +104,9 @@ class VoxFlowWindow(QWidget):
         self.settings_window.set_rewrite_tester(self.smart.test_connection)
         self.settings_window.set_model_lister(self.smart.list_models)
         self.settings_window.language_changed.connect(lambda _choice: self.retranslate())
+        self.settings_window.hotkey_capture.connect(self.suspend_hotkeys)
+        self.settings_window.set_hotkey_applier(self.set_hotkey)
+        self._refresh_hotkey_hints()
         self._apply_transcript_font()
         self._set_background_color(saved_color(self.settings.value("appearance/background_color", DEFAULT_BACKGROUND), DEFAULT_BACKGROUND))
         self.capsule.set_accent_color(saved_color(self.settings.value("appearance/capsule_color", DEFAULT_CAPSULE), DEFAULT_CAPSULE))
@@ -194,7 +202,6 @@ class VoxFlowWindow(QWidget):
         controls.addSpacing(14)
         self.record_button = CircleIconButton("mic", tr("button.start_recording"))
         self.record_button.setEnabled(False)
-        self.record_button.setToolTip(tr("tip.shortcut"))
         self.record_button.clicked.connect(self.toggle_recording)
         controls.addWidget(self.record_button)
         self.close_button = CircleIconButton("close", tr("tip.hide"))
@@ -328,6 +335,7 @@ class VoxFlowWindow(QWidget):
         key, values, tooltip = self._status
         self.show_status(key, tooltip, **values)
         self.smart.retranslate()
+        self._refresh_hotkey_hints()
 
     def _sync_content_visibility(self) -> None:
         expanded = self.mode in {"recording", "finalizing", "result"} and self._background_progress >= 0.50
@@ -601,7 +609,7 @@ class VoxFlowWindow(QWidget):
         self.capsule.setEnabled(self.model_ready)
         self.time_label.setText("00:00 / 05:00")
         if self.model_ready:
-            self.show_status("status.press_hotkey")
+            self._show_idle_hint()
         self._reset_result_size()
         self._set_mode("idle")
 
@@ -627,25 +635,93 @@ class VoxFlowWindow(QWidget):
         else:
             super().keyPressEvent(event)
 
+    # Global shortcuts ---------------------------------------------------------------------------
+
     def register_hotkey(self) -> bool:
-        if sys.platform != "win32":
-            return False
-        self.hotkey_registered = bool(ctypes.windll.user32.RegisterHotKey(int(self.winId()), 0x564F, 0x0002 | 0x0004, 0x20))
-        return self.hotkey_registered
+        """Register every global shortcut; False when any of them is taken (see hotkey_failures)."""
+        self._hotkeys_active = True
+        self.hotkey_failures = [action for action in ACTIONS if not self._register_hotkey(action)]
+        return not self.hotkey_failures
+
+    def _register_hotkey(self, action: str) -> bool:
+        if action not in self._registered_hotkeys:
+            if not self.hotkey_api.register(int(self.winId()), HOTKEY_IDS[action], self.hotkeys[action]):
+                return False
+            self._registered_hotkeys.add(action)
+        return True
+
+    def _unregister_hotkey(self, action: str) -> None:
+        if action in self._registered_hotkeys:
+            self.hotkey_api.unregister(int(self.winId()), HOTKEY_IDS[action])
+            self._registered_hotkeys.discard(action)
+
+    def suspend_hotkeys(self, paused: bool) -> None:
+        """Release the shortcuts while settings records a new one, so pressing them reaches the recorder."""
+        if self._hotkeys_active:
+            for action in ACTIONS:
+                if paused:
+                    self._unregister_hotkey(action)
+                else:
+                    self._register_hotkey(action)
+
+    def set_hotkey(self, action: str, text: str) -> str | None:
+        """Switch a shortcut; returns an error key and keeps the old shortcut when the new one is unusable."""
+        hotkey = parse(text)
+        if hotkey is None:
+            return "hotkey.invalid"
+        old = self.hotkeys[action]
+        self.hotkeys[action] = hotkey
+        if self._hotkeys_active:
+            self._unregister_hotkey(action)
+            if not self._register_hotkey(action):
+                self.hotkeys[action] = old
+                self._register_hotkey(action)
+                return "hotkey.in_use"
+        self.settings.setValue(f"hotkeys/{action}", hotkey.text)
+        if action in self.hotkey_failures:
+            self.hotkey_failures.remove(action)
+            if self._status[0] == "status.shortcut_unavailable" and self.model_ready:
+                self._show_idle_hint()
+        self._refresh_hotkey_hints()
+        self.hotkeys_changed.emit()
+        return None
+
+    def _show_idle_hint(self) -> None:
+        if self.hotkey_failures:
+            self.show_shortcut_problem()
+        else:
+            self.show_status("status.press_hotkey", hotkey=self.hotkeys["record"].text)
+
+    def show_shortcut_problem(self) -> None:
+        taken = " / ".join(self.hotkeys[action].text for action in self.hotkey_failures)
+        self.show_status("status.shortcut_unavailable", hotkey=taken)
+
+    def _refresh_hotkey_hints(self) -> None:
+        self.record_button.setToolTip(tr("tip.shortcut", hotkey=self.hotkeys["record"].text))
+        self.smart.continue_button.setToolTip(tr("tip.continue", hotkey=self.hotkeys["continue"].text))
+        if self._status[0] == "status.press_hotkey":
+            self.show_status("status.press_hotkey", self._status[2], hotkey=self.hotkeys["record"].text)
+
+    def _on_hotkey(self, action: str) -> None:
+        if not self.isVisible():
+            self.reveal()
+            if self.model_ready:
+                self._start_recording()
+        elif action == "continue":
+            self.continue_recording()
+        else:
+            self.toggle_recording()
 
     def nativeEvent(self, event_type, message):
         if sys.platform == "win32" and event_type == b"windows_generic_MSG":
             from ctypes import wintypes
 
             msg = wintypes.MSG.from_address(int(message))
-            if msg.message == WM_HOTKEY and msg.wParam == HOTKEY_ID:
-                if self.isVisible():
-                    self.toggle_recording()
-                else:
-                    self.reveal()
-                    if self.model_ready:
-                        self._start_recording()
-                return True, 0
+            if msg.message == WM_HOTKEY:
+                action = next((name for name, ident in HOTKEY_IDS.items() if ident == msg.wParam), None)
+                if action is not None:
+                    self._on_hotkey(action)
+                    return True, 0
         return super().nativeEvent(event_type, message)
 
     def _load_devices(self) -> None:
@@ -788,7 +864,7 @@ class VoxFlowWindow(QWidget):
         if self.ready_future is not None and self.ready_future.done():
             try:
                 self.model_ready = self.ready_future.result()
-                self.show_status("status.press_hotkey")
+                self._show_idle_hint()
                 self.record_button.setEnabled(self.device_box.count() > 0)
                 self.capsule.setEnabled(self.device_box.count() > 0)
             except Exception as exc:
@@ -896,9 +972,8 @@ class VoxFlowWindow(QWidget):
         self.settings_window.close()
         self.timer.stop()
         self.particle_timer.stop()
-        if self.hotkey_registered:
-            ctypes.windll.user32.UnregisterHotKey(int(self.winId()), HOTKEY_ID)
-            self.hotkey_registered = False
+        for action in ACTIONS:
+            self._unregister_hotkey(action)
         if self.stream is not None:
             self.stream.stop()
             self.stream.close()

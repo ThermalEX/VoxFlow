@@ -86,6 +86,16 @@ def stylesheet(theme: Theme) -> str:
         QPushButton#colorButton {{ text-align: left; padding-left: 10px; }}
         QPushButton#secondary:hover, QPushButton#colorButton:hover {{ background: {t.hover}; }}
         QPushButton#secondary:disabled {{ color: {t.muted}; }}
+        QComboBox:disabled {{ color: {t.muted}; }}
+        QPushButton#hotkeyButton {{ background: {t.field}; color: {t.text}; border: 1px solid {t.border};
+            border-radius: 8px; padding: 6px 14px; min-height: 20px; font-weight: 600; }}
+        QPushButton#hotkeyButton:hover {{ background: {t.hover}; }}
+        QPushButton#hotkeyButton:checked {{ border: 1px solid {t.accent}; color: {t.accent}; }}
+        QPushButton#link {{ background: transparent; border: none; padding: 0; color: {t.accent};
+            font-weight: 600; text-align: left; }}
+        QPushButton#link:disabled {{ color: {t.muted}; }}
+        QLabel#aboutName {{ font-size: 20px; font-weight: 650; }}
+        QLabel#rowValue {{ font-weight: 500; }}
         QScrollBar:vertical {{ background: transparent; width: 8px; margin: 2px; }}
         QScrollBar::handle:vertical {{ background: {t.border}; border-radius: 3px; min-height: 30px; }}
         QScrollBar::add-line:vertical, QScrollBar::sub-line:vertical {{ height: 0; }}

@@ -333,9 +333,9 @@ def test_standalone_settings_saves_alignment_without_revealing_overlay(tmp_path)
     window.device_button.click()
     assert window.settings_window.isVisible()
     assert not window.isVisible()
-    assert window.settings_window.pages.count() == 3
+    assert window.settings_window.pages.count() == 5
     assert not window.settings_window.windowIcon().isNull()
-    assert all(not window.settings_window.categories.item(index).icon().isNull() for index in range(3))
+    assert all(not window.settings_window.categories.item(index).icon().isNull() for index in range(5))
     assert window.settings_window.categories.item(0).text() == "General"
     assert window.settings_window.categories.item(1).text() == "Appearance"
     assert window.settings_window.categories.item(2).text() == "Smart editing"

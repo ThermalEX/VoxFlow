@@ -1,8 +1,10 @@
 """VoxFlow settings: sidebar navigation and pages of grouped rows, following the system light/dark scheme."""
 
+from importlib.metadata import PackageNotFoundError, version as package_version
 from pathlib import Path
 
-from PySide6.QtCore import QEasingCurve, QPropertyAnimation, QSettings, QSize, Qt, Signal
+import PySide6
+from PySide6.QtCore import QEasingCurve, QPropertyAnimation, QSettings, QSize, Qt, Signal, qVersion
 from PySide6.QtGui import QColor, QFont, QGuiApplication, QIcon, QPainter, QPixmap
 from PySide6.QtWidgets import (
     QAbstractSpinBox, QApplication, QColorDialog, QFileDialog, QFrame, QGraphicsOpacityEffect, QHBoxLayout,
@@ -10,17 +12,31 @@ from PySide6.QtWidgets import (
     QVBoxLayout, QWidget,
 )
 
+from .hotkeys import ACTIONS, DEFAULTS as DEFAULT_HOTKEYS, parse as parse_hotkey, saved as saved_hotkey
 from .appearance import DEFAULT_BACKGROUND, DEFAULT_CAPSULE, DEFAULT_FONT, DEFAULT_TEXT_SIZE, saved_color
 from .i18n import LANGUAGE_CHOICES, describe_error, resolve, set_language, tr
 from .model_catalog import LocalModel, describe as describe_model, discover_models, quant_of
 from .rewriter import RewriteConfig
 from .settings_theme import Theme, current_theme, stylesheet
-from .settings_widgets import SettingRow, SettingsCard, SettingsComboBox, SettingsFontComboBox, ToggleSwitch
+from .settings_widgets import (
+    HotkeyButton, SettingRow, SettingsCard, SettingsComboBox, SettingsFontComboBox, ToggleSwitch,
+)
 from .ui_icons import app_icon, line_icon
 
 REPO_ROOT = Path(__file__).resolve().parents[1]
 BROWSE = "__browse__"
-CATEGORIES = (("settings", "category.general"), ("personalize", "category.appearance"), ("smart", "category.smart"))
+CATEGORIES = (("settings", "category.general"), ("personalize", "category.appearance"), ("smart", "category.smart"),
+              ("shortcuts", "category.shortcuts"), ("about", "category.about"))
+HOTKEY_FIELDS = {"record": "field.hotkey_record", "continue": "field.hotkey_continue"}
+AUTHOR = "ThermalEX"
+REPO_URL = "https://github.com/ThermalEX/VoxFlow"
+
+
+def app_version() -> str:
+    try:
+        return package_version("voxflow")
+    except PackageNotFoundError:
+        return "dev"
 
 
 def _repo_relative(path: str | Path) -> str:
@@ -47,6 +63,7 @@ class SettingsWindow(QWidget):
     alignment_changed = Signal(str)
     rewrite_changed = Signal()
     language_changed = Signal(str)
+    hotkey_capture = Signal(bool)  # True while a shortcut is being recorded
 
     def __init__(self, settings: QSettings) -> None:
         super().__init__()
@@ -56,6 +73,8 @@ class SettingsWindow(QWidget):
         self._test_result: tuple[str, dict] | None = None
         self._rewrite_tester = None
         self._model_lister = None
+        self._hotkey_applier = None
+        self._hotkey_message: tuple[str, dict] = ("hotkey.help", {})
         self._cards: list[SettingsCard] = []
         self.theme = current_theme()
         # File pickers go through this hook so tests can answer them.
@@ -97,7 +116,8 @@ class SettingsWindow(QWidget):
 
         self.pages = QStackedWidget()
         root.addWidget(self.pages, 1)
-        for build in (self._build_general, self._build_appearance, self._build_smart_editing):
+        for build in (self._build_general, self._build_appearance, self._build_smart_editing,
+                      self._build_shortcuts, self._build_about):
             self.pages.addWidget(self._scrollable(build()))
         self._page_effects = []
         for index in range(self.pages.count()):
@@ -138,7 +158,8 @@ class SettingsWindow(QWidget):
         for kind in (SettingsComboBox, SettingsFontComboBox, ToggleSwitch):
             for widget in self.findChildren(kind):
                 widget.set_theme(theme)
-        self.restore_button.setIcon(line_icon("restore", theme.text))
+        for button in (self.restore_button, self.hotkey_restore_button):
+            button.setIcon(line_icon("restore", theme.text))
         self._paint_category_icons(self.categories.currentRow())
 
     def _paint_category_icons(self, row: int) -> None:
@@ -187,6 +208,10 @@ class SettingsWindow(QWidget):
             self.set_model_status(self._model_status[0], **self._model_status[1])
         self.rewrite_status.setText(tr(self._test_result[0], **self._test_result[1]) if self._test_result else "")
         self.rewrite_status.setVisible(self._test_result is not None)
+        for index, key in enumerate(("channel.stable", "channel.beta")):
+            self.update_channel.setItemText(index, tr(key))
+        key, values = self._hotkey_message
+        self._show_hotkey_message(key, **values)
 
     def _set_language(self, _index: int) -> None:
         choice = str(self.language_box.currentData())
@@ -388,6 +413,107 @@ class SettingsWindow(QWidget):
         self._sync_rewrite_rows()
         return page
 
+    def _build_shortcuts(self) -> QWidget:
+        page, layout = self._page("category.shortcuts")
+        card = self._section(layout, "section.global_shortcuts")
+        self.hotkey_buttons: dict[str, HotkeyButton] = {}
+        for action in ACTIONS:
+            button = HotkeyButton(saved_hotkey(self.settings, action).text)
+            button.setMinimumWidth(190)
+            self._bind(lambda _text, b=button: b.set_texts(tr("hotkey.prompt"), tr("hotkey.need_modifier")),
+                       "hotkey.prompt")
+            button.capture_changed.connect(self.hotkey_capture)
+            button.captured.connect(lambda text, a=action: self._hotkey_captured(a, text))
+            self.hotkey_buttons[action] = button
+            row = self._row(card, HOTKEY_FIELDS[action], f"desc.hotkey_{action}", button)
+            button.setAccessibleName(row.title.text())
+        self.hotkey_status = QLabel()
+        self.hotkey_status.setObjectName("note")
+        self.hotkey_status.setWordWrap(True)
+        layout.addSpacing(4)
+        layout.addWidget(self.hotkey_status)
+        self._show_hotkey_message("hotkey.help")
+
+        self.hotkey_restore_button = self._button("button.restore", self._restore_hotkeys)
+        self.hotkey_restore_button.setIconSize(QSize(16, 16))
+        card = self._section(layout, "section.reset")
+        row = self._row(card, "field.hotkey_restore", None, self.hotkey_restore_button)
+        self._bind(row.set_desc, "desc.hotkey_restore", record=DEFAULT_HOTKEYS["record"],
+                   resume=DEFAULT_HOTKEYS["continue"])
+        layout.addStretch()
+        return page
+
+    def _build_about(self) -> QWidget:
+        page, layout = self._page("category.about")
+        hero = QWidget()
+        hero_layout = QHBoxLayout(hero)
+        hero_layout.setContentsMargins(20, 20, 20, 20)
+        hero_layout.setSpacing(18)
+        icon = QLabel()
+        icon.setPixmap(app_icon().pixmap(64, 64))
+        hero_layout.addWidget(icon, 0, Qt.AlignmentFlag.AlignTop)
+        column = QVBoxLayout()
+        column.setSpacing(3)
+        self.about_name = QLabel("VoxFlow")
+        self.about_name.setObjectName("aboutName")
+        self.about_version = QLabel()
+        self.about_version.setObjectName("rowDesc")
+        self._bind(self.about_version.setText, "about.version", version=app_version())
+        self.about_author = QLabel()
+        self.about_author.setObjectName("rowDesc")
+        self._bind(self.about_author.setText, "about.author", author=AUTHOR)
+        self.about_repo_button = QPushButton()
+        self.about_repo_button.setObjectName("link")
+        self.about_repo_button.setCursor(Qt.CursorShape.PointingHandCursor)
+        self._bind(self.about_repo_button.setText, "about.repo")
+        # Reserved until the first public release: the repository link opens REPO_URL then.
+        self.about_repo_button.setEnabled(False)
+        self._bind(self.about_repo_button.setToolTip, "about.coming")
+        for widget in (self.about_name, self.about_version, self.about_author):
+            column.addWidget(widget)
+        column.addSpacing(6)
+        column.addWidget(self.about_repo_button, 0, Qt.AlignmentFlag.AlignLeft)
+        hero_layout.addLayout(column, 1)
+        self._section(layout).add_row(hero)
+
+        card = self._section(layout, "section.components")
+        self._row(card, "about.asr", None, self._value("SenseVoiceSmall · sherpa-onnx"))
+        rewrite_value = self._value("")
+        self._bind(rewrite_value.setText, "about.rewrite_value")
+        self._row(card, "about.rewrite", None, rewrite_value)
+        self._row(card, "about.framework", None, self._value(f"PySide6 {PySide6.__version__} · Qt {qVersion()}"))
+        license_value = self._value("")
+        self._bind(license_value.setText, "about.license_value")
+        self._row(card, "about.license", None, license_value)
+
+        # Updates are reserved until VoxFlow is published; the controls show what is coming.
+        self.update_channel = SettingsComboBox()
+        for key, value in (("channel.stable", "stable"), ("channel.beta", "beta")):
+            self.update_channel.addItem(tr(key), value)
+        self.update_on_start = ToggleSwitch()
+        self.update_check_button = self._button("button.check_updates", lambda: None)
+        card = self._section(layout, "section.updates")
+        self._row(card, "about.channel", "desc.channel", self._sized(self.update_channel, 220))
+        self._row(card, "about.check_on_start", "desc.check_on_start", self.update_on_start)
+        self._row(card, "about.check_now", "desc.check_now", self.update_check_button)
+        for control in (self.update_channel, self.update_on_start, self.update_check_button):
+            control.setEnabled(False)
+        note = QLabel()
+        note.setObjectName("note")
+        note.setWordWrap(True)
+        self._bind(note.setText, "about.updates_note")
+        layout.addSpacing(4)
+        layout.addWidget(note)
+        layout.addStretch()
+        return page
+
+    @staticmethod
+    def _value(text: str) -> QLabel:
+        label = QLabel(text)
+        label.setObjectName("rowValue")
+        label.setTextInteractionFlags(Qt.TextInteractionFlag.TextSelectableByMouse)
+        return label
+
     def _line(self, value: str, placeholder_key: str | None, placeholder: str = "",
               password: bool = False) -> QLineEdit:
         edit = QLineEdit(value)
@@ -519,6 +645,45 @@ class SettingsWindow(QWidget):
         self.rewrite_model.setCurrentText(current or (names[0] if names else ""))
         self._show_test_result("models.refreshed", count=len(names))
         self._save_rewrite()
+
+    # Shortcuts --------------------------------------------------------------------------------
+
+    def set_hotkey_applier(self, applier) -> None:
+        """applier(action, text) registers the shortcut and returns None, or an error key to keep the old one."""
+        self._hotkey_applier = applier
+
+    def _show_hotkey_message(self, key: str, **values) -> None:
+        self._hotkey_message = (key, values)
+        shown = dict(values)
+        if "action" in shown:
+            shown["action"] = tr(shown["action"])
+        self.hotkey_status.setText(tr(key, **shown))
+
+    def _apply_hotkey(self, action: str, text: str) -> str | None:
+        error = self._hotkey_applier(action, text) if self._hotkey_applier is not None else None
+        if error is None:
+            self.settings.setValue(f"hotkeys/{action}", text)
+            self.hotkey_buttons[action].set_hotkey(text)
+        return error
+
+    def _hotkey_captured(self, action: str, text: str) -> None:
+        other = next(name for name in ACTIONS if name != action)
+        if parse_hotkey(text) == parse_hotkey(self.hotkey_buttons[other].hotkey):
+            self._show_hotkey_message("hotkey.duplicate", hotkey=text, action=HOTKEY_FIELDS[other])
+            return
+        error = self._apply_hotkey(action, text)
+        self._show_hotkey_message(error or "hotkey.saved", hotkey=text)
+
+    def _restore_hotkeys(self) -> None:
+        # Release both first so swapped custom keys can trade places.
+        self.hotkey_capture.emit(True)
+        errors = [(error, DEFAULT_HOTKEYS[action]) for action in ACTIONS
+                  if (error := self._apply_hotkey(action, DEFAULT_HOTKEYS[action]))]
+        self.hotkey_capture.emit(False)
+        if errors:
+            self._show_hotkey_message(errors[0][0], hotkey=errors[0][1])
+        else:
+            self._show_hotkey_message("hotkey.saved", hotkey=" / ".join(DEFAULT_HOTKEYS[a] for a in ACTIONS))
 
     # Appearance -------------------------------------------------------------------------------
 
