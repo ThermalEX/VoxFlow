@@ -3,12 +3,13 @@
 from PySide6.QtCore import QEasingCurve, QPropertyAnimation, QSettings, QSize, Qt, Signal, QVariantAnimation
 from PySide6.QtGui import QColor, QFont, QIcon, QPainter, QPixmap
 from PySide6.QtWidgets import (
-    QAbstractSpinBox, QApplication, QComboBox, QColorDialog, QFontComboBox, QFrame,
-    QGraphicsOpacityEffect, QHBoxLayout, QLabel, QListWidget, QListWidgetItem,
+    QAbstractSpinBox, QApplication, QCheckBox, QComboBox, QColorDialog, QFontComboBox, QFrame,
+    QGraphicsOpacityEffect, QHBoxLayout, QLabel, QLineEdit, QListWidget, QListWidgetItem,
     QPushButton, QSpinBox, QStackedWidget, QVBoxLayout, QWidget,
 )
 
 from .appearance import DEFAULT_BACKGROUND, DEFAULT_CAPSULE, DEFAULT_FONT, DEFAULT_TEXT_SIZE, saved_color
+from .rewriter import RewriteConfig
 from .ui_icons import app_icon, line_icon, symbol_pixmap
 
 
@@ -78,14 +79,15 @@ class SettingsWindow(QWidget):
     background_color_changed = Signal(QColor)
     capsule_color_changed = Signal(QColor)
     alignment_changed = Signal(str)
+    rewrite_changed = Signal()
 
     def __init__(self, settings: QSettings) -> None:
         super().__init__()
         self.settings = settings
         self.setWindowTitle("VoxFlow Settings")
         self.setWindowIcon(app_icon())
-        self.setMinimumSize(700, 490)
-        self.resize(760, 520)
+        self.setMinimumSize(700, 560)
+        self.resize(760, 590)
         self.setObjectName("settingsWindow")
         self.setStyleSheet("""
             QWidget#settingsWindow { background: #FFFFFF; color: #20242B; font-family: 'Segoe UI'; }
@@ -119,6 +121,11 @@ class SettingsWindow(QWidget):
             QPushButton#resetButton { background: #FFFFFF; color: #2A5083;
                 border: 1px solid #CFD6DF; border-radius: 8px; padding: 8px 14px; }
             QPushButton#resetButton:hover { background: #F3F6FA; }
+            QLineEdit { background: #FFFFFF; color: #20242B; border: 1px solid #CFD6DF;
+                border-radius: 9px; padding: 6px 12px; min-height: 29px; }
+            QLineEdit:hover { border-color: #9BAFC8; }
+            QLineEdit:focus { border: 2px solid #5C87C7; }
+            QCheckBox { color: #20242B; font-size: 14px; spacing: 9px; }
         """)
 
         root = QHBoxLayout(self)
@@ -150,6 +157,7 @@ class SettingsWindow(QWidget):
         self.categories.setVerticalScrollBarPolicy(Qt.ScrollBarPolicy.ScrollBarAlwaysOff)
         self.categories.addItem(QListWidgetItem(line_icon("personalize"), "Personalization"))
         self.categories.addItem(QListWidgetItem(line_icon("settings"), "App settings"))
+        self.categories.addItem(QListWidgetItem(line_icon("smart"), "Smart editing"))
         self.categories.setAccessibleName("Settings categories")
         self.categories.viewport().setCursor(Qt.CursorShape.PointingHandCursor)
         sidebar_layout.addWidget(self.categories, 1)
@@ -158,6 +166,7 @@ class SettingsWindow(QWidget):
         root.addWidget(self.pages, 1)
         self.pages.addWidget(self._build_personalization())
         self.pages.addWidget(self._build_app_settings())
+        self.pages.addWidget(self._build_smart_editing())
         self._page_effects = []
         for index in range(self.pages.count()):
             effect = QGraphicsOpacityEffect(self.pages.widget(index))
@@ -193,8 +202,7 @@ class SettingsWindow(QWidget):
         if self._page_animation is not None:
             self._page_animation.stop()
         self.pages.setCurrentIndex(row)
-        for index in range(self.categories.count()):
-            name = "personalize" if index == 0 else "settings"
+        for index, name in enumerate(("personalize", "settings", "smart")):
             color = "#285C9D" if index == row else "#657486"
             self.categories.item(index).setIcon(line_icon(name, color))
         effect = self._page_effects[row]
@@ -232,6 +240,116 @@ class SettingsWindow(QWidget):
         layout.addWidget(label)
         layout.addWidget(control)
         layout.addSpacing(9)
+
+    @staticmethod
+    def _field_row(title: str, control: QWidget) -> QWidget:
+        row = QWidget()
+        layout = QVBoxLayout(row)
+        layout.setContentsMargins(0, 0, 0, 6)
+        layout.setSpacing(8)
+        label = QLabel(title)
+        label.setObjectName("fieldTitle")
+        layout.addWidget(label)
+        layout.addWidget(control)
+        return row
+
+    def _build_smart_editing(self) -> QWidget:
+        page, layout = self._page(
+            "Smart editing", "Polish the final transcript with a rewrite model. The original stays one click away.")
+        config = RewriteConfig.from_settings(self.settings)
+        self._rewrite_tester = None
+        self.rewrite_enabled = QCheckBox("Polish final transcripts and suggest rewrites")
+        self.rewrite_enabled.setChecked(config.enabled)
+        layout.addWidget(self.rewrite_enabled)
+        layout.addSpacing(6)
+        self.rewrite_provider = SettingsComboBox()
+        self.rewrite_provider.setAccessibleName("Model source")
+        self.rewrite_provider.addItem("VoxFlow local model", "local")
+        self.rewrite_provider.addItem("Custom OpenAI-compatible endpoint", "custom")
+        self.rewrite_provider.setCurrentIndex(max(0, self.rewrite_provider.findData(config.provider)))
+        layout.addWidget(self._field_row("Model source", self.rewrite_provider))
+
+        def line(value: str, placeholder: str, password: bool = False) -> QLineEdit:
+            edit = QLineEdit(value)
+            edit.setPlaceholderText(placeholder)
+            if password:
+                edit.setEchoMode(QLineEdit.EchoMode.Password)
+            edit.editingFinished.connect(self._save_rewrite)
+            return edit
+
+        self.rewrite_endpoint = line(config.endpoint, "http://localhost:1234/v1")
+        self.rewrite_model = line(config.model, "Model name")
+        self.rewrite_api_key = line(config.api_key, "Optional", password=True)
+        self.rewrite_distro = line(config.wsl_distro, "Default distribution")
+        self.rewrite_environment = line(config.environment, "~/voxflow-train")
+        self.rewrite_adapter = line(config.adapter, "training/rewrite/runs/qwen3.5-2b/adapter")
+        self.rewrite_endpoint_row = self._field_row("Endpoint", self.rewrite_endpoint)
+        self.rewrite_model_row = self._field_row("Model", self.rewrite_model)
+        self.rewrite_api_key_row = self._field_row("API key", self.rewrite_api_key)
+        self.rewrite_distro_row = self._field_row("WSL distribution", self.rewrite_distro)
+        self.rewrite_environment_row = self._field_row("Training environment", self.rewrite_environment)
+        self.rewrite_adapter_row = self._field_row("Adapter", self.rewrite_adapter)
+        for row in (self.rewrite_endpoint_row, self.rewrite_model_row, self.rewrite_api_key_row,
+                    self.rewrite_distro_row, self.rewrite_environment_row, self.rewrite_adapter_row):
+            layout.addWidget(row)
+
+        test_row = QHBoxLayout()
+        self.rewrite_test_button = QPushButton("Test connection")
+        self.rewrite_test_button.setObjectName("resetButton")
+        self.rewrite_test_button.setCursor(Qt.CursorShape.PointingHandCursor)
+        self.rewrite_test_button.clicked.connect(self._test_rewrite)
+        test_row.addWidget(self.rewrite_test_button)
+        self.rewrite_status = QLabel("")
+        self.rewrite_status.setObjectName("description")
+        self.rewrite_status.setWordWrap(True)
+        test_row.addWidget(self.rewrite_status, 1)
+        layout.addLayout(test_row)
+        layout.addStretch()
+
+        self.rewrite_enabled.toggled.connect(self._save_rewrite)
+        self.rewrite_provider.currentIndexChanged.connect(self._sync_rewrite_rows)
+        self.rewrite_provider.currentIndexChanged.connect(self._save_rewrite)
+        self._sync_rewrite_rows()
+        return page
+
+    def rewrite_config(self) -> RewriteConfig:
+        return RewriteConfig(
+            enabled=self.rewrite_enabled.isChecked(),
+            provider=str(self.rewrite_provider.currentData()),
+            endpoint=self.rewrite_endpoint.text().strip(),
+            model=self.rewrite_model.text().strip(),
+            api_key=self.rewrite_api_key.text().strip(),
+            wsl_distro=self.rewrite_distro.text().strip(),
+            environment=self.rewrite_environment.text().strip() or RewriteConfig.environment,
+            adapter=self.rewrite_adapter.text().strip() or RewriteConfig.adapter,
+        )
+
+    def _sync_rewrite_rows(self) -> None:
+        custom = self.rewrite_provider.currentData() == "custom"
+        for row in (self.rewrite_endpoint_row, self.rewrite_model_row, self.rewrite_api_key_row):
+            row.setVisible(custom)
+        for row in (self.rewrite_distro_row, self.rewrite_environment_row, self.rewrite_adapter_row):
+            row.setVisible(not custom)
+
+    def _save_rewrite(self) -> None:
+        self.rewrite_config().save(self.settings)
+        self.rewrite_changed.emit()
+
+    def set_rewrite_tester(self, tester) -> None:
+        self._rewrite_tester = tester
+
+    def _test_rewrite(self) -> None:
+        if self._rewrite_tester is None:
+            self.rewrite_status.setText("Connection test is unavailable")
+            return
+        self.rewrite_status.setText("Testing…")
+        self.rewrite_status.repaint()
+        try:
+            name = self._rewrite_tester(self.rewrite_config())
+        except Exception as exc:  # show any backend failure to the user verbatim
+            self.rewrite_status.setText(f"Not connected · {exc}")
+        else:
+            self.rewrite_status.setText(f"Connected · {name}")
 
     def _build_personalization(self) -> QWidget:
         page, layout = self._page("Personalization", "Changes appear in the voice overlay immediately.")

@@ -332,11 +332,12 @@ def test_standalone_settings_saves_alignment_without_revealing_overlay(tmp_path)
     window.device_button.click()
     assert window.settings_window.isVisible()
     assert not window.isVisible()
-    assert window.settings_window.pages.count() == 2
+    assert window.settings_window.pages.count() == 3
     assert not window.settings_window.windowIcon().isNull()
-    assert all(not window.settings_window.categories.item(index).icon().isNull() for index in range(2))
+    assert all(not window.settings_window.categories.item(index).icon().isNull() for index in range(3))
     assert window.settings_window.categories.item(0).text() == "Personalization"
     assert window.settings_window.categories.item(1).text() == "App settings"
+    assert window.settings_window.categories.item(2).text() == "Smart editing"
     window.settings_window.categories.setCurrentRow(1)
     window.alignment_box.setCurrentIndex(window.alignment_box.findData("right"))
     assert window.transcript_alignment == "right"

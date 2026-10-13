@@ -48,5 +48,6 @@ def line_icon(name: str, color: str = "#526376") -> QIcon:
         "personalize": "tune",
         "settings": "settings",
         "restore": "restart_alt",
+        "smart": "auto_fix_high",
     }
     return QIcon(symbol_pixmap(symbols[name], 40, color))
