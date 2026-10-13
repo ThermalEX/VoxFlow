@@ -8,7 +8,9 @@ import json
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parent
-LORA_TARGETS = ["q_proj", "k_proj", "v_proj", "o_proj", "gate_proj", "up_proj", "down_proj"]
+# Qwen3.5 mixes full attention (q/k/v/o) with linear-attention layers (in_proj_qkv/in_proj_z/out_proj).
+LORA_TARGETS = ["q_proj", "k_proj", "v_proj", "o_proj", "in_proj_qkv", "in_proj_z", "out_proj",
+                "gate_proj", "up_proj", "down_proj"]
 
 
 def render_prompt(tokenizer, messages: list[dict]) -> str:
@@ -45,8 +47,8 @@ def main() -> int:
     parser.add_argument("--learning-rate", type=float, default=2e-4)
     parser.add_argument("--rank", type=int, default=16)
     parser.add_argument("--max-length", type=int, default=1024)
-    parser.add_argument("--batch-size", type=int, default=2)
-    parser.add_argument("--grad-accum", type=int, default=4)
+    parser.add_argument("--batch-size", type=int, default=1)
+    parser.add_argument("--grad-accum", type=int, default=8)
     parser.add_argument("--seed", type=int, default=3407)
     args = parser.parse_args()
 
@@ -81,7 +83,7 @@ def main() -> int:
             max_steps=args.max_steps,
             learning_rate=args.learning_rate,
             lr_scheduler_type="cosine",
-            warmup_ratio=0.03,
+            warmup_steps=20,
             logging_steps=10,
             eval_strategy="epoch",
             save_strategy="epoch",
@@ -100,8 +102,10 @@ def main() -> int:
     evaluation = trainer.evaluate()
     model.save_pretrained(str(args.output / "adapter"))
     processor.save_pretrained(str(args.output / "adapter"))
+    import torch
     summary = {"args": {key: str(value) for key, value in vars(args).items()}, "skipped": skipped,
-               "train": result.metrics, "eval": evaluation}
+               "train": result.metrics, "eval": evaluation,
+               "max_memory_gb": round(torch.cuda.max_memory_allocated() / 2**30, 2)}
     (args.output / "train_summary.json").write_text(json.dumps(summary, indent=2), encoding="utf-8")
     print(json.dumps(summary, indent=2))
     return 0
