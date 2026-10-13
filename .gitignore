@@ -10,3 +10,4 @@ __pycache__/
 !.env.example
 .DS_Store
 Thumbs.db
+training/rewrite/build/

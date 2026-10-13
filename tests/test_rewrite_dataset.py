@@ -179,3 +179,106 @@ def test_augment_never_returns_the_clean_text():
 def test_augment_is_deterministic():
     text = "周六下午三点开会，记得带电脑。"
     assert augment.augment_text(text, random.Random(9)) == augment.augment_text(text, random.Random(9))
+
+
+from pathlib import Path
+
+import pytest
+
+from training.rewrite import build_dataset
+
+
+def write_seeds(seeds_dir: Path, clean_cases, suggestions):
+    seeds_dir.mkdir(parents=True, exist_ok=True)
+    for name, records in (("clean_cases.jsonl", clean_cases), ("suggestions.jsonl", suggestions)):
+        (seeds_dir / name).write_text(
+            "".join(json.dumps(record, ensure_ascii=False) + "\n" for record in records), encoding="utf-8")
+
+
+def sample_seeds(count=40):
+    cases = [clean_case(id=f"case-{i:03d}", raw=f"额，周六下午{i % 9 + 1}点去买第{i}样东西",
+                        output=f"周六下午{i % 9 + 1}点去买第{i}样东西。", categories=["filler"])
+             for i in range(count)]
+    tips = [suggestion(id=f"sug-{i:03d}", input=f"第{i}件事我明天处理。",
+                       suggestions=[{"label": "更正式", "text": f"第{i}件事我将于明天处理完毕。"}])
+            for i in range(count)]
+    return cases, tips
+
+
+def read_split(out_dir: Path, name: str):
+    return [json.loads(line) for line in (out_dir / f"{name}.jsonl").read_text(encoding="utf-8").splitlines()]
+
+
+def test_split_is_stable_when_seeds_are_added():
+    before = {f"case-{i}": build_dataset.split_for(f"case-{i}") for i in range(200)}
+    assert set(before.values()) == {"train", "valid", "test"}
+    assert {key: build_dataset.split_for(key) for key in before} == before
+    counts = {name: list(before.values()).count(name) for name in ("train", "valid", "test")}
+    assert counts["train"] > counts["test"] > counts["valid"]
+
+
+def test_build_exports_chat_files_without_test_leakage(tmp_path):
+    cases, tips = sample_seeds()
+    write_seeds(tmp_path / "seeds", cases, tips)
+    report = build_dataset.build(tmp_path / "seeds", tmp_path / "out")
+    splits = {name: read_split(tmp_path / "out", name) for name in ("train", "valid", "test")}
+    assert sum(report.counts.values()) == sum(len(rows) for rows in splits.values())
+    assert report.hand_total == 80
+    assert 0 < report.augmented_total <= int(report.hand_total * build_dataset.AUGMENT_RATIO)
+    assert all(row["meta"]["source"] == "hand" for row in splits["test"])
+    groups = {name: {row["meta"]["group"] for row in rows} for name, rows in splits.items()}
+    assert not groups["test"] & (groups["train"] | groups["valid"])
+    assert not groups["train"] & groups["valid"]
+    row = splits["train"][0]
+    assert [message["role"] for message in row["messages"]] == ["system", "user", "assistant"]
+
+
+def test_augmented_rows_target_the_clean_text(tmp_path):
+    cases, tips = sample_seeds()
+    write_seeds(tmp_path / "seeds", cases, tips)
+    build_dataset.build(tmp_path / "seeds", tmp_path / "out")
+    rows = [row for name in ("train", "valid") for row in read_split(tmp_path / "out", name)
+            if row["meta"]["source"] == "augmented"]
+    assert rows
+    for row in rows:
+        user, assistant = row["messages"][1]["content"], row["messages"][2]["content"]
+        assert row["meta"]["task"] == "clean"
+        assert user != assistant
+        assert row["messages"][0]["content"] == build_dataset.CLEAN_SYSTEM_PROMPT
+
+
+def test_suggest_examples_round_trip_as_compact_json(tmp_path):
+    cases, tips = sample_seeds()
+    write_seeds(tmp_path / "seeds", cases, tips)
+    build_dataset.build(tmp_path / "seeds", tmp_path / "out")
+    rows = [row for name in ("train", "valid", "test") for row in read_split(tmp_path / "out", name)
+            if row["meta"]["task"] == "suggest"]
+    assert len(rows) == 40
+    content = rows[0]["messages"][2]["content"]
+    assert "\\u" not in content and ", " not in content and "更正式" in content
+    assert json.loads(content)[0].keys() == {"label", "text"}
+    assert rows[0]["messages"][0]["content"] == build_dataset.SUGGEST_SYSTEM_PROMPT
+
+
+def test_build_fails_with_every_error_listed(tmp_path):
+    cases, tips = sample_seeds(3)
+    cases[1]["scene"] = "moon"
+    tips[2]["id"] = cases[0]["id"]
+    write_seeds(tmp_path / "seeds", cases, tips)
+    with pytest.raises(build_dataset.DatasetError) as caught:
+        build_dataset.build(tmp_path / "seeds", tmp_path / "out")
+    text = "\n".join(caught.value.errors)
+    assert "case-001" in text and "scene" in text
+    assert "duplicate id" in text and "case-000" in text
+    assert not (tmp_path / "out" / "train.jsonl").exists()
+
+
+def test_coverage_warns_below_plan_and_flags_near_duplicates(tmp_path):
+    cases, tips = sample_seeds(3)
+    cases.append(clean_case(id="case-dup", raw=cases[0]["raw"] + "啊", output=cases[0]["output"],
+                            categories=["filler"]))
+    write_seeds(tmp_path / "seeds", cases, tips)
+    report = build_dataset.build(tmp_path / "seeds", tmp_path / "out")
+    assert any("instr_translate" in warning for warning in report.warnings)
+    assert any("near-duplicate" in warning and "case-dup" in warning for warning in report.warnings)
+    assert any(line.startswith("filler") for line in report.coverage)
