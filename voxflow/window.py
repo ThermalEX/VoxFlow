@@ -143,6 +143,7 @@ class VoxFlowWindow(QWidget):
         layout.setAlignment(self.status_label, Qt.AlignmentFlag.AlignHCenter)
         self.transcript = QTextEdit()
         self.transcript.setFixedWidth(max(200, min(660, self.width() - 100)))
+        self.status_label.setFixedWidth(self.transcript.width())
         self.transcript.setReadOnly(True)
         self.transcript.setVerticalScrollBarPolicy(Qt.ScrollBarPolicy.ScrollBarAlwaysOff)
         self.transcript.viewport().setAutoFillBackground(False)
@@ -462,6 +463,7 @@ class VoxFlowWindow(QWidget):
                 self._edge_mask = None
                 if hasattr(self, "transcript"):
                     self.transcript.setFixedWidth(max(200, min(660, self.width() - 100)))
+                    self.status_label.setFixedWidth(self.transcript.width())
             self.move(area.x() + (area.width() - self.width()) // 2, area.y() + area.height() - self.height())
 
     def _reset_result_size(self) -> None:

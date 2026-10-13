@@ -236,3 +236,30 @@ def test_turning_smart_editing_off_in_settings_stops_it(tmp_path):
     window.settings_window.rewrite_enabled.setChecked(False)
     assert not window.smart.active and server.stopped == 1
     window.close()
+
+
+def test_polished_text_keeps_the_transcript_font(tmp_path):
+    from PySide6.QtGui import QTextCursor
+
+    app, window, _output = make_window(tmp_path, FakeClient())
+    family = window.transcript.font().family()
+    window.apply_transcript("final", ORIGINAL)
+    animation = window.smart.animation
+    settle(app, window, lambda: animation.state() == animation.State.Running)
+    animation.setCurrentTime(animation.duration() // 2)
+    assert family in window.transcript.toHtml()
+    animation.setCurrentTime(animation.duration())
+    app.processEvents()
+    cursor = QTextCursor(window.transcript.document())
+    cursor.setPosition(1)
+    assert cursor.charFormat().font().family() == family
+    window.smart.undo_button.hovered.emit(True)
+    assert family in window.transcript.toHtml()
+    window.close()
+
+
+def test_status_line_is_as_wide_as_the_transcript(tmp_path):
+    app, window, _output = make_window(tmp_path, FakeClient())
+    polish(app, window)
+    assert window.status_label.width() == window.transcript.width()
+    window.close()
