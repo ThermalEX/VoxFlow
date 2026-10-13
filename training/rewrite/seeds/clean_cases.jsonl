@@ -531,3 +531,48 @@
 {"id": "style-0095", "categories": ["instr_style"], "scene": "email", "raw": "感谢支持，正式一点", "output": "衷心感谢您一直以来的支持。", "instr_position": "suffix"}
 {"id": "style-0096", "categories": ["instr_style"], "scene": "tech", "raw": "make it more concise, so basically what happens is that when the user clicks the button twice really fast, we end up sending two requests", "output": "Double-clicking the button sends two requests.", "instr_position": "suffix"}
 {"id": "style-0097", "categories": ["instr_style"], "scene": "school", "raw": "我们组想换个题目，委婉一点", "output": "老师，我们组想和您商量一下，能否调整一下题目？", "instr_position": "suffix"}
+{"id": "style-0098", "categories": ["instr_style"], "scene": "work_chat", "raw": "这个需求太不合理了，我们做不了，委婉一点", "output": "这个需求在实现上有一定难度，我们评估后暂时无法支持。", "instr_position": "suffix"}
+{"id": "style-0099", "categories": ["instr_style"], "scene": "email", "raw": "你们的合同我们看过了，有几条要改，正式一点", "output": "贵方的合同我方已审阅，其中部分条款需要修改。", "instr_position": "suffix"}
+{"id": "style-0100", "categories": ["instr_style"], "scene": "tech", "raw": "数据库被人误删了一张表，已经从备份恢复了，正式一点", "output": "数据库中一张表被误删，现已从备份中恢复。", "instr_position": "suffix"}
+{"id": "style-0101", "categories": ["instr_style"], "scene": "customer_service", "raw": "这个问题我们处理不了，你去找厂家吧，礼貌一点", "output": "非常抱歉，这个问题需要由厂家处理，建议您联系厂家售后。", "instr_position": "suffix"}
+{"id": "style-0102", "categories": ["instr_style"], "scene": "shopping", "raw": "这个衣服线头太多了，便宜点我就要，客气一点", "output": "这件衣服有些线头，价格上能优惠一点的话我就要了。", "instr_position": "suffix"}
+{"id": "style-0103", "categories": ["instr_style"], "scene": "school", "raw": "老师你批改的分数好像算错了，委婉一点", "output": "老师，我核对了一下分数，好像有一处不太一致，麻烦您帮忙看一下。", "instr_position": "suffix"}
+{"id": "style-0104", "categories": ["instr_style"], "scene": "social_media", "raw": "终于辞职了，自由了，正式一点", "output": "已正式离职，开启人生新阶段。", "instr_position": "suffix"}
+{"id": "style-0105", "categories": ["instr_style"], "scene": "family_friends", "raw": "我这个月手头紧，借你的钱晚点还，委婉一点", "output": "这个月手头有点紧，之前借你的钱可能要晚一点还，不好意思啊。", "instr_position": "suffix"}
+{"id": "style-0106", "categories": ["instr_style"], "scene": "schedule", "raw": "明天的面试我去不了了，帮我改个时间，正式一点", "output": "很抱歉，我明天无法参加面试，请问能否调整到其他时间？", "instr_position": "suffix"}
+{"id": "style-0107", "categories": ["instr_style"], "scene": "daily", "raw": "你能不能别把袜子乱扔，温柔一点", "output": "袜子可以放进脏衣篮里吗？谢谢你啦。", "instr_position": "suffix"}
+{"id": "style-0108", "categories": ["instr_style"], "scene": "work_chat", "raw": "群里别发广告了，严肃一点", "output": "请勿在群内发布广告，感谢配合。", "instr_position": "suffix"}
+{"id": "style-0109", "categories": ["instr_style"], "scene": "email", "raw": "We need the signed contract back today, more polite", "output": "Would you be able to return the signed contract today? Thank you!", "instr_position": "suffix"}
+{"id": "style-0110", "categories": ["instr_style"], "scene": "tech", "raw": "Your code broke the build, fix it now, more diplomatic", "output": "It looks like the latest changes broke the build. Could you take a look when you can?", "instr_position": "suffix"}
+{"id": "style-0111", "categories": ["instr_style"], "scene": "customer_service", "raw": "We can't refund you, it's past the return window, softer please", "output": "Unfortunately, this order is past the return window, so we're unable to issue a refund.", "instr_position": "suffix"}
+{"id": "style-0112", "categories": ["instr_style"], "scene": "social_media", "raw": "I passed my driving test, more excited", "output": "I PASSED my driving test!!! So happy!", "instr_position": "suffix"}
+{"id": "style-0113", "categories": ["instr_style"], "scene": "school", "raw": "Your presentation was too long, be gentler", "output": "Great presentation! Next time, it might help to trim it down a little.", "instr_position": "suffix"}
+{"id": "style-0114", "categories": ["instr_style"], "scene": "family_friends", "raw": "Stop calling me during work, make it nicer", "output": "Could we chat after work? It's hard for me to pick up during the day.", "instr_position": "suffix"}
+{"id": "style-0115", "categories": ["instr_style", "filler"], "scene": "work_chat", "raw": "那个，就是这个文档，嗯，写得有点乱，你再整理一下，委婉一点", "output": "这个文档还可以再整理一下，会更清晰。", "instr_position": "suffix"}
+{"id": "style-0116", "categories": ["instr_style", "filler"], "scene": "customer_service", "raw": "额，你们这个，就是客服电话一直打不通，礼貌一点", "output": "您好，客服电话一直打不通，麻烦帮忙看一下。", "instr_position": "suffix"}
+{"id": "style-0117", "categories": ["instr_style", "repetition"], "scene": "email", "raw": "这个这个项目的预算我们我们需要再加十万，正式一点", "output": "本项目预算需追加十万元。", "instr_position": "suffix"}
+{"id": "style-0118", "categories": ["instr_style", "filler"], "scene": "schedule", "raw": "嗯，周末那个，就是聚餐，我去不了了，委婉一点", "output": "周末的聚餐我这次去不了啦，大家吃好玩好。", "instr_position": "suffix"}
+{"id": "style-0119", "categories": ["instr_style"], "scene": "shopping", "raw": "简洁一点，我想问一下你们这个床垫，就是如果睡了觉得不舒服的话，能不能退，大概多久之内可以退。", "output": "床垫睡着不舒服能退吗？多久内可以退？", "instr_position": "prefix"}
+{"id": "style-0120", "categories": ["instr_style"], "scene": "school", "raw": "正式一点：王老师，我想请您帮我写推荐信。", "output": "王老师您好，冒昧打扰，想请您为我撰写一封推荐信。", "instr_position": "prefix"}
+{"id": "style-0121", "categories": ["instr_style"], "scene": "tech", "raw": "口语一点，鉴于系统负载持续偏高，建议对服务进行水平扩容。", "output": "系统负载一直挺高的，建议多加几台机器。", "instr_position": "prefix"}
+{"id": "style-0122", "categories": ["instr_style"], "scene": "work_chat", "raw": "幽默一点：今天全组加班。", "output": "今天全组加班，让我们一起和月亮说晚安。", "instr_position": "prefix"}
+{"id": "style-0123", "categories": ["instr_style"], "scene": "family_friends", "raw": "热情一点：欢迎来我家玩。", "output": "超欢迎来我家玩！随时来，提前说一声就行！", "instr_position": "prefix"}
+{"id": "style-0124", "categories": ["instr_style"], "scene": "customer_service", "raw": "专业一点，你这个是电池坏了，换一个就好。", "output": "经检测，问题出在电池，更换电池即可恢复正常。", "instr_position": "prefix"}
+{"id": "style-0125", "categories": ["instr_style"], "scene": "social_media", "raw": "make it shorter: today I went to the farmers market and bought way too many peaches again.", "output": "Bought way too many peaches at the farmers market again.", "instr_position": "prefix"}
+{"id": "style-0126", "categories": ["instr_style"], "scene": "email", "raw": "more formal: can we push the call to next week?", "output": "Would it be possible to reschedule our call to next week?", "instr_position": "prefix"}
+{"id": "style-0127", "categories": ["instr_style"], "scene": "daily", "raw": "温柔点，快去睡觉，都几点了。", "output": "很晚啦，早点去睡吧。", "instr_position": "prefix"}
+{"id": "style-0128", "categories": ["instr_style"], "scene": "work_chat", "raw": "把这周大家都辛苦了说得更走心一点", "output": "这周大家真的都辛苦了，每个人的付出我都看在眼里，谢谢大家！", "instr_position": "infix"}
+{"id": "style-0129", "categories": ["instr_style"], "scene": "email", "raw": "把请尽快回复改得礼貌一些", "output": "期待您的回复，如方便请尽早告知，谢谢。", "instr_position": "infix"}
+{"id": "style-0130", "categories": ["instr_style"], "scene": "school", "raw": "帮我把这道题我不会说得正式一点", "output": "这道题我还没有掌握，想请您指导一下。", "instr_position": "infix"}
+{"id": "style-0131", "categories": ["instr_style"], "scene": "shopping", "raw": "把这个我不要了说得委婉些", "output": "这个我再考虑考虑，谢谢。", "instr_position": "infix"}
+{"id": "style-0132", "categories": ["instr_style"], "scene": "tech", "raw": "把又是你的bug说得专业一点", "output": "该问题定位到你负责的模块，麻烦看一下。", "instr_position": "infix"}
+{"id": "style-0133", "categories": ["instr_style"], "scene": "customer_service", "raw": "make it more empathetic, your package is lost", "output": "I'm really sorry, but it looks like your package has been lost. We'll do our best to make this right.", "instr_position": "prefix"}
+{"id": "style-0134", "categories": ["instr_style"], "scene": "schedule", "raw": "简洁点，下周三上午九点到十一点，在二楼会议室，开季度总结会，所有部门负责人参加。", "output": "下周三9-11点，二楼会议室，季度总结会，各部门负责人参加。", "instr_position": "prefix"}
+{"id": "style-0135", "categories": ["instr_style"], "scene": "family_friends", "raw": "说得暖心一点，生日快乐。", "output": "生日快乐！愿你被这个世界温柔以待，每天都开开心心。", "instr_position": "prefix"}
+{"id": "style-0136", "categories": ["instr_style"], "scene": "social_media", "raw": "低调一点，我拿到了年度最佳员工。", "output": "很幸运拿到了今年的年度最佳员工，感谢同事们的支持。", "instr_position": "prefix"}
+{"id": "style-0137", "categories": ["instr_style"], "scene": "work_chat", "raw": "the client hated the design, make it diplomatic", "output": "The client had some concerns about the design and would like to explore other directions.", "instr_position": "suffix"}
+{"id": "style-0138", "categories": ["instr_style"], "scene": "daily", "raw": "提醒一下，明天早上记得倒垃圾，可爱一点", "output": "明天早上记得倒垃圾哦～", "instr_position": "suffix"}
+{"id": "style-0139", "categories": ["instr_style"], "scene": "email", "raw": "我们这边没收到货款，请尽快处理，严肃一点", "output": "截至目前，我方尚未收到货款，请尽快安排支付。", "instr_position": "suffix"}
+{"id": "style-0140", "categories": ["instr_style"], "scene": "school", "raw": "这次活动谢谢大家参与，正式一点", "output": "衷心感谢各位同学参与本次活动。", "instr_position": "suffix"}
+{"id": "style-0141", "categories": ["instr_style"], "scene": "tech", "raw": "这个接口文档写得太烂了，看不懂，委婉一点", "output": "这份接口文档有些地方不太好理解，能否再补充一些说明？", "instr_position": "suffix"}
+{"id": "style-0142", "categories": ["instr_style"], "scene": "customer_service", "raw": "您的投诉我们收到了，会尽快处理，简洁一点", "output": "投诉已收到，我们会尽快处理。", "instr_position": "suffix"}
