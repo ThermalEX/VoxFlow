@@ -20,8 +20,28 @@ MAX_ANSWER_TOKENS = 4096
 _REASONING = re.compile(r"<think>.*?</think>", re.S)
 
 
+# New installs start with smart editing on so the local model loads with the app.
+DEFAULT_ENABLED = True
+# Version 1 stored "off" as the default; version 2 switches such settings on once.
+DEFAULTS_VERSION = 2
+
+
+def migrate_settings(settings: QSettings) -> None:
+    if int(settings.value("rewrite/defaults_version", 1)) >= DEFAULTS_VERSION:
+        return
+    if DEFAULT_ENABLED and settings.contains("rewrite/enabled"):
+        settings.setValue("rewrite/enabled", True)
+    settings.setValue("rewrite/defaults_version", DEFAULTS_VERSION)
+
+
 class RewriteError(Exception):
-    pass
+    """A failed rewrite; ``kind`` selects the user-facing explanation (see i18n ``error.*``)."""
+
+    def __init__(self, message: str, kind: str = "other", code: int | None = None, path: str = "") -> None:
+        super().__init__(message)
+        self.kind = kind
+        self.code = code
+        self.path = path
 
 
 @dataclass(frozen=True)
@@ -46,7 +66,8 @@ class RewriteConfig:
     def from_settings(cls, settings: QSettings) -> "RewriteConfig":
         default = cls()
         values = {}
-        for key, fallback in asdict(default).items():
+        fallbacks = asdict(default) | {"enabled": DEFAULT_ENABLED}
+        for key, fallback in fallbacks.items():
             kind = bool if isinstance(fallback, bool) else str
             values[key] = settings.value(f"rewrite/{key}", fallback, type=kind)
         if values["provider"] not in {"local", "custom"}:
@@ -56,6 +77,7 @@ class RewriteConfig:
     def save(self, settings: QSettings) -> None:
         for key, value in asdict(self).items():
             settings.setValue(f"rewrite/{key}", value)
+        settings.setValue("rewrite/defaults_version", DEFAULTS_VERSION)
 
 
 class RewriteClient:
@@ -75,8 +97,14 @@ class RewriteClient:
         try:
             with self._open(request, timeout=timeout) as response:
                 return json.loads(response.read().decode("utf-8"))
-        except (urllib.error.URLError, TimeoutError, OSError, ValueError) as exc:
-            raise RewriteError(str(exc) or type(exc).__name__) from exc
+        except urllib.error.HTTPError as exc:
+            raise RewriteError(str(exc), kind="http", code=exc.code) from exc
+        except (TimeoutError, urllib.error.URLError, OSError) as exc:
+            reason = getattr(exc, "reason", exc)
+            kind = "timeout" if isinstance(exc, TimeoutError) or isinstance(reason, TimeoutError) else "unreachable"
+            raise RewriteError(str(exc) or type(exc).__name__, kind=kind) from exc
+        except ValueError as exc:
+            raise RewriteError(str(exc), kind="bad_response") from exc
 
     def _chat(self, system: str, text: str, timeout: float) -> str:
         reply = self._request("/chat/completions", {
@@ -90,13 +118,13 @@ class RewriteClient:
             choice = reply["choices"][0]
             content = choice["message"]["content"]
         except (KeyError, IndexError, TypeError) as exc:
-            raise RewriteError("unexpected response from the rewrite model") from exc
+            raise RewriteError("unexpected response from the rewrite model", kind="bad_response") from exc
         if choice.get("finish_reason") == "length":
-            raise RewriteError("the rewrite was cut off")
+            raise RewriteError("the rewrite was cut off", kind="truncated")
         if isinstance(content, str):
             content = _REASONING.sub("", content).strip()
         if not isinstance(content, str) or not content:
-            raise RewriteError("the rewrite model returned no text")
+            raise RewriteError("the rewrite model returned no text", kind="empty")
         return content
 
     def clean(self, text: str) -> str:

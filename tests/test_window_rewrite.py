@@ -37,6 +37,7 @@ class FakeServer:
     def __init__(self):
         self.is_ready = False
         self.failed = None
+        self.problem = None
         self.started = self.stopped = 0
 
     def start(self):
@@ -225,7 +226,8 @@ def test_server_failure_is_reported_and_original_kept(tmp_path):
     app, window, _output = make_window(tmp_path, FakeClient(), provider="local", server=server)
     server.failed = "Local model server exited (code 1). See serve.log"
     window.apply_transcript("final", ORIGINAL)
-    settle(app, window, lambda: "exited" in window.status_label.text())
+    settle(app, window, lambda: "Local model unavailable" in window.status_label.text())
+    assert "exited" in window.status_label.toolTip()
     assert window.transcript.toPlainText() == ORIGINAL
     window.close()
 
@@ -359,4 +361,47 @@ def test_failed_paste_ends_the_session(tmp_path):
     assert window.smart.animation.state() != window.smart.animation.State.Running
     assert window.transcript.toPlainText() == ORIGINAL
     assert "manual paste" in window.status_label.text()
+    window.close()
+
+
+def test_model_state_is_shown_in_settings(tmp_path):
+    server = FakeServer()
+    app, window, _output = make_window(tmp_path, FakeClient(), provider="local", server=server)
+    status = window.settings_window.rewrite_model_status
+    window._poll()
+    assert status.text() == "Starting…"
+    server.is_ready = True
+    window._poll()
+    assert status.text() == "Ready"
+    server.problem = ("missing_model", "D:/models/x.gguf")
+    server.failed = "Required file not found: D:/models/x.gguf"
+    window._poll()
+    assert status.text() == "Model file not found: D:/models/x.gguf"
+    window.close()
+
+
+def test_connection_test_explains_the_local_model_state(tmp_path):
+    server = FakeServer()
+    app, window, _output = make_window(tmp_path, FakeClient(), provider="local", server=server)
+    window.settings_window.rewrite_test_button.click()
+    assert window.settings_window.rewrite_status.text() == "Not connected · the local model is still starting"
+    window.settings_window.rewrite_enabled.setChecked(False)
+    window.settings_window.rewrite_test_button.click()
+    assert window.settings_window.rewrite_status.text() == "Not connected · smart editing is off"
+    window.close()
+
+
+def test_switching_language_updates_overlay_and_settings(tmp_path):
+    app, window, _output = make_window(tmp_path, FakeClient())
+    polish(app, window)
+    settings = window.settings_window
+    settings.language_box.setCurrentIndex(settings.language_box.findData("zh"))
+    assert window.smart.undo_button.text() == "撤回修改"
+    assert window.status_label.text().startswith("已整理")
+    assert settings.categories.item(2).text() == "智能编辑"
+    assert settings.rewrite_test_button.text() == "测试连接"
+    assert window.settings.value("ui/language") == "zh"
+    settings.language_box.setCurrentIndex(settings.language_box.findData("en"))
+    assert window.smart.undo_button.text() == "Undo edits"
+    assert settings.categories.item(2).text() == "Smart editing"
     window.close()

@@ -8,6 +8,7 @@ from pathlib import Path
 import soundfile as sf
 from PySide6.QtWidgets import QApplication, QMenu, QSystemTrayIcon
 
+from .i18n import tr
 from .recognizer import SenseVoiceRecognizer
 from .ui_icons import app_icon
 from .window import VoxFlowWindow
@@ -38,25 +39,34 @@ def main() -> int:
     app.setQuitOnLastWindowClosed(False)
     window = VoxFlowWindow(args.model_dir)
     tray = QSystemTrayIcon(icon)
-    tray.setToolTip("VoxFlow · Ctrl+Shift+Space to speak")
     menu = QMenu()
-    menu.addAction("Show VoxFlow", window.reveal)
-    menu.addAction("Start voice input", window.toggle_recording)
-    menu.addAction("Settings", window.open_settings)
+    actions = {
+        "tray.show": menu.addAction("", window.reveal),
+        "tray.start": menu.addAction("", window.toggle_recording),
+        "tray.settings": menu.addAction("", window.open_settings),
+    }
     menu.addSeparator()
     def quit_app() -> None:
         window.close()
         tray.hide()
         app.quit()
 
-    menu.addAction("Quit", quit_app)
+    actions["tray.quit"] = menu.addAction("", quit_app)
+
+    def retranslate_tray() -> None:
+        tray.setToolTip(tr("tray.tooltip"))
+        for key, action in actions.items():
+            action.setText(tr(key))
+
+    retranslate_tray()
+    window.settings_window.language_changed.connect(lambda _choice: retranslate_tray())
     tray.setContextMenu(menu)
     tray.activated.connect(lambda reason: window.reveal() if reason == QSystemTrayIcon.ActivationReason.Trigger else None)
     if QSystemTrayIcon.isSystemTrayAvailable():
         tray.show()
         if not window.register_hotkey():
-            window.status_label.setText("Shortcut unavailable · click the microphone")
-            tray.showMessage("VoxFlow shortcut unavailable", "Ctrl+Shift+Space is in use. Open VoxFlow from the tray.")
+            window.show_status("status.shortcut_unavailable")
+            tray.showMessage(tr("tray.shortcut_title"), tr("tray.shortcut_body"))
     else:
         app.setQuitOnLastWindowClosed(True)
         window.reveal()

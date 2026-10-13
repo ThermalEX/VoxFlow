@@ -132,3 +132,23 @@ def test_missing_server_binary_is_reported_instead_of_crashing(tmp_path):
     assert "llama-server.exe not found" in server.failed
     server.start()
     server.stop()
+
+
+def test_missing_files_are_reported_before_launching(tmp_path):
+    popen = FakePopen()
+    model = tmp_path / "model.gguf"
+    server = LocalRewriteServer(["llama-server.exe"], "http://127.0.0.1:8765/health", tmp_path / "serve.log",
+                                popen=popen, required=[("missing_server", tmp_path / "llama-server.exe"),
+                                                       ("missing_model", model)])
+    server.start()
+    assert popen.calls == []
+    assert server.problem == ("missing_server", str(tmp_path / "llama-server.exe"))
+    assert "llama-server.exe" in server.failed
+
+
+def test_problem_describes_launch_failures_and_exits(tmp_path):
+    server, popen, _clock, _checks, _attached = make(tmp_path)
+    server.start()
+    assert server.problem is None
+    popen.process.returncode = 3
+    assert server.problem == ("exited", "3")

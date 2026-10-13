@@ -8,6 +8,7 @@ from PySide6.QtCore import QEasingCurve, QObject, QTimer, QVariantAnimation
 from PySide6.QtWidgets import QHBoxLayout, QWidget
 
 from .edit_diff import frame_html, same_text
+from .i18n import describe_error, tr
 from .local_server import LocalRewriteServer
 from .overlay_widgets import PillButton
 from .rewriter import LOCAL_ENDPOINT, RewriteClient, RewriteConfig, RewriteError
@@ -17,7 +18,6 @@ EDIT_ANIMATION_MS = 800
 # Suggestions are requested only after the polished text has been on screen a moment, so a quick
 # confirm never leaves a slow suggestion request queued ahead of the next sentence.
 SUGGEST_DELAY_MS = 1200
-READY_STATUS = "Transcript ready · edit or confirm"
 MAX_SUGGESTIONS = 3
 TEXT_RGB = (243, 247, 255)
 REMOVED_RGB = (150, 162, 180)
@@ -33,8 +33,10 @@ def _repo_path(value: str) -> Path:
 
 
 def default_server_factory(config: RewriteConfig) -> LocalRewriteServer:
-    command = LocalRewriteServer.llama_command(_repo_path(config.server_path), _repo_path(config.model_path))
-    return LocalRewriteServer(command, HEALTH_URL, REPO_ROOT / "runtime" / "llama-server.log")
+    server_path, model_path = _repo_path(config.server_path), _repo_path(config.model_path)
+    return LocalRewriteServer(LocalRewriteServer.llama_command(server_path, model_path), HEALTH_URL,
+                              REPO_ROOT / "runtime" / "llama-server.log",
+                              required=[("missing_server", server_path), ("missing_model", model_path)])
 
 
 class SmartEditor(QObject):
@@ -80,7 +82,7 @@ class SmartEditor(QObject):
         bar_layout.setContentsMargins(0, 0, 0, 0)
         bar_layout.setSpacing(8)
         bar_layout.addStretch(1)
-        self.undo_button = PillButton("Undo edits")
+        self.undo_button = PillButton(tr("button.undo_edits"))
         self.undo_button.hovered.connect(self._preview_other_version)
         self.undo_button.clicked.connect(self._toggle_undo)
         bar_layout.addWidget(self.undo_button)
@@ -115,7 +117,7 @@ class SmartEditor(QObject):
             self.reset()
             self.client = None
             if had_session and self.window.mode == "result":
-                self._set_status(READY_STATUS)
+                self._set_status("status.ready")
             return
         self.client = self._fixed_client or RewriteClient(config.base_url, config.model_name, config.api_key)
         if config.provider == "local" and self.server is None and self._server_factory is not None:
@@ -126,9 +128,34 @@ class SmartEditor(QObject):
         return self.active and (self.server is None or self.server.ready())
 
     def test_connection(self, config: RewriteConfig) -> str:
+        if not config.enabled:
+            raise RewriteError("smart editing is off", kind="disabled")
         if config.provider == "local" and self.server is not None and not self.server.ready():
-            raise RewriteError(self.server.failed or "the local model is still starting")
+            problem = getattr(self.server, "problem", None)
+            if problem and problem[0] in ("missing_server", "missing_model"):
+                raise RewriteError(self.server.failed or "", kind=problem[0], path=problem[1])
+            if self.server.failed:
+                raise RewriteError(self.server.failed, kind="local_failed")
+            raise RewriteError("the local model is still starting", kind="starting")
         return RewriteClient(config.base_url, config.model_name, config.api_key).check()
+
+    def model_status(self) -> tuple[str, dict]:
+        """The local model's state for the settings page, as an i18n key and its values."""
+        if not self.config.enabled:
+            return "model.off", {}
+        if self.config.provider != "local":
+            return "model.custom", {}
+        if self.server is None:
+            return "model.ready", {}
+        problem = getattr(self.server, "problem", None)
+        if problem and problem[0] in ("missing_server", "missing_model"):
+            return f"model.{problem[0]}", {"path": problem[1]}
+        if self.server.failed:
+            return "model.failed", {"detail": self.server.failed}
+        return ("model.ready", {}) if self.server.ready() else ("model.starting", {})
+
+    def retranslate(self) -> None:
+        self.undo_button.setText(tr("button.restore_edits" if self.showing_original else "button.undo_edits"))
 
     def shutdown(self) -> None:
         self.animation.stop()
@@ -148,10 +175,10 @@ class SmartEditor(QObject):
         if self.ready():
             self._submit("clean", text)
         elif self.server is not None and self.server.failed:
-            self._set_status(f"{self.server.failed} · kept the original")
+            self._set_status("status.local_failed", tooltip=self.server.failed)
         else:
             self._waiting = True
-            self._set_status("Waiting for the local model · you can confirm the original now")
+            self._set_status("status.waiting_model")
 
     def reset(self) -> None:
         if self.future is not None and self.future.cancel():
@@ -170,7 +197,7 @@ class SmartEditor(QObject):
         self._hover_text = None
         self.showing_original = False
         self._suggestions = []
-        self.undo_button.setText("Undo edits")
+        self.undo_button.setText(tr("button.undo_edits"))
         self._sync_bar()
 
     def _submit(self, kind: str, text: str) -> None:
@@ -179,18 +206,23 @@ class SmartEditor(QObject):
         self._future_kind = kind
         self._future_session = self.session
         if kind == "clean":
-            self._set_status("Polishing…")
+            self._set_status("status.polishing")
 
     def _still_current(self) -> bool:
         return (self.session is not None and not self._user_edited and self.window.mode == "result")
 
     def poll(self) -> None:
+        settings_window = getattr(self.window, "settings_window", None)
+        if settings_window is not None:
+            key, values = self.model_status()
+            if settings_window._model_status != (key, values):
+                settings_window.set_model_status(key, **values)
         if not self.active:
             return
         if self._waiting and self.session is not None:
             if self.server is not None and self.server.failed:
                 self._waiting = False
-                self._set_status(f"{self.server.failed} · kept the original")
+                self._set_status("status.local_failed", tooltip=self.server.failed)
             elif self.ready() and self._still_current():
                 self._waiting = False
                 self._submit("clean", self.original_text)
@@ -204,8 +236,7 @@ class SmartEditor(QObject):
             result = future.result()
         except Exception as exc:  # any backend failure keeps the original text
             if kind == "clean":
-                detail = str(exc) if isinstance(exc, RewriteError) else type(exc).__name__
-                self._set_status(f"Smart editing unavailable · kept the original ({detail})")
+                self._set_status("status.smart_failed", tooltip=str(exc), reason=describe_error(exc))
             return
         if kind == "clean":
             self._apply_clean(result)
@@ -216,7 +247,7 @@ class SmartEditor(QObject):
         if self.transcript.toPlainText() != self.original_text:
             return
         if "".join(cleaned.split()) == "".join(self.original_text.split()):
-            self._set_status("Transcript ready · no edits needed")
+            self._set_status("status.no_edits")
             self._suggest_timer.start(self.suggest_delay_ms)
             return
         self.edited_text = cleaned
@@ -233,7 +264,7 @@ class SmartEditor(QObject):
         self.transcript.setReadOnly(False)
         self._sync_bar()
         self.window._expand_for_result()
-        self._set_status("Polished · hover Undo edits to see the original")
+        self._set_status("status.polished")
         self._suggest_timer.start(self.suggest_delay_ms)
 
     def _request_suggestions(self) -> None:
@@ -267,7 +298,7 @@ class SmartEditor(QObject):
     def _toggle_undo(self) -> None:
         target = self._other_version()
         self.showing_original = not self.showing_original
-        self.undo_button.setText("Restore edits" if self.showing_original else "Undo edits")
+        self.undo_button.setText(tr("button.restore_edits" if self.showing_original else "button.undo_edits"))
         self._end_preview(target)
         self.window._expand_for_result()
 
@@ -276,10 +307,10 @@ class SmartEditor(QObject):
             return
         self.edited_text = self._suggestions[index]["text"]
         self.showing_original = False
-        self.undo_button.setText("Undo edits")
+        self.undo_button.setText(tr("button.undo_edits"))
         self._end_preview(self.edited_text)
         self._sync_bar()
-        self._set_status("Suggestion applied · Undo edits returns to the original")
+        self._set_status("status.suggestion_applied")
         self.window._expand_for_result()
 
     def current_text(self) -> str:
@@ -290,7 +321,7 @@ class SmartEditor(QObject):
             return
         self._user_edited = True
         if self._waiting or (self.future is not None and self._future_kind == "clean"):
-            self._set_status(READY_STATUS)
+            self._set_status("status.ready")
         self._waiting = False
         self._suggest_timer.stop()
         if self.bar.isVisible():
@@ -321,8 +352,8 @@ class SmartEditor(QObject):
     def bar_height(self) -> int:
         return 0 if self.bar.isHidden() else self.bar.sizeHint().height() + 10
 
-    def _set_status(self, text: str) -> None:
-        self.window.status_label.setText(text)
+    def _set_status(self, key: str, tooltip: str = "", **values) -> None:
+        self.window.show_status(key, tooltip, **values)
 
     def _set_plain(self, text: str) -> None:
         self._programmatic = True

@@ -50,6 +50,8 @@ py -3.12 -m venv .venv
 
 **智能编辑数据流**：`apply_transcript("final")` 调用 `SmartEditor.begin()`；启用且接口就绪时，单线程 `ThreadPoolExecutor` 调用 `RewriteClient.clean()`，由 `_poll` → `SmartEditor.poll()` 收取。只有会话号一致、仍在结果模式且用户未编辑时才应用：播放约 0.8 s 修改动画后显示整理结果，再请求 `suggest()` 显示建议。本地模型服务就绪前（llama-server 约 4 s）结果会排队等待；服务异常退出时状态栏提示并保留原文。2026-10-13 改为原生 llama-server 后端到端（注入文字、未用麦克风）：清理 0.23–0.25 s，建议约 2.4 s 后出现（含 1.2 s 延迟）。测试集上 GGUF Q8 与原 PyTorch 版质量一致（完全一致率 54.5%、字符错误率 0.21），短句延迟 0.14 s；Q4_K_M 略降（53.4%、0.24）。已知问题：默认字体 Segoe UI 无中文字形，本机回退为宋体（与智能编辑无关，可在设置中换字体）；模型偶有补充原文没有的理由。
 
+**界面语言与默认开启（2026-10-13）**：`voxflow/i18n.py` 维护中英文字符串表，`tr(key)` 取当前语言；设置项 `ui/language`（system/en/zh，默认跟随系统），切换后设置窗口、浮层状态、按钮和托盘菜单即时更新（浮层状态按 key 保存，`VoxFlowWindow.show_status`）。智能编辑默认开启并随应用启动本地模型；旧版本保存的“关闭”会被 `rewriter.migrate_settings` 一次性改为开启。设置页显示本地模型状态（启动中/已就绪/缺少文件/已停止），连接测试与错误提示按类型本地化。测试固定英文界面（`VOXFLOW_LANG=en`）且默认不开启智能编辑，避免启动真实 llama-server。
+
 ## 4. 验证与操作边界
 
 ```powershell

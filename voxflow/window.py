@@ -21,12 +21,14 @@ from PySide6.QtWidgets import (
 )
 
 from .audio import AudioBuffer
+from .i18n import resolve, set_language, tr
 from .appearance import DEFAULT_BACKGROUND, DEFAULT_CAPSULE, DEFAULT_FONT, DEFAULT_TEXT_SIZE, saved_color, tint
 from .input_target import WindowsPasteTarget
 from .overlay_widgets import CircleIconButton, GlowCapsule
 from .particles import ParticleField
 from .recognizer import initialize_worker, transcribe_in_worker, worker_ready
 from .scheduler import RecognitionJob, RecognitionScheduler
+from .rewriter import migrate_settings
 from .settings_window import SettingsWindow
 from .smart_editing import SmartEditor
 from .ui_icons import app_icon
@@ -45,6 +47,10 @@ class VoxFlowWindow(QWidget):
         super().__init__()
         self.model_dir = Path(model_dir)
         self.settings = settings if settings is not None else QSettings("VoxFlow", "VoxFlow")
+        set_language(resolve(str(self.settings.value("ui/language", "system"))))
+        migrate_settings(self.settings)
+        self._status: tuple[str, dict, str] = ("status.loading", {}, "")
+        self._record_text_key = "button.start_recording"
         self.text_output = text_output if text_output is not None else WindowsPasteTarget()
         self.audio = AudioBuffer(max_seconds=MAX_RECORDING_SECONDS)
         self._recording_serial = 0
@@ -89,6 +95,7 @@ class VoxFlowWindow(QWidget):
         self.edit_bar_slot.addWidget(self.smart.bar)
         self.settings_window.rewrite_changed.connect(self.smart.reload)
         self.settings_window.set_rewrite_tester(self.smart.test_connection)
+        self.settings_window.language_changed.connect(lambda _choice: self.retranslate())
         self._apply_transcript_font()
         self._set_background_color(saved_color(self.settings.value("appearance/background_color", DEFAULT_BACKGROUND), DEFAULT_BACKGROUND))
         self.capsule.set_accent_color(saved_color(self.settings.value("appearance/capsule_color", DEFAULT_CAPSULE), DEFAULT_CAPSULE))
@@ -133,7 +140,7 @@ class VoxFlowWindow(QWidget):
         self.time_label.setObjectName("muted")
         self.time_label.setAlignment(Qt.AlignmentFlag.AlignCenter)
         layout.addWidget(self.time_label)
-        self.status_label = QLabel("Loading local speech model…")
+        self.status_label = QLabel(tr("status.loading"))
         self.status_label.setObjectName("status")
         self.status_label.setWordWrap(True)
         self.status_label.setAlignment(Qt.AlignmentFlag.AlignCenter)
@@ -161,10 +168,10 @@ class VoxFlowWindow(QWidget):
         controls = QHBoxLayout()
         controls.setSpacing(14)
         controls.addStretch(1)
-        self.device_button = CircleIconButton("settings", "Open settings")
+        self.device_button = CircleIconButton("settings", tr("tip.open_settings"))
         self.device_button.clicked.connect(self.open_settings)
         controls.addWidget(self.device_button)
-        self.confirm_button = CircleIconButton("confirm", "Confirm and insert text")
+        self.confirm_button = CircleIconButton("confirm", tr("tip.confirm"))
         self.confirm_button.setEnabled(False)
         self.confirm_button.clicked.connect(self._confirm_text)
         self.transcript.textChanged.connect(self._sync_confirm_button)
@@ -173,7 +180,7 @@ class VoxFlowWindow(QWidget):
         controls.addSpacing(14)
         self.capsule = GlowCapsule()
         self.capsule.setEnabled(False)
-        self.capsule.setToolTip("Start voice input")
+        self.capsule.setToolTip(tr("tip.start_voice"))
         capsule_shadow = QGraphicsDropShadowEffect(self.capsule)
         capsule_shadow.setBlurRadius(20)
         capsule_shadow.setOffset(0, 2)
@@ -182,12 +189,12 @@ class VoxFlowWindow(QWidget):
         self.capsule.clicked.connect(self.toggle_recording)
         controls.addWidget(self.capsule)
         controls.addSpacing(14)
-        self.record_button = CircleIconButton("mic", "Start recording")
+        self.record_button = CircleIconButton("mic", tr("button.start_recording"))
         self.record_button.setEnabled(False)
-        self.record_button.setToolTip("Shortcut: Ctrl+Shift+Space")
+        self.record_button.setToolTip(tr("tip.shortcut"))
         self.record_button.clicked.connect(self.toggle_recording)
         controls.addWidget(self.record_button)
-        self.close_button = CircleIconButton("close", "Hide overlay")
+        self.close_button = CircleIconButton("close", tr("tip.hide"))
         self.close_button.clicked.connect(self.hide_overlay)
         controls.addWidget(self.close_button)
         self.action_buttons = (self.device_button, self.confirm_button, self.record_button, self.close_button)
@@ -269,10 +276,7 @@ class VoxFlowWindow(QWidget):
             self.transcript.setFixedHeight(82)
             self.transcript.setVerticalScrollBarPolicy(Qt.ScrollBarPolicy.ScrollBarAlwaysOff)
         self.device_button.setEnabled(mode != "recording")
-        self.capsule.setToolTip("Stop recording" if mode == "recording" else "Start voice input")
-        self.capsule.setAccessibleName("Stop recording" if mode == "recording" else "Start voice input")
-        self.record_button.setToolTip("Stop recording" if mode == "recording" else "Start recording")
-        self.record_button.setAccessibleName("Stop recording" if mode == "recording" else "Start recording")
+        self._sync_mode_texts()
         self.record_button.icon_name = "stop" if mode == "recording" else "mic"
         self.record_button.update()
         self.capsule.set_recording(mode == "recording" and self.stream is not None)
@@ -289,6 +293,38 @@ class VoxFlowWindow(QWidget):
         self._sync_content_visibility()
         if self.isVisible():
             self._update_input_mask()
+
+    def _sync_mode_texts(self) -> None:
+        recording = getattr(self, "mode", None) == "recording"
+        capsule_key = "button.stop_recording" if recording else "tip.start_voice"
+        record_key = "button.stop_recording" if recording else "button.start_recording"
+        self.capsule.setToolTip(tr(capsule_key))
+        self.capsule.setAccessibleName(tr(capsule_key))
+        self.record_button.setToolTip(tr(record_key))
+        self.record_button.setAccessibleName(tr(record_key))
+
+    def show_status(self, key: str, tooltip: str = "", **values) -> None:
+        """Show an overlay status by i18n key; it is re-rendered when the interface language changes."""
+        self._status = (key, values, tooltip)
+        self.status_label.setText(tr(key, **values))
+        self.status_label.setToolTip(tooltip)
+
+    def _set_record_text(self, key: str) -> None:
+        self._record_text_key = key
+        self.record_button.setText(tr(key))
+
+    def retranslate(self) -> None:
+        self.device_button.setToolTip(tr("tip.open_settings"))
+        self.device_button.setAccessibleName(tr("tip.open_settings"))
+        self.confirm_button.setToolTip(tr("tip.confirm"))
+        self.confirm_button.setAccessibleName(tr("tip.confirm"))
+        self.close_button.setToolTip(tr("tip.hide"))
+        self.close_button.setAccessibleName(tr("tip.hide"))
+        self._sync_mode_texts()
+        self.record_button.setText(tr(self._record_text_key))
+        key, values, tooltip = self._status
+        self.show_status(key, tooltip, **values)
+        self.smart.retranslate()
 
     def _sync_content_visibility(self) -> None:
         expanded = self.mode in {"recording", "finalizing", "result"} and self._background_progress >= 0.50
@@ -556,12 +592,12 @@ class VoxFlowWindow(QWidget):
         self.transcript.clear()
         self.transcript.setReadOnly(True)
         self.device_box.setEnabled(True)
-        self.record_button.setText("Start recording")
+        self._set_record_text("button.start_recording")
         self.record_button.setEnabled(self.model_ready)
         self.capsule.setEnabled(self.model_ready)
         self.time_label.setText("00:00 / 05:00")
         if self.model_ready:
-            self.status_label.setText("Press Ctrl+Shift+Space to speak")
+            self.show_status("status.press_hotkey")
         self._reset_result_size()
         self._set_mode("idle")
 
@@ -622,11 +658,11 @@ class VoxFlowWindow(QWidget):
             if saved_index >= 0:
                 self.device_box.setCurrentIndex(saved_index)
         except Exception as exc:
-            self.status_label.setText(f"Microphone unavailable: {exc}")
+            self.show_status("status.mic_unavailable", error=exc)
 
     def _start_worker(self) -> None:
         if not (self.model_dir / "model.int8.onnx").is_file():
-            self.status_label.setText("Speech model missing. Run: python scripts/download_model.py")
+            self.show_status("status.asr_missing")
             return
         try:
             self.executor = ProcessPoolExecutor(
@@ -636,7 +672,7 @@ class VoxFlowWindow(QWidget):
             )
             self.ready_future = self.executor.submit(worker_ready)
         except Exception as exc:
-            self.status_label.setText(f"Could not start recognition: {exc}")
+            self.show_status("status.asr_start_failed", error=exc)
 
     def toggle_recording(self) -> None:
         if self.stream is not None:
@@ -676,8 +712,8 @@ class VoxFlowWindow(QWidget):
             self.stream.start()
             self._recording_serial += 1
             self._set_mode("recording")
-            self.record_button.setText("Stop recording")
-            self.status_label.setText("Listening · live transcription")
+            self._set_record_text("button.stop_recording")
+            self.show_status("status.listening")
         except Exception as exc:
             if self.stream is not None:
                 self.stream.close()
@@ -685,7 +721,7 @@ class VoxFlowWindow(QWidget):
             self.audio.stop()
             self.scheduler = None
             self.device_box.setEnabled(True)
-            self.status_label.setText(f"Could not start microphone: {exc}")
+            self.show_status("status.mic_start_failed", error=exc)
             self._set_mode("idle")
 
     def _on_audio(self, frames, _count, _time, status) -> None:
@@ -705,7 +741,7 @@ class VoxFlowWindow(QWidget):
         self.record_button.icon_name = "mic"
         self.record_button.update()
         self._set_mode("finalizing")
-        self.status_label.setText("Finalizing transcript…")
+        self.show_status("status.finalizing")
         if self.isVisible():
             self.repaint()
             self.capsule.repaint()
@@ -715,17 +751,17 @@ class VoxFlowWindow(QWidget):
         self.stream = None
         self.audio.stop()
         self.device_box.setEnabled(True)
-        self.record_button.setText("Transcribing…")
+        self._set_record_text("button.transcribing")
         self.record_button.setEnabled(False)
         self.capsule.setEnabled(False)
         if self.scheduler:
             self.scheduler.stop()
         if self.audio.duration_seconds < 0.25:
             self.scheduler = None
-            self.record_button.setText("Start recording")
+            self._set_record_text("button.start_recording")
             self.record_button.setEnabled(True)
             self.capsule.setEnabled(True)
-            self.status_label.setText("Recording was too short. Try again.")
+            self.show_status("status.too_short")
             self._set_mode("idle")
 
     def _poll(self) -> None:
@@ -734,11 +770,11 @@ class VoxFlowWindow(QWidget):
         if self.ready_future is not None and self.ready_future.done():
             try:
                 self.model_ready = self.ready_future.result()
-                self.status_label.setText("Press Ctrl+Shift+Space to speak")
+                self.show_status("status.press_hotkey")
                 self.record_button.setEnabled(self.device_box.count() > 0)
                 self.capsule.setEnabled(self.device_box.count() > 0)
             except Exception as exc:
-                self.status_label.setText(f"Could not load speech model: {exc}")
+                self.show_status("status.asr_load_failed", error=exc)
             self.ready_future = None
 
         if self.result_future is not None and self.result_future.done():
@@ -752,8 +788,8 @@ class VoxFlowWindow(QWidget):
                     if result:
                         self.apply_transcript(*result)
             except Exception as exc:
-                self.status_label.setText(f"Transcription failed: {exc}")
-                self.record_button.setText("Record again")
+                self.show_status("status.transcription_failed", error=exc)
+                self._set_record_text("button.record_again")
                 self.record_button.setEnabled(self.model_ready)
                 self.capsule.setEnabled(self.model_ready)
                 self.scheduler = None
@@ -763,7 +799,7 @@ class VoxFlowWindow(QWidget):
             seconds = int(self.audio.duration_seconds)
             self.time_label.setText(f"{seconds // 60:02d}:{seconds % 60:02d} / 05:00")
             if self.capture_warning:
-                self.status_label.setText(f"Recording notice: {self.capture_warning}")
+                self.show_status("status.recording_notice", notice=self.capture_warning)
             if self.limit_reached:
                 self._stop_recording()
 
@@ -808,11 +844,9 @@ class VoxFlowWindow(QWidget):
             cursor.movePosition(QTextCursor.MoveOperation.Start)
             self.transcript.setTextCursor(cursor)
             self.transcript.verticalScrollBar().setValue(0)
-            self.status_label.setText(
-                "Live draft saved · edit or confirm" if recovered_draft else
-                "Transcript ready · edit or confirm" if text else "No speech detected. Try again."
-            )
-            self.record_button.setText("Record again")
+            self.show_status("status.draft_saved" if recovered_draft else
+                             "status.ready" if text else "status.no_speech")
+            self._set_record_text("button.record_again")
             self.record_button.setEnabled(self.model_ready)
             self.capsule.setEnabled(self.model_ready)
             self.confirm_button.setEnabled(bool(text.strip()))
@@ -820,7 +854,7 @@ class VoxFlowWindow(QWidget):
                 self.smart.begin(text, self._recording_serial)
         else:
             self._set_mode("recording")
-            self.status_label.setText("Listening · draft may change")
+            self.show_status("status.listening_draft")
 
     def _confirm_text(self) -> None:
         text = self.smart.current_text()
@@ -831,7 +865,7 @@ class VoxFlowWindow(QWidget):
             self.hide_overlay()
         else:
             QApplication.clipboard().setText(text)
-            self.status_label.setText("Could not focus the previous input · text copied for manual paste")
+            self.show_status("status.paste_failed")
 
     def closeEvent(self, event: QCloseEvent) -> None:
         self.settings_window.close()

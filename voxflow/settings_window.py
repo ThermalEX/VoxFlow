@@ -9,6 +9,7 @@ from PySide6.QtWidgets import (
 )
 
 from .appearance import DEFAULT_BACKGROUND, DEFAULT_CAPSULE, DEFAULT_FONT, DEFAULT_TEXT_SIZE, saved_color
+from .i18n import LANGUAGE_CHOICES, describe_error, resolve, set_language, tr
 from .rewriter import RewriteConfig
 from .ui_icons import app_icon, line_icon, symbol_pixmap
 
@@ -80,11 +81,16 @@ class SettingsWindow(QWidget):
     capsule_color_changed = Signal(QColor)
     alignment_changed = Signal(str)
     rewrite_changed = Signal()
+    language_changed = Signal(str)
 
     def __init__(self, settings: QSettings) -> None:
         super().__init__()
         self.settings = settings
-        self.setWindowTitle("VoxFlow Settings")
+        self._texts: list[tuple] = []
+        self._model_status: tuple[str, dict] | None = None
+        self._test_result: tuple[str, dict] | None = None
+        set_language(resolve(str(self.settings.value("ui/language", "system"))))
+        self._bind(self.setWindowTitle, "settings.title")
         self.setWindowIcon(app_icon())
         self.setMinimumSize(700, 560)
         self.resize(760, 590)
@@ -147,7 +153,8 @@ class SettingsWindow(QWidget):
         brand_row.addWidget(brand)
         brand_row.addStretch()
         sidebar_layout.addLayout(brand_row)
-        eyebrow = QLabel("PREFERENCES")
+        eyebrow = QLabel()
+        self._bind(eyebrow.setText, "settings.eyebrow")
         eyebrow.setObjectName("eyebrow")
         sidebar_layout.addSpacing(24)
         sidebar_layout.addWidget(eyebrow)
@@ -155,10 +162,12 @@ class SettingsWindow(QWidget):
         self.categories.setIconSize(QSize(20, 20))
         self.categories.setHorizontalScrollBarPolicy(Qt.ScrollBarPolicy.ScrollBarAlwaysOff)
         self.categories.setVerticalScrollBarPolicy(Qt.ScrollBarPolicy.ScrollBarAlwaysOff)
-        self.categories.addItem(QListWidgetItem(line_icon("personalize"), "Personalization"))
-        self.categories.addItem(QListWidgetItem(line_icon("settings"), "App settings"))
-        self.categories.addItem(QListWidgetItem(line_icon("smart"), "Smart editing"))
-        self.categories.setAccessibleName("Settings categories")
+        for icon, key in (("personalize", "category.personalization"), ("settings", "category.app"),
+                          ("smart", "category.smart")):
+            item = QListWidgetItem(line_icon(icon), "")
+            self.categories.addItem(item)
+            self._bind(item.setText, key)
+        self._bind(self.categories.setAccessibleName, "settings.categories")
         self.categories.viewport().setCursor(Qt.CursorShape.PointingHandCursor)
         sidebar_layout.addWidget(self.categories, 1)
         root.addWidget(sidebar)
@@ -217,82 +226,118 @@ class SettingsWindow(QWidget):
         self._page_animation.setEasingCurve(QEasingCurve.Type.OutCubic)
         self._page_animation.start()
 
-    @staticmethod
-    def _page(title: str, description: str) -> tuple[QWidget, QVBoxLayout]:
+    def _bind(self, setter, key: str, **values) -> None:
+        setter(tr(key, **values))
+        self._texts.append((setter, key, values))
+
+    def retranslate(self) -> None:
+        for setter, key, values in self._texts:
+            setter(tr(key, **values))
+        for index, key in enumerate(("source.local", "source.custom")):
+            self.rewrite_provider.setItemText(index, tr(key))
+        for index, key in enumerate(("align.left", "align.center", "align.right")):
+            self.alignment_box.setItemText(index, tr(key))
+        self.language_box.setItemText(0, tr("language.system"))
+        for key, fallback in (("background", DEFAULT_BACKGROUND), ("capsule", DEFAULT_CAPSULE)):
+            button = self.background_button if key == "background" else self.capsule_button
+            self._show_color(button, saved_color(self.settings.value(f"appearance/{key}_color", fallback), fallback))
+        if self._model_status is not None:
+            self.set_model_status(*self._model_status[:1], **self._model_status[1])
+        self.rewrite_status.setText(tr(self._test_result[0], **self._test_result[1]) if self._test_result else "")
+
+    def _set_language(self, _index: int) -> None:
+        choice = str(self.language_box.currentData())
+        self.settings.setValue("ui/language", choice)
+        set_language(resolve(choice))
+        self.retranslate()
+        self.language_changed.emit(choice)
+
+    def _page(self, title_key: str, description_key: str) -> tuple[QWidget, QVBoxLayout]:
         page = QWidget()
         layout = QVBoxLayout(page)
         layout.setContentsMargins(0, 0, 0, 0)
         layout.setSpacing(10)
-        heading = QLabel(title)
+        heading = QLabel()
+        self._bind(heading.setText, title_key)
         heading.setObjectName("pageTitle")
         layout.addWidget(heading)
-        subtitle = QLabel(description)
+        subtitle = QLabel()
+        self._bind(subtitle.setText, description_key)
         subtitle.setObjectName("description")
         subtitle.setWordWrap(True)
         layout.addWidget(subtitle)
         layout.addSpacing(13)
         return page, layout
 
-    @staticmethod
-    def _field(layout: QVBoxLayout, title: str, control: QWidget) -> None:
-        label = QLabel(title)
+    def _field(self, layout: QVBoxLayout, title_key: str, control: QWidget) -> None:
+        label = QLabel()
+        self._bind(label.setText, title_key)
+        self._bind(control.setAccessibleName, title_key)
         label.setObjectName("fieldTitle")
         layout.addWidget(label)
         layout.addWidget(control)
         layout.addSpacing(9)
 
-    @staticmethod
-    def _field_row(title: str, control: QWidget) -> QWidget:
+    def _field_row(self, title_key: str, control: QWidget) -> QWidget:
         row = QWidget()
         layout = QVBoxLayout(row)
         layout.setContentsMargins(0, 0, 0, 6)
         layout.setSpacing(8)
-        label = QLabel(title)
+        label = QLabel()
+        self._bind(label.setText, title_key)
+        self._bind(control.setAccessibleName, title_key)
         label.setObjectName("fieldTitle")
         layout.addWidget(label)
         layout.addWidget(control)
         return row
 
     def _build_smart_editing(self) -> QWidget:
-        page, layout = self._page(
-            "Smart editing", "Polish the final transcript with a rewrite model. The original stays one click away.")
+        page, layout = self._page("category.smart", "page.smart.desc")
         config = RewriteConfig.from_settings(self.settings)
         self._rewrite_tester = None
-        self.rewrite_enabled = QCheckBox("Polish final transcripts and suggest rewrites")
+        self.rewrite_enabled = QCheckBox()
+        self._bind(self.rewrite_enabled.setText, "smart.enable")
         self.rewrite_enabled.setChecked(config.enabled)
         layout.addWidget(self.rewrite_enabled)
         layout.addSpacing(6)
         self.rewrite_provider = SettingsComboBox()
-        self.rewrite_provider.setAccessibleName("Model source")
-        self.rewrite_provider.addItem("VoxFlow local model", "local")
-        self.rewrite_provider.addItem("Custom OpenAI-compatible endpoint", "custom")
+        self.rewrite_provider.addItem(tr("source.local"), "local")
+        self.rewrite_provider.addItem(tr("source.custom"), "custom")
         self.rewrite_provider.setCurrentIndex(max(0, self.rewrite_provider.findData(config.provider)))
-        layout.addWidget(self._field_row("Model source", self.rewrite_provider))
+        layout.addWidget(self._field_row("field.model_source", self.rewrite_provider))
 
         def line(value: str, placeholder: str, password: bool = False) -> QLineEdit:
             edit = QLineEdit(value)
-            edit.setPlaceholderText(placeholder)
+            if placeholder.startswith("placeholder."):
+                self._bind(edit.setPlaceholderText, placeholder)
+            else:
+                edit.setPlaceholderText(placeholder)
             if password:
                 edit.setEchoMode(QLineEdit.EchoMode.Password)
             edit.editingFinished.connect(self._save_rewrite)
             return edit
 
         self.rewrite_endpoint = line(config.endpoint, "http://localhost:1234/v1")
-        self.rewrite_model = line(config.model, "Model name")
-        self.rewrite_api_key = line(config.api_key, "Optional", password=True)
+        self.rewrite_model = line(config.model, "placeholder.model")
+        self.rewrite_api_key = line(config.api_key, "placeholder.optional", password=True)
         self.rewrite_server_path = line(config.server_path, RewriteConfig.server_path)
         self.rewrite_model_path = line(config.model_path, RewriteConfig.model_path)
-        self.rewrite_endpoint_row = self._field_row("Endpoint", self.rewrite_endpoint)
-        self.rewrite_model_row = self._field_row("Model", self.rewrite_model)
-        self.rewrite_api_key_row = self._field_row("API key", self.rewrite_api_key)
-        self.rewrite_server_path_row = self._field_row("llama-server", self.rewrite_server_path)
-        self.rewrite_model_path_row = self._field_row("Model file (GGUF)", self.rewrite_model_path)
+        self.rewrite_endpoint_row = self._field_row("field.endpoint", self.rewrite_endpoint)
+        self.rewrite_model_row = self._field_row("field.model", self.rewrite_model)
+        self.rewrite_api_key_row = self._field_row("field.api_key", self.rewrite_api_key)
+        self.rewrite_server_path_row = self._field_row("field.server_path", self.rewrite_server_path)
+        self.rewrite_model_path_row = self._field_row("field.model_path", self.rewrite_model_path)
+        self.rewrite_model_status = QLabel("")
+        self.rewrite_model_status.setObjectName("description")
+        self.rewrite_model_status.setWordWrap(True)
+        self.rewrite_model_status_row = self._field_row("field.model_status", self.rewrite_model_status)
         for row in (self.rewrite_endpoint_row, self.rewrite_model_row, self.rewrite_api_key_row,
-                    self.rewrite_server_path_row, self.rewrite_model_path_row):
+                    self.rewrite_server_path_row, self.rewrite_model_path_row, self.rewrite_model_status_row):
             layout.addWidget(row)
 
         test_row = QHBoxLayout()
-        self.rewrite_test_button = QPushButton("Test connection")
+        self.rewrite_test_button = QPushButton()
+        self._bind(self.rewrite_test_button.setText, "button.test")
         self.rewrite_test_button.setObjectName("resetButton")
         self.rewrite_test_button.setCursor(Qt.CursorShape.PointingHandCursor)
         self.rewrite_test_button.clicked.connect(self._test_rewrite)
@@ -325,7 +370,7 @@ class SettingsWindow(QWidget):
         custom = self.rewrite_provider.currentData() == "custom"
         for row in (self.rewrite_endpoint_row, self.rewrite_model_row, self.rewrite_api_key_row):
             row.setVisible(custom)
-        for row in (self.rewrite_server_path_row, self.rewrite_model_path_row):
+        for row in (self.rewrite_server_path_row, self.rewrite_model_path_row, self.rewrite_model_status_row):
             row.setVisible(not custom)
 
     def _save_rewrite(self) -> None:
@@ -335,46 +380,53 @@ class SettingsWindow(QWidget):
     def set_rewrite_tester(self, tester) -> None:
         self._rewrite_tester = tester
 
+    def set_model_status(self, key: str, **values) -> None:
+        self._model_status = (key, values)
+        self.rewrite_model_status.setText(tr(key, **values))
+
+    def _show_test_result(self, key: str, **values) -> None:
+        self._test_result = (key, values)
+        self.rewrite_status.setText(tr(key, **values))
+
     def _test_rewrite(self) -> None:
         if self._rewrite_tester is None:
-            self.rewrite_status.setText("Connection test is unavailable")
+            self._show_test_result("test.unavailable")
             return
-        self.rewrite_status.setText("Testing…")
+        self.rewrite_status.setText(tr("test.testing"))
         self.rewrite_status.repaint()
         try:
             name = self._rewrite_tester(self.rewrite_config())
-        except Exception as exc:  # show any backend failure to the user verbatim
-            self.rewrite_status.setText(f"Not connected · {exc}")
+        except Exception as exc:  # explain any backend failure in the interface language
+            self._show_test_result("test.failed", reason=describe_error(exc))
         else:
-            self.rewrite_status.setText(f"Connected · {name}")
+            self._show_test_result("test.connected", model=name)
 
     def _build_personalization(self) -> QWidget:
-        page, layout = self._page("Personalization", "Changes appear in the voice overlay immediately.")
+        page, layout = self._page("category.personalization", "page.personalization.desc")
         self.font_box = SettingsFontComboBox()
-        self.font_box.setAccessibleName("Transcript font")
         self.font_box.setCurrentFont(QFont(str(self.settings.value("appearance/font", DEFAULT_FONT))))
         self.font_box.currentFontChanged.connect(self._set_font)
-        self._field(layout, "Transcript font", self.font_box)
+        self._field(layout, "field.font", self.font_box)
 
         self.text_size_box = QSpinBox()
         self.text_size_box.setRange(14, 48)
         self.text_size_box.setButtonSymbols(QAbstractSpinBox.ButtonSymbols.NoButtons)
         self.text_size_box.setSuffix(" px")
-        self.text_size_box.setAccessibleName("Transcript font size")
         try:
             saved_size = int(self.settings.value("appearance/text_size", DEFAULT_TEXT_SIZE))
         except (TypeError, ValueError):
             saved_size = DEFAULT_TEXT_SIZE
         self.text_size_box.setValue(max(14, min(48, saved_size)))
         self.text_size_box.valueChanged.connect(self._set_text_size)
-        self._field(layout, "Text size", self.text_size_box)
+        self._field(layout, "field.text_size", self.text_size_box)
 
-        self.background_button = self._color_button("background", "Background color", DEFAULT_BACKGROUND)
-        self._field(layout, "Background glow", self.background_button)
-        self.capsule_button = self._color_button("capsule", "Capsule color", DEFAULT_CAPSULE)
-        self._field(layout, "Capsule glow", self.capsule_button)
+        self.background_button = self._color_button("background", DEFAULT_BACKGROUND)
+        self._field(layout, "field.background", self.background_button)
+        self.capsule_button = self._color_button("capsule", DEFAULT_CAPSULE)
+        self._field(layout, "field.capsule", self.capsule_button)
 
-        reset = QPushButton("Restore appearance defaults")
+        reset = QPushButton()
+        self._bind(reset.setText, "button.restore_appearance")
         reset.setObjectName("resetButton")
         reset.setIcon(line_icon("restore", "#285C9D"))
         reset.setIconSize(QSize(18, 18))
@@ -385,31 +437,36 @@ class SettingsWindow(QWidget):
         return page
 
     def _build_app_settings(self) -> QWidget:
-        page, layout = self._page("App settings", "Choose how VoxFlow listens and displays speech.")
+        page, layout = self._page("category.app", "page.app.desc")
+        self.language_box = SettingsComboBox()
+        for code, name in LANGUAGE_CHOICES:
+            self.language_box.addItem(name or tr("language.system"), code)
+        saved_language = str(self.settings.value("ui/language", "system"))
+        self.language_box.setCurrentIndex(max(0, self.language_box.findData(saved_language)))
+        self.language_box.currentIndexChanged.connect(self._set_language)
+        self._field(layout, "field.language", self.language_box)
         self.device_box = SettingsComboBox()
-        self.device_box.setAccessibleName("Microphone")
-        self._field(layout, "Microphone", self.device_box)
+        self._field(layout, "field.microphone", self.device_box)
         self.alignment_box = SettingsComboBox()
-        self.alignment_box.setAccessibleName("Transcript alignment")
-        for title, value in (("Left", "left"), ("Center", "center"), ("Right", "right")):
-            self.alignment_box.addItem(title, value)
+        for key, value in (("align.left", "left"), ("align.center", "center"), ("align.right", "right")):
+            self.alignment_box.addItem(tr(key), value)
         saved = str(self.settings.value("transcript/alignment", "left"))
         self.alignment_box.setCurrentIndex(max(0, self.alignment_box.findData(saved)))
         self.alignment_box.currentIndexChanged.connect(
             lambda _index: self.alignment_changed.emit(str(self.alignment_box.currentData()))
         )
-        self._field(layout, "Transcript alignment", self.alignment_box)
-        note = QLabel("Confirm inserts the final text into the last active app.")
+        self._field(layout, "field.alignment", self.alignment_box)
+        note = QLabel()
+        self._bind(note.setText, "page.app.note")
         note.setObjectName("description")
         note.setWordWrap(True)
         layout.addWidget(note)
         layout.addStretch()
         return page
 
-    def _color_button(self, key: str, label: str, fallback: str) -> QPushButton:
+    def _color_button(self, key: str, fallback: str) -> QPushButton:
         button = QPushButton()
         button.setObjectName("colorButton")
-        button.setAccessibleName(label)
         button.setCursor(Qt.CursorShape.PointingHandCursor)
         self._show_color(button, saved_color(self.settings.value(f"appearance/{key}_color", fallback), fallback))
         button.clicked.connect(lambda: self._choose_color(key))
@@ -425,7 +482,7 @@ class SettingsWindow(QWidget):
         painter.drawRoundedRect(1, 1, 17, 17, 4, 4)
         painter.end()
         button.setIcon(QIcon(swatch))
-        button.setText(f"{color.name().upper()}    Change…")
+        button.setText(tr("button.change_color", color=color.name().upper()))
 
     def _choose_color(self, key: str) -> None:
         fallback = DEFAULT_BACKGROUND if key == "background" else DEFAULT_CAPSULE

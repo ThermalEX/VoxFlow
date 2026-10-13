@@ -3,6 +3,7 @@
 import os
 
 os.environ.setdefault("QT_QPA_PLATFORM", "offscreen")
+os.environ["VOXFLOW_LANG"] = "en"  # tests assert English UI text regardless of the machine locale
 
 import pytest
 from PySide6.QtCore import QMimeData
@@ -25,3 +26,12 @@ def preserve_clipboard():
             clipboard.setMimeData(original)
         else:
             clipboard.clear()
+
+
+@pytest.fixture(autouse=True)
+def smart_editing_off_by_default(monkeypatch):
+    """The app turns smart editing on by default; tests opt in so no real llama-server is launched."""
+    from voxflow import i18n, rewriter
+
+    monkeypatch.setattr(rewriter, "DEFAULT_ENABLED", False)
+    i18n.set_language("en")

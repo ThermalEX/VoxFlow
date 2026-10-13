@@ -152,3 +152,45 @@ def test_reasoning_blocks_are_removed(endpoint):
     assert client.clean("额，我明天请个假") == "我明天请个假。"
     endpoint.reply = {"content": '<think>想想</think>[{"label": "更正式", "text": "明日请假。"}]'}
     assert client.suggest("我明天请个假。") == [{"label": "更正式", "text": "明日请假。"}]
+
+
+def test_smart_editing_is_on_by_default_for_new_installs(tmp_path, monkeypatch):
+    monkeypatch.setattr(rewriter, "DEFAULT_ENABLED", True)
+    settings = QSettings(str(tmp_path / "fresh.ini"), QSettings.Format.IniFormat)
+    assert rewriter.RewriteConfig.from_settings(settings).enabled
+    rewriter.RewriteConfig(enabled=False).save(settings)
+    assert not rewriter.RewriteConfig.from_settings(settings).enabled
+
+
+def test_errors_carry_a_kind_for_friendly_messages(endpoint):
+    client = rewriter.RewriteClient(endpoint.base_url, "m")
+    endpoint.reply = {"status": 503}
+    with pytest.raises(rewriter.RewriteError) as caught:
+        client.clean("你好")
+    assert caught.value.kind == "http" and caught.value.code == 503
+    with pytest.raises(rewriter.RewriteError) as caught:
+        rewriter.RewriteClient("http://127.0.0.1:9/v1", "m").clean("你好")
+    assert caught.value.kind == "unreachable"
+
+    def slow(*_args, **_kwargs):
+        raise TimeoutError("timed out")
+
+    with pytest.raises(rewriter.RewriteError) as caught:
+        rewriter.RewriteClient(endpoint.base_url, "m", opener=slow).clean("你好")
+    assert caught.value.kind == "timeout"
+    endpoint.reply = {"content": "半句", "finish_reason": "length"}
+    with pytest.raises(rewriter.RewriteError) as caught:
+        client.clean("你好")
+    assert caught.value.kind == "truncated"
+
+
+def test_old_default_off_is_switched_on_once(tmp_path, monkeypatch):
+    monkeypatch.setattr(rewriter, "DEFAULT_ENABLED", True)
+    settings = QSettings(str(tmp_path / "old.ini"), QSettings.Format.IniFormat)
+    rewriter.RewriteConfig(enabled=False).save(settings)
+    settings.remove("rewrite/defaults_version")
+    rewriter.migrate_settings(settings)
+    assert rewriter.RewriteConfig.from_settings(settings).enabled
+    rewriter.RewriteConfig(enabled=False).save(settings)
+    rewriter.migrate_settings(settings)
+    assert not rewriter.RewriteConfig.from_settings(settings).enabled

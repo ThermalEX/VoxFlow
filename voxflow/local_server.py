@@ -49,7 +49,7 @@ def attach_to_job(process) -> None:
 class LocalRewriteServer:
     def __init__(self, command: list[str], health_url: str, log_path: Path,
                  popen=subprocess.Popen, opener=urllib.request.urlopen, clock=time.monotonic,
-                 attach=attach_to_job) -> None:
+                 attach=attach_to_job, required: list[tuple[str, Path]] = ()) -> None:
         self.command = command
         self.health_url = health_url
         self.log_path = Path(log_path)
@@ -57,11 +57,13 @@ class LocalRewriteServer:
         self._open = opener
         self._clock = clock
         self._attach = attach
+        self._required = list(required)
         self.process = None
         self._log = None
         self._ready = False
         self._next_check = 0.0
         self._start_error: str | None = None
+        self._problem: tuple[str, str] | None = None
 
     @staticmethod
     def llama_command(server_path: Path, model_path: Path, port: int = DEFAULT_PORT) -> list[str]:
@@ -75,6 +77,11 @@ class LocalRewriteServer:
     def start(self) -> None:
         if self.process is not None or self._start_error:
             return
+        for kind, path in self._required:
+            if not Path(path).is_file():
+                self._problem = (kind, str(path))
+                self._start_error = f"Required file not found: {path}"
+                return
         flags = subprocess.CREATE_NO_WINDOW if sys.platform == "win32" else 0
         try:
             self.log_path.parent.mkdir(parents=True, exist_ok=True)
@@ -83,6 +90,7 @@ class LocalRewriteServer:
                                        stderr=subprocess.STDOUT, creationflags=flags)
         except OSError as exc:  # missing binary or unwritable log: report, never crash the app
             self._start_error = f"Could not start the local model ({exc})"
+            self._problem = ("launch", str(exc))
             if self._log is not None:
                 self._log.close()
                 self._log = None
@@ -93,6 +101,15 @@ class LocalRewriteServer:
             pass  # the server still works; it just is not tied to VoxFlow's lifetime
         self._ready = False
         self._next_check = 0.0
+
+    @property
+    def problem(self) -> tuple[str, str] | None:
+        """Why the server is unavailable, as (kind, detail): missing_server, missing_model, launch or exited."""
+        if self._problem is not None:
+            return self._problem
+        if self.process is not None and self.process.poll() is not None:
+            return ("exited", str(self.process.returncode))
+        return None
 
     @property
     def failed(self) -> str | None:
