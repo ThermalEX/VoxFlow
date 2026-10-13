@@ -16,3 +16,5 @@ CLAUDE.md
 .claude/
 training/rewrite/build/
 training/rewrite/runs/
+.superpowers/
+unsloth_compiled_cache/
