@@ -39,6 +39,8 @@ py -3.12 -m venv .venv
 
 `sounddevice` 的回调把音频写入 `AudioBuffer`。主窗口通过 `RecognitionScheduler` 约每 1.2 秒提交一次任务，由单独的 `ProcessPoolExecutor` 加载并运行 ASR；识别器把长录音按约 6–10 秒的安静边界分段，已完成片段缓存，临时结果可能修订。停录后请求最终结果并保留可编辑预览。若最终识别为空但已有临时草稿，`apply_transcript()` 会保留草稿供用户确认。
 
+**智能改写数据集（尚未训练、未接入软件）**：`training/rewrite/` 存放口语改写模型的数据集，设计见 `docs/superpowers/specs/2026-10-13-rewrite-dataset-design.md`。两个任务共用 `prompts.py` 里的系统提示：任务 1 清理并执行语音内联指令（口气词、改口与回头编辑、口述格式、翻译、语气改写），任务 2 生成 0–3 条自由改写建议。手写种子在 `seeds/*.jsonl`（约 830 条清理、约 400 条建议），`.\.venv\Scripts\python.exe -m training.rewrite.build_dataset` 校验种子、注入口语噪声并按种子哈希划分，输出到已忽略的 `training/rewrite/build/{train,valid,test}.jsonl`（chat messages 格式），同时打印覆盖报告。用户要求训练阶段使用 4B 及以上的模型；本机 6 GB 显存微调上限约 4B，更大模型需云端训练。
+
 ## 4. 验证与操作边界
 
 ```powershell
