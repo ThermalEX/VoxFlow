@@ -10,5 +10,9 @@ __pycache__/
 !.env.example
 .DS_Store
 Thumbs.db
+
+# Claude Code
+CLAUDE.md
+.claude/
 training/rewrite/build/
 training/rewrite/runs/

@@ -8,7 +8,7 @@ from concurrent.futures import Future, ProcessPoolExecutor
 from pathlib import Path
 
 import sounddevice as sd
-from PySide6.QtCore import QEasingCurve, QPointF, QPropertyAnimation, QRectF, QSettings, Qt, QTimer, QVariantAnimation
+from PySide6.QtCore import QEasingCurve, QEvent, QPointF, QPropertyAnimation, QRectF, QSettings, Qt, QTimer, QVariantAnimation
 from PySide6.QtGui import QColor, QCloseEvent, QCursor, QFont, QImage, QKeyEvent, QLinearGradient, QPainter, QPainterPath, QRadialGradient, QRegion, QTextBlockFormat, QTextCursor
 from PySide6.QtWidgets import (
     QApplication,
@@ -140,6 +140,7 @@ class VoxFlowWindow(QWidget):
         self.transcript.setReadOnly(True)
         self.transcript.setVerticalScrollBarPolicy(Qt.ScrollBarPolicy.ScrollBarAlwaysOff)
         self.transcript.viewport().setAutoFillBackground(False)
+        self.transcript.installEventFilter(self)
         saved_alignment = str(self.settings.value("transcript/alignment", "left"))
         self.transcript_alignment = saved_alignment if saved_alignment in {"left", "center", "right"} else "left"
         self.set_transcript_alignment(self.transcript_alignment)
@@ -518,12 +519,7 @@ class VoxFlowWindow(QWidget):
             self._animation.start()
 
     def hide_overlay(self) -> None:
-        if self.stream is not None:
-            self._stop_recording()
-        if self._result_animation.state() == QVariantAnimation.State.Running:
-            target = int(self._result_animation.endValue())
-            self._result_animation.stop()
-            self._set_overlay_height(target)
+        self._discard_session()
         if self._animation is not None:
             self._animation.stop()
         self.setWindowOpacity(1.0)
@@ -534,9 +530,46 @@ class VoxFlowWindow(QWidget):
         self._background_retracting = False
         self.hide()
 
+    def _discard_session(self) -> None:
+        # Closing the overlay drops the current recording and transcript; a late ASR result is
+        # ignored because the scheduler that would accept it is gone.
+        if self.stream is not None:
+            self.stream.stop()
+            self.stream.close()
+            self.stream = None
+            self.audio.stop()
+        self.scheduler = None
+        self.transcript.clear()
+        self.transcript.setReadOnly(True)
+        self.device_box.setEnabled(True)
+        self.record_button.setText("Start recording")
+        self.record_button.setEnabled(self.model_ready)
+        self.capsule.setEnabled(self.model_ready)
+        self.time_label.setText("00:00 / 05:00")
+        if self.model_ready:
+            self.status_label.setText("Press Ctrl+Shift+Space to speak")
+        self._reset_result_size()
+        self._set_mode("idle")
+
+    def _is_confirm_key(self, event: QKeyEvent) -> bool:
+        return (event.key() in {Qt.Key.Key_Return, Qt.Key.Key_Enter}
+                and not event.modifiers() & Qt.KeyboardModifier.ShiftModifier)
+
+    def eventFilter(self, watched, event) -> bool:
+        # Enter confirms the result; Shift+Enter still inserts a line break while editing.
+        if (watched is self.transcript and event.type() == QEvent.Type.KeyPress
+                and self._is_confirm_key(event)):
+            if self.mode == "result":
+                self._confirm_text()
+            return True
+        return super().eventFilter(watched, event)
+
     def keyPressEvent(self, event: QKeyEvent) -> None:
         if event.key() == Qt.Key.Key_Escape:
             self.hide_overlay()
+        elif self._is_confirm_key(event):
+            if self.mode == "result":
+                self._confirm_text()
         else:
             super().keyPressEvent(event)
 

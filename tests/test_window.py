@@ -516,3 +516,89 @@ def test_ambient_glow_has_a_moving_organic_contour(tmp_path):
     assert any(abs(first.pixelColor(x, y).alpha() - second.pixelColor(x, y).alpha()) > 10 for x, y in points)
     window.close()
     assert app is not None
+
+
+class RecordingOutput:
+    def __init__(self):
+        self.calls = []
+
+    def remember_foreground(self, _own_hwnd):
+        pass
+
+    def paste(self, text):
+        self.calls.append(text)
+        return True
+
+
+def test_closing_overlay_clears_the_result(tmp_path):
+    app = QApplication.instance() or QApplication([])
+    window = VoxFlowWindow(model_dir=tmp_path, start_worker=False, text_output=RecordingOutput())
+    window.model_ready = True
+    window.reveal()
+    window._background_progress = 1.0
+    window.apply_transcript("final", "old words " * 80)
+    window._result_animation.setCurrentTime(260)
+    app.processEvents()
+    assert window.height() > 310
+    window.close_button.click()
+    window.reveal()
+    assert window.mode == "idle"
+    assert window.transcript.toPlainText() == ""
+    assert window.transcript.isReadOnly()
+    assert not window.confirm_button.isEnabled()
+    assert window.record_button.isEnabled()
+    assert window.height() == 310
+    window.close()
+
+
+def test_closing_while_recording_discards_the_session(tmp_path):
+    QApplication.instance() or QApplication([])
+    window = VoxFlowWindow(model_dir=tmp_path, start_worker=False, text_output=RecordingOutput())
+    window.model_ready = True
+    window.reveal()
+    window.audio.start(16000)
+    window.audio.append(np.zeros(16000, dtype=np.float32))
+    window.scheduler = window_module.RecognitionScheduler(16000)
+    window.scheduler.start()
+    window.stream = SimpleNamespace(stop=lambda: None, close=lambda: None)
+    window._set_mode("recording")
+    window.apply_transcript("partial", "half a sentence")
+    window.hide_overlay()
+    assert window.stream is None
+    assert window.scheduler is None
+    assert window.mode == "idle"
+    assert window.transcript.toPlainText() == ""
+    window.close()
+
+
+def test_enter_confirms_result_and_shift_enter_adds_a_line(tmp_path):
+    QApplication.instance() or QApplication([])
+    output = RecordingOutput()
+    window = VoxFlowWindow(model_dir=tmp_path, start_worker=False, text_output=output)
+    window.reveal()
+    window._background_progress = 1.0
+    window.apply_transcript("final", "first line")
+    cursor = window.transcript.textCursor()
+    cursor.movePosition(cursor.MoveOperation.End)
+    window.transcript.setTextCursor(cursor)
+    QTest.keyClick(window.transcript, Qt.Key.Key_Return, Qt.KeyboardModifier.ShiftModifier)
+    assert window.transcript.toPlainText() == "first line\n"
+    assert output.calls == []
+    QTest.keyClick(window.transcript, Qt.Key.Key_Return)
+    assert output.calls == ["first line\n"]
+    assert not window.isVisible()
+    window.close()
+
+
+def test_enter_does_nothing_while_recording(tmp_path):
+    QApplication.instance() or QApplication([])
+    output = RecordingOutput()
+    window = VoxFlowWindow(model_dir=tmp_path, start_worker=False, text_output=output)
+    window.reveal()
+    window._set_mode("recording")
+    window.apply_transcript("partial", "still talking")
+    QTest.keyClick(window.transcript, Qt.Key.Key_Enter)
+    QTest.keyClick(window, Qt.Key.Key_Enter)
+    assert output.calls == []
+    assert window.isVisible()
+    window.close()
