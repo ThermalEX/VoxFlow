@@ -716,3 +716,58 @@
 {"id": "neg-cs-0038", "categories": ["neg_code_switch"], "scene": "school", "raw": "明天交PDF版的作业", "output": "明天交PDF版的作业。"}
 {"id": "neg-cs-0039", "categories": ["neg_code_switch"], "scene": "customer_service", "raw": "我的VIP会员到期了，怎么续费", "output": "我的VIP会员到期了，怎么续费？"}
 {"id": "neg-cs-0040", "categories": ["neg_code_switch"], "scene": "email", "raw": "请在CC里加上HR", "output": "请在CC里加上HR。"}
+{"id": "neg-clean-0011", "categories": ["neg_clean"], "scene": "daily", "raw": "那个蓝色的杯子是我的", "output": "那个蓝色的杯子是我的。"}
+{"id": "neg-clean-0012", "categories": ["neg_clean"], "scene": "shopping", "raw": "我要的就是这个颜色", "output": "我要的就是这个颜色。"}
+{"id": "neg-clean-0013", "categories": ["neg_clean"], "scene": "family_friends", "raw": "先洗菜然后切菜，最后下锅", "output": "先洗菜，然后切菜，最后下锅。"}
+{"id": "neg-clean-0014", "categories": ["neg_clean"], "scene": "work_chat", "raw": "问题就是出在这里", "output": "问题就是出在这里。"}
+{"id": "neg-clean-0015", "categories": ["neg_clean"], "scene": "tech", "raw": "先编译然后再部署", "output": "先编译然后再部署。"}
+{"id": "neg-clean-0016", "categories": ["neg_clean"], "scene": "school", "raw": "那个问题我明天再问老师", "output": "那个问题我明天再问老师。"}
+{"id": "neg-clean-0017", "categories": ["neg_clean"], "scene": "customer_service", "raw": "我说的就是上周买的那台", "output": "我说的就是上周买的那台。"}
+{"id": "neg-clean-0018", "categories": ["neg_clean"], "scene": "family_friends", "raw": "谢谢谢谢，太麻烦你了", "output": "谢谢谢谢，太麻烦你了。"}
+{"id": "neg-clean-0019", "categories": ["neg_clean"], "scene": "daily", "raw": "你好好休息，别想太多", "output": "你好好休息，别想太多。"}
+{"id": "neg-clean-0020", "categories": ["neg_clean"], "scene": "shopping", "raw": "我先看看，再试试别的", "output": "我先看看，再试试别的。"}
+{"id": "neg-clean-0021", "categories": ["neg_clean"], "scene": "social_media", "raw": "天天加班，常常忘了吃饭", "output": "天天加班，常常忘了吃饭。"}
+{"id": "neg-clean-0022", "categories": ["neg_clean"], "scene": "work_chat", "raw": "大家多多指教", "output": "大家多多指教。"}
+{"id": "neg-clean-0023", "categories": ["neg_clean"], "scene": "school", "raw": "这道题要慢慢算", "output": "这道题要慢慢算。"}
+{"id": "neg-clean-0024", "categories": ["neg_clean"], "scene": "family_friends", "raw": "Bye bye, see you soon", "output": "Bye bye, see you soon."}
+{"id": "neg-clean-0025", "categories": ["neg_clean"], "scene": "social_media", "raw": "Very very happy today", "output": "Very very happy today."}
+{"id": "neg-clean-0026", "categories": ["neg_clean"], "scene": "school", "raw": "这个答案不对，要重新算", "output": "这个答案不对，要重新算。"}
+{"id": "neg-clean-0027", "categories": ["neg_clean"], "scene": "work_chat", "raw": "不是我写的代码，是外包写的", "output": "不是我写的代码，是外包写的。"}
+{"id": "neg-clean-0028", "categories": ["neg_clean"], "scene": "family_friends", "raw": "算了，下次再去吧", "output": "算了，下次再去吧。"}
+{"id": "neg-clean-0029", "categories": ["neg_clean"], "scene": "customer_service", "raw": "你们发的型号不对", "output": "你们发的型号不对。"}
+{"id": "neg-clean-0030", "categories": ["neg_clean"], "scene": "tech", "raw": "数据对不上，不是缓存的问题", "output": "数据对不上，不是缓存的问题。"}
+{"id": "neg-clean-0031", "categories": ["neg_clean"], "scene": "email", "raw": "That's not what we agreed on", "output": "That's not what we agreed on."}
+{"id": "neg-clean-0032", "categories": ["neg_clean"], "scene": "work_chat", "raw": "这周五之前把方案定下来吧", "output": "这周五之前把方案定下来吧。"}
+{"id": "neg-clean-0033", "categories": ["neg_clean"], "scene": "email", "raw": "感谢您的耐心等待，我们会尽快回复。", "output": "感谢您的耐心等待，我们会尽快回复。"}
+{"id": "neg-clean-0034", "categories": ["neg_clean"], "scene": "tech", "raw": "测试环境已经部署好了，可以开始验证", "output": "测试环境已经部署好了，可以开始验证。"}
+{"id": "neg-clean-0035", "categories": ["neg_clean"], "scene": "shopping", "raw": "请问有没有小一号的", "output": "请问有没有小一号的？"}
+{"id": "neg-clean-0036", "categories": ["neg_clean"], "scene": "family_friends", "raw": "你们到哪儿了呢", "output": "你们到哪儿了呢？"}
+{"id": "neg-clean-0037", "categories": ["neg_clean"], "scene": "schedule", "raw": "周三下午我有空，可以约", "output": "周三下午我有空，可以约。"}
+{"id": "neg-clean-0038", "categories": ["neg_clean"], "scene": "school", "raw": "明天的实验课要带白大褂", "output": "明天的实验课要带白大褂。"}
+{"id": "neg-clean-0039", "categories": ["neg_clean"], "scene": "customer_service", "raw": "麻烦帮我查一下退款到哪一步了", "output": "麻烦帮我查一下退款到哪一步了。"}
+{"id": "neg-clean-0040", "categories": ["neg_clean"], "scene": "social_media", "raw": "周末的海边真的太舒服了", "output": "周末的海边真的太舒服了。"}
+{"id": "neg-clean-0041", "categories": ["neg_clean"], "scene": "daily", "raw": "我出门了，晚饭不用等我哈", "output": "我出门了，晚饭不用等我哈。"}
+{"id": "neg-clean-0042", "categories": ["neg_clean"], "scene": "work_chat", "raw": "收到，今天下班前给你", "output": "收到，今天下班前给你。"}
+{"id": "neg-clean-0043", "categories": ["neg_clean"], "scene": "family_friends", "raw": "奶奶身体还好吧", "output": "奶奶身体还好吧？"}
+{"id": "neg-clean-0044", "categories": ["neg_clean"], "scene": "email", "raw": "Please let me know if you have any questions", "output": "Please let me know if you have any questions."}
+{"id": "neg-clean-0045", "categories": ["neg_clean"], "scene": "schedule", "raw": "The meeting starts at 10 sharp", "output": "The meeting starts at 10 sharp."}
+{"id": "neg-clean-0046", "categories": ["neg_clean"], "scene": "tech", "raw": "The deploy finished without errors", "output": "The deploy finished without errors."}
+{"id": "neg-clean-0047", "categories": ["neg_clean"], "scene": "shopping", "raw": "Do you have this in black", "output": "Do you have this in black?"}
+{"id": "neg-clean-0048", "categories": ["neg_clean"], "scene": "school", "raw": "Can we meet during office hours", "output": "Can we meet during office hours?"}
+{"id": "neg-clean-0049", "categories": ["neg_clean"], "scene": "daily", "raw": "我买了点水果，放在桌上了", "output": "我买了点水果，放在桌上了。"}
+{"id": "neg-clean-0050", "categories": ["neg_clean"], "scene": "social_media", "raw": "新学期，新开始", "output": "新学期，新开始。"}
+{"id": "neg-clean-0051", "categories": ["neg_clean"], "scene": "customer_service", "raw": "好的，谢谢你的帮助", "output": "好的，谢谢你的帮助。"}
+{"id": "neg-clean-0052", "categories": ["neg_clean"], "scene": "work_chat", "raw": "这个问题我需要再确认一下", "output": "这个问题我需要再确认一下。"}
+{"id": "neg-clean-0053", "categories": ["neg_clean"], "scene": "family_friends", "raw": "路上注意安全，到了说一声", "output": "路上注意安全，到了说一声。"}
+{"id": "neg-clean-0054", "categories": ["neg_clean"], "scene": "tech", "raw": "日志我已经打包发你了", "output": "日志我已经打包发你了。"}
+{"id": "neg-clean-0055", "categories": ["neg_clean"], "scene": "email", "raw": "附件请查收，如有问题随时联系", "output": "附件请查收，如有问题随时联系。"}
+{"id": "neg-clean-0056", "categories": ["neg_clean"], "scene": "schedule", "raw": "下周一上午九点在公司门口集合不要迟到", "output": "下周一上午九点在公司门口集合，不要迟到。"}
+{"id": "neg-clean-0057", "categories": ["neg_clean"], "scene": "shopping", "raw": "这个怎么卖多少钱一斤", "output": "这个怎么卖？多少钱一斤？"}
+{"id": "neg-clean-0058", "categories": ["neg_clean"], "scene": "daily", "raw": "the dog needs a walk can you take him", "output": "The dog needs a walk, can you take him?"}
+{"id": "neg-instr-0041", "categories": ["neg_instruction_like"], "scene": "work_chat", "raw": "我们组负责把这些文档翻译成英文", "output": "我们组负责把这些文档翻译成英文。"}
+{"id": "neg-instr-0042", "categories": ["neg_instruction_like"], "scene": "school", "raw": "翻译成英文这一步最难", "output": "翻译成英文这一步最难。"}
+{"id": "neg-instr-0043", "categories": ["neg_instruction_like"], "scene": "tech", "raw": "这个按钮的作用是删掉选中的行", "output": "这个按钮的作用是删掉选中的行。"}
+{"id": "neg-instr-0044", "categories": ["neg_instruction_like"], "scene": "family_friends", "raw": "我妈让我把客厅的灯换成暖光的", "output": "我妈让我把客厅的灯换成暖光的。"}
+{"id": "neg-instr-0045", "categories": ["neg_instruction_like"], "scene": "email", "raw": "Our team will translate the manual by Friday", "output": "Our team will translate the manual by Friday."}
+{"id": "neg-cs-0041", "categories": ["neg_code_switch"], "scene": "work_chat", "raw": "这个KPI定得有点高", "output": "这个KPI定得有点高。"}
+{"id": "neg-cs-0042", "categories": ["neg_code_switch"], "scene": "tech", "raw": "这个bug在iOS上能复现，Android上不行", "output": "这个bug在iOS上能复现，Android上不行。"}
