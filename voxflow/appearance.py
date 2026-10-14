@@ -6,7 +6,7 @@ from PySide6.QtGui import QColor
 DEFAULT_BACKGROUND = "#438aee"
 DEFAULT_CAPSULE = "#2766d6"
 DEFAULT_TEXT_SIZE = 24
-DEFAULT_FONT = "Segoe UI"
+DEFAULT_FONT = "Microsoft YaHei UI"  # Segoe UI has no CJK glyphs and falls back to SimSun
 
 
 def saved_color(value: object, fallback: str) -> QColor:

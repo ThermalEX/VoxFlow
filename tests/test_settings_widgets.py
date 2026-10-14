@@ -61,3 +61,8 @@ def test_a_chosen_theme_beats_the_system_scheme(monkeypatch):
     assert settings_theme.current_theme("dark") is settings_theme.DARK
     assert settings_theme.current_theme("light") is settings_theme.LIGHT
     assert settings_theme.current_theme("system") in (settings_theme.LIGHT, settings_theme.DARK)
+
+
+def test_default_transcript_font_has_chinese_glyphs():
+    from voxflow.appearance import DEFAULT_FONT
+    assert DEFAULT_FONT == "Microsoft YaHei UI"
