@@ -412,3 +412,15 @@
 {"id": "sug-0412", "scene": "daily", "input": "我叫王嘉安。", "suggestions": [{"label": "译成英文", "text": "My name is Jia'an Wang."}]}
 {"id": "sug-0413", "scene": "school", "input": "单雪和解晓明下周答辩。", "suggestions": [{"label": "改成通知", "text": "【通知】单雪、解晓明将于下周进行答辩。"}, {"label": "译成英文", "text": "Xue Shan and Xiaoming Xie will defend their theses next week."}]}
 {"id": "sug-0414", "scene": "social_media", "input": "恭喜陈欣怡入职新公司！", "suggestions": [{"label": "更热情", "text": "恭喜陈欣怡入职新公司！新的开始，加油！"}, {"label": "译成英文", "text": "Congrats to Xinyi Chen on starting at a new company!"}]}
+{"id": "sug-0415", "scene": "work_chat", "input": "这个活我不接。", "suggestions": [{"label": "更委婉", "text": "这个工作我这边可能接不了，抱歉。"}, {"label": "更正式", "text": "这项工作我无法承接。"}]}
+{"id": "sug-0416", "scene": "family_friends", "input": "周末不去你家了。", "suggestions": [{"label": "更委婉", "text": "这个周末可能去不了你家了，不好意思。"}, {"label": "译成英文", "text": "I won't be coming to your place this weekend."}]}
+{"id": "sug-0417", "scene": "customer_service", "input": "我要求退差价。", "suggestions": [{"label": "更礼貌", "text": "您好，我想申请退一下差价，麻烦处理。"}, {"label": "更正式", "text": "我申请办理差价退款。"}]}
+{"id": "sug-0418", "scene": "email", "input": "下周的会我不参加了。", "suggestions": [{"label": "更正式", "text": "下周的会议我将无法参加。"}, {"label": "更礼貌", "text": "不好意思，下周的会议我参加不了。"}]}
+{"id": "sug-0419", "scene": "school", "input": "老师，我作业还没写完。", "suggestions": [{"label": "更礼貌", "text": "老师，不好意思，我的作业还没有完成。"}]}
+{"id": "sug-0420", "scene": "work_chat", "input": "你上次说的文件还没发我。", "suggestions": [{"label": "更礼貌", "text": "您上次提到的文件我这边还没收到，麻烦有空发我一下。"}, {"label": "译成英文", "text": "I haven't received the file you mentioned last time."}]}
+{"id": "sug-0421", "scene": "daily", "input": "我晚上十一点多才能到家。", "suggestions": [{"label": "译成英文", "text": "I won't be home until after 11 tonight."}]}
+{"id": "sug-0422", "scene": "shopping", "input": "这件衣服太贵了。", "suggestions": [{"label": "更客气", "text": "这件衣服的价格还能再优惠一些吗？"}]}
+{"id": "sug-0423", "scene": "family_friends", "input": "你能不能别老打游戏了。", "suggestions": [{"label": "更委婉", "text": "游戏可以少玩一点吗？"}, {"label": "更温和", "text": "打游戏也注意休息，别玩太久啦。"}]}
+{"id": "sug-0424", "scene": "work_chat", "input": "这个需求没必要做。", "suggestions": [{"label": "更委婉", "text": "这个需求的必要性可能还需要再评估一下。"}, {"label": "更正式", "text": "该需求暂无实施的必要。"}]}
+{"id": "sug-0425", "scene": "tech", "input": "先跑单元测试，然后再合并到主分支。", "suggestions": [{"label": "改成步骤", "text": "1. 跑单元测试\n2. 合并到主分支"}, {"label": "译成英文", "text": "Run the unit tests first, then merge into the main branch."}]}
+{"id": "sug-0426", "scene": "social_media", "input": "今天天气很好，去公园拍了很多照片。", "suggestions": [{"label": "更活泼", "text": "今天天气超好！去公园拍了一大堆照片～"}, {"label": "译成英文", "text": "Lovely weather today, so I went to the park and took lots of photos."}]}
