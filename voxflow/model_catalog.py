@@ -39,7 +39,9 @@ def discover_models(root: Path) -> list[LocalModel]:
              if path.is_file()}
     models = [LocalModel(path, quant_of(path), path.stat().st_size, _archived_run(root, path))
               for path in found.values()]
-    return sorted(models, key=lambda model: (bool(model.run), ORDER[model.quant], str(model.path)))
+    # Current runs first; among archived runs the most recently written comes first.
+    return sorted(models, key=lambda model: (bool(model.run), ORDER[model.quant],
+                                             -model.path.stat().st_mtime if model.run else 0, str(model.path)))
 
 
 def replace_missing_model(settings: QSettings, root: Path) -> Path | None:

@@ -407,3 +407,8 @@
 {"id": "sug-0407", "scene": "customer_service", "input": "您好，我是客服周婷。", "suggestions": [{"label": "更亲切", "text": "您好～我是客服周婷，很高兴为您服务！"}, {"label": "译成英文", "text": "Hello, I'm Ting Zhou from customer service."}]}
 {"id": "sug-0408", "scene": "work_chat", "input": "这个问题找小李。", "suggestions": [{"label": "更客气", "text": "这个问题可以麻烦小李看一下。"}, {"label": "译成英文", "text": "Ask Xiao Li about this."}]}
 {"id": "sug-0409", "scene": "email", "input": "欧阳娜娜下周一入职。", "suggestions": [{"label": "改成通知", "text": "【入职通知】欧阳娜娜将于下周一入职。"}, {"label": "译成英文", "text": "Nana Ouyang starts next Monday."}]}
+{"id": "sug-0410", "scene": "work_chat", "input": "张晓雨和刘建国都同意了。", "suggestions": [{"label": "更正式", "text": "张晓雨与刘建国均已同意。"}, {"label": "译成英文", "text": "Xiaoyu Zhang and Jianguo Liu both agreed."}]}
+{"id": "sug-0411", "scene": "email", "input": "请联系曾晓东确认合同细节。", "suggestions": [{"label": "更礼貌", "text": "麻烦您联系曾晓东确认一下合同细节，谢谢。"}, {"label": "译成英文", "text": "Please contact Xiaodong Zeng to confirm the contract details."}]}
+{"id": "sug-0412", "scene": "daily", "input": "我叫王嘉安。", "suggestions": [{"label": "译成英文", "text": "My name is Jia'an Wang."}]}
+{"id": "sug-0413", "scene": "school", "input": "单雪和解晓明下周答辩。", "suggestions": [{"label": "改成通知", "text": "【通知】单雪、解晓明将于下周进行答辩。"}, {"label": "译成英文", "text": "Xue Shan and Xiaoming Xie will defend their theses next week."}]}
+{"id": "sug-0414", "scene": "social_media", "input": "恭喜陈欣怡入职新公司！", "suggestions": [{"label": "更热情", "text": "恭喜陈欣怡入职新公司！新的开始，加油！"}, {"label": "译成英文", "text": "Congrats to Xinyi Chen on starting at a new company!"}]}

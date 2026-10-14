@@ -858,3 +858,50 @@
 {"id": "combo-0045", "categories": ["instr_combo"], "scene": "email", "raw": "翻译成英文，正式一点，我是王书涵，想咨询一下合作的事。", "output": "My name is Shuhan Wang, and I would like to inquire about a potential collaboration.", "instr_position": "prefix"}
 {"id": "neg-clean-0063", "categories": ["neg_clean"], "scene": "daily", "raw": "你好我叫王书涵", "output": "你好，我叫王书涵。"}
 {"id": "neg-cs-0044", "categories": ["neg_code_switch"], "scene": "work_chat", "raw": "这个PR是Shuhan Wang提的", "output": "这个PR是Shuhan Wang提的。"}
+{"id": "tr-0148", "categories": ["instr_translate"], "scene": "work_chat", "raw": "我的同事张晓雨和刘建国都同意了，翻译成英文", "output": "My colleagues Xiaoyu Zhang and Jianguo Liu both agreed.", "instr_position": "suffix"}
+{"id": "tr-0149", "categories": ["instr_translate"], "scene": "email", "raw": "翻译成英文：请把报价单发给陈欣怡。", "output": "Please send the quotation to Xinyi Chen.", "instr_position": "prefix"}
+{"id": "tr-0150", "categories": ["instr_translate"], "scene": "tech", "raw": "这个接口林睿在维护，翻成英文", "output": "Rui Lin maintains this API.", "instr_position": "suffix"}
+{"id": "tr-0151", "categories": ["instr_translate"], "scene": "school", "raw": "用英文说，赵梓轩是我们班的班长。", "output": "Zixuan Zhao is our class monitor.", "instr_position": "prefix"}
+{"id": "tr-0152", "categories": ["instr_translate"], "scene": "family_friends", "raw": "我表妹周思琪下个月结婚，翻译成英文", "output": "My cousin Siqi Zhou is getting married next month.", "instr_position": "suffix"}
+{"id": "tr-0153", "categories": ["instr_translate"], "scene": "work_chat", "raw": "翻译成英文，吴昊天今天请假了。", "output": "Haotian Wu is on leave today.", "instr_position": "prefix"}
+{"id": "tr-0154", "categories": ["instr_translate"], "scene": "customer_service", "raw": "您好，我是售后徐静怡，翻成英文", "output": "Hello, I'm Jingyi Xu from after-sales service.", "instr_position": "suffix"}
+{"id": "tr-0155", "categories": ["instr_translate"], "scene": "email", "raw": "翻译成英文：孙嘉禾和胡晓峰会参加周三的评审。", "output": "Jiahe Sun and Xiaofeng Hu will attend Wednesday's review.", "instr_position": "prefix"}
+{"id": "tr-0156", "categories": ["instr_translate"], "scene": "schedule", "raw": "下午四点和郭婧确认方案，翻译成英文", "output": "Confirm the plan with Jing Guo at 4 pm.", "instr_position": "suffix"}
+{"id": "tr-0157", "categories": ["instr_translate"], "scene": "social_media", "raw": "用英文说，祝何泽宇生日快乐！", "output": "Happy birthday, Zeyu He!", "instr_position": "prefix"}
+{"id": "tr-0158", "categories": ["instr_translate"], "scene": "school", "raw": "高诗涵和罗晨曦拿了一等奖，翻成英文", "output": "Shihan Gao and Chenxi Luo won first prize.", "instr_position": "suffix"}
+{"id": "tr-0159", "categories": ["instr_translate"], "scene": "work_chat", "raw": "翻译成英文：梁皓然负责前端，宋雨萱负责测试。", "output": "Haoran Liang is in charge of the front end, and Yuxuan Song is in charge of testing.", "instr_position": "prefix"}
+{"id": "tr-0160", "categories": ["instr_translate"], "scene": "email", "raw": "此致，谢晓琳，翻译成英文", "output": "Best regards,\nXiaolin Xie", "instr_position": "suffix"}
+{"id": "tr-0161", "categories": ["instr_translate"], "scene": "daily", "raw": "用英文说，我叫韩旭，很高兴认识你。", "output": "My name is Xu Han. Nice to meet you.", "instr_position": "prefix"}
+{"id": "tr-0162", "categories": ["instr_translate"], "scene": "family_friends", "raw": "唐瑶和冯一鸣是我大学室友，翻译成英文", "output": "Yao Tang and Yiming Feng were my college roommates.", "instr_position": "suffix"}
+{"id": "tr-0163", "categories": ["instr_translate"], "scene": "work_chat", "raw": "翻成英文，邓子涵明天开始休产假。", "output": "Zihan Deng starts maternity leave tomorrow.", "instr_position": "prefix"}
+{"id": "tr-0164", "categories": ["instr_translate"], "scene": "customer_service", "raw": "您的订单由曹钰跟进，翻译成英文", "output": "Yu Cao will follow up on your order.", "instr_position": "suffix"}
+{"id": "tr-0165", "categories": ["instr_translate"], "scene": "social_media", "raw": "翻译成英文：恭喜彭佳琪考研上岸！", "output": "Congrats to Jiaqi Peng on getting into grad school!", "instr_position": "prefix"}
+{"id": "tr-0166", "categories": ["instr_translate"], "scene": "school", "raw": "黄晓雯老师下周请假，翻成英文", "output": "Our teacher Xiaowen Huang will be on leave next week.", "instr_position": "suffix"}
+{"id": "tr-0167", "categories": ["instr_translate"], "scene": "tech", "raw": "用英文说，许晓晴修复了登录的问题。", "output": "Xiaoqing Xu fixed the login issue.", "instr_position": "prefix"}
+{"id": "tr-0168", "categories": ["instr_translate"], "scene": "email", "raw": "请抄送秦晓岚和叶欣，翻译成英文", "output": "Please cc Xiaolan Qin and Xin Ye.", "instr_position": "suffix"}
+{"id": "tr-0169", "categories": ["instr_translate"], "scene": "work_chat", "raw": "翻译成英文，程睿哲和魏星辰下午过来。", "output": "Ruizhe Cheng and Xingchen Wei are coming over this afternoon.", "instr_position": "prefix"}
+{"id": "tr-0170", "categories": ["instr_translate"], "scene": "schedule", "raw": "周五和蒋晓舟吃饭，翻成英文", "output": "Dinner with Xiaozhou Jiang on Friday.", "instr_position": "suffix"}
+{"id": "tr-0171", "categories": ["instr_translate"], "scene": "family_friends", "raw": "用英文说，沈心怡是我最好的朋友。", "output": "Xinyi Shen is my best friend.", "instr_position": "prefix"}
+{"id": "tr-0172", "categories": ["instr_translate"], "scene": "work_chat", "raw": "卢思远和姚瑞会一起出差，翻译成英文", "output": "Siyuan Lu and Rui Yao will travel for work together.", "instr_position": "suffix"}
+{"id": "tr-0173", "categories": ["instr_translate"], "scene": "school", "raw": "翻译成英文：潘晓雪的论文被录用了。", "output": "Xiaoxue Pan's paper was accepted.", "instr_position": "prefix"}
+{"id": "tr-0174", "categories": ["instr_translate"], "scene": "daily", "raw": "田嘉欣和白璐约我周末爬山，翻成英文", "output": "Jiaxin Tian and Lu Bai invited me to go hiking this weekend.", "instr_position": "suffix"}
+{"id": "tr-0175", "categories": ["instr_translate"], "scene": "work_chat", "raw": "用英文说，崔浩和夏晓晨是新来的实习生。", "output": "Hao Cui and Xiaochen Xia are the new interns.", "instr_position": "prefix"}
+{"id": "tr-0176", "categories": ["instr_translate"], "scene": "daily", "raw": "我叫王嘉安，翻译成英文", "output": "My name is Jia'an Wang.", "instr_position": "suffix"}
+{"id": "tr-0177", "categories": ["instr_translate"], "scene": "email", "raw": "翻译成英文：刘嘉恩会把合同寄给您。", "output": "Jia'en Liu will mail the contract to you.", "instr_position": "prefix"}
+{"id": "tr-0178", "categories": ["instr_translate"], "scene": "work_chat", "raw": "曾晓东下周调去深圳，翻译成英文", "output": "Xiaodong Zeng is transferring to Shenzhen next week.", "instr_position": "suffix"}
+{"id": "tr-0179", "categories": ["instr_translate"], "scene": "email", "raw": "翻译成英文：单雪是这个项目的负责人。", "output": "Xue Shan is the lead of this project.", "instr_position": "prefix"}
+{"id": "tr-0180", "categories": ["instr_translate"], "scene": "school", "raw": "解晓明的实验数据还没交，翻成英文", "output": "Xiaoming Xie hasn't submitted the experiment data yet.", "instr_position": "suffix"}
+{"id": "tr-0181", "categories": ["instr_translate"], "scene": "tech", "raw": "用英文说，查文博在排查线上故障。", "output": "Wenbo Zha is troubleshooting the production incident.", "instr_position": "prefix"}
+{"id": "tr-0182", "categories": ["instr_translate"], "scene": "family_friends", "raw": "乐嘉明天来我家做客，翻译成英文", "output": "Jia Yue is coming over to my place tomorrow.", "instr_position": "suffix"}
+{"id": "tr-0183", "categories": ["instr_translate"], "scene": "work_chat", "raw": "翻译成英文，翟晓光和仇鹏负责采购。", "output": "Xiaoguang Zhai and Peng Qiu are in charge of purchasing.", "instr_position": "prefix"}
+{"id": "tr-0184", "categories": ["instr_translate"], "scene": "customer_service", "raw": "您好，我是区家明，翻成英文", "output": "Hello, I'm Jiaming Ou.", "instr_position": "suffix"}
+{"id": "tr-0185", "categories": ["instr_translate"], "scene": "school", "raw": "司马明轩是我们的辅导员，翻译成英文", "output": "Mingxuan Sima is our counselor.", "instr_position": "suffix"}
+{"id": "tr-0186", "categories": ["instr_translate"], "scene": "work_chat", "raw": "用英文说，诸葛文和上官晓都在会议室。", "output": "Wen Zhuge and Xiao Shangguan are both in the meeting room.", "instr_position": "prefix"}
+{"id": "combo-0046", "categories": ["instr_combo", "immediate_correction"], "scene": "email", "raw": "请联系陈晓，不对，陈晓雨，翻译成英文", "output": "Please contact Xiaoyu Chen.", "instr_position": "suffix"}
+{"id": "combo-0047", "categories": ["instr_combo", "edit_replace"], "scene": "work_chat", "raw": "明天由林睿汇报，林睿换成曾晓东，翻成英文", "output": "Xiaodong Zeng will give the report tomorrow.", "instr_position": "suffix"}
+{"id": "combo-0048", "categories": ["instr_combo"], "scene": "email", "raw": "翻译成英文，正式一点，我是解晓明，想跟您约个时间面谈。", "output": "My name is Xiaoming Xie, and I would like to schedule a meeting with you.", "instr_position": "prefix"}
+{"id": "combo-0049", "categories": ["instr_combo", "filler"], "scene": "work_chat", "raw": "额，那个，翻译成英文，周思琪和沈心怡，嗯，下午到。", "output": "Siqi Zhou and Xinyi Shen will arrive this afternoon.", "instr_position": "prefix"}
+{"id": "neg-clean-0064", "categories": ["neg_clean"], "scene": "work_chat", "raw": "张晓雨你下午有空吗", "output": "张晓雨，你下午有空吗？"}
+{"id": "neg-clean-0065", "categories": ["neg_clean"], "scene": "email", "raw": "请把文件发给曾晓东和单雪", "output": "请把文件发给曾晓东和单雪。"}
+{"id": "neg-clean-0066", "categories": ["neg_clean"], "scene": "school", "raw": "司马明轩老师说明天不上课", "output": "司马明轩老师说明天不上课。"}
+{"id": "neg-cs-0045", "categories": ["neg_code_switch"], "scene": "work_chat", "raw": "这个需求Xiaoyu Zhang已经确认了", "output": "这个需求Xiaoyu Zhang已经确认了。"}

@@ -67,3 +67,11 @@ def test_a_missing_saved_model_is_replaced_by_the_best_one_found(tmp_path):
     assert replace_missing_model(settings, tmp_path) == archived
     assert RewriteConfig.from_settings(settings).model_path == "training/rewrite/runs/archive/v1/gguf/voxflow-rewrite-q8_0.gguf"
     assert replace_missing_model(settings, tmp_path) is None  # already usable
+
+
+def test_the_newest_archived_run_comes_first(tmp_path):
+    import os
+    old = make_gguf(tmp_path / "training/rewrite/runs/archive/run-b/gguf/voxflow-rewrite-q8_0.gguf")
+    new = make_gguf(tmp_path / "training/rewrite/runs/archive/run-a/gguf/voxflow-rewrite-q8_0.gguf")
+    os.utime(old, (1_000_000, 1_000_000))
+    assert [model.path for model in discover_models(tmp_path)] == [new, old]
