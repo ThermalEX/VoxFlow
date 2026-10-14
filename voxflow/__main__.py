@@ -2,6 +2,7 @@
 
 import argparse
 import ctypes
+import multiprocessing
 import sys
 from pathlib import Path
 
@@ -9,13 +10,15 @@ import soundfile as sf
 from PySide6.QtWidgets import QApplication, QMenu, QSystemTrayIcon
 
 from .i18n import tr
+from .paths import APP_ROOT
+from .process_guard import end_children_with_this_process
 from .recognizer import SenseVoiceRecognizer
 from .ui_icons import app_icon
 from .window import VoxFlowWindow
 
 
 MODEL_NAME = "sherpa-onnx-sense-voice-zh-en-ja-ko-yue-int8-2024-07-17"
-DEFAULT_MODEL_DIR = Path(__file__).resolve().parents[1] / "models" / MODEL_NAME
+DEFAULT_MODEL_DIR = APP_ROOT / "models" / MODEL_NAME
 
 
 def main() -> int:
@@ -32,6 +35,7 @@ def main() -> int:
 
     if sys.platform == "win32":
         ctypes.windll.shell32.SetCurrentProcessExplicitAppUserModelID("VoxFlow.Desktop")
+        end_children_with_this_process()  # the speech worker and llama-server never outlive the app
     app = QApplication([])
     app.setApplicationName("VoxFlow")
     icon = app_icon()
@@ -76,4 +80,5 @@ def main() -> int:
 
 
 if __name__ == "__main__":
+    multiprocessing.freeze_support()  # the packaged app re-launches itself for the speech worker
     raise SystemExit(main())

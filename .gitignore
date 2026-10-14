@@ -19,3 +19,7 @@ training/rewrite/runs/
 .superpowers/
 unsloth_compiled_cache/
 runtime/
+
+# Packaging output
+build/
+dist/

@@ -1,0 +1,21 @@
+VoxFlow bundles the following third-party components.
+
+Speech recognition model
+  SenseVoiceSmall (sherpa-onnx INT8 export), models\sherpa-onnx-sense-voice-zh-en-ja-ko-yue-int8-2024-07-17\
+  License: see LICENSE in that folder.
+
+Rewrite model
+  Fine-tuned from Qwen3.5-2B (Qwen team, Alibaba Cloud), Apache License 2.0.
+  runtime\models\voxflow-rewrite-q8_0.gguf
+
+llama.cpp (llama-server and ggml), runtime\llama.cpp\
+  MIT License, see runtime\llama.cpp\LICENSE-llama.cpp.
+  Includes the LLVM OpenMP runtime (LICENSE-LLVM-OpenMP) and NVIDIA CUDA runtime/cuBLAS libraries
+  redistributed under the NVIDIA CUDA Toolkit EULA.
+
+Python runtime and libraries
+  Python (PSF License), PySide6 / Qt 6 (LGPL v3), sherpa-onnx and onnxruntime (Apache 2.0 / MIT),
+  NumPy (BSD), sounddevice and PortAudio (MIT), soundfile and libsndfile (BSD / LGPL).
+
+Icons
+  Google Material Symbols, Apache License 2.0 (voxflow\assets\icons\LICENSE).

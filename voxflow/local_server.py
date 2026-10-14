@@ -1,11 +1,12 @@
 """Start and stop the native llama.cpp server that backs the "VoxFlow local model" option."""
 
-import ctypes
 import subprocess
 import sys
 import time
 import urllib.request
 from pathlib import Path
+
+from .process_guard import kill_on_close_job
 
 HEALTH_INTERVAL = 2.0
 DEFAULT_PORT = 8765
@@ -14,36 +15,9 @@ MODEL_ALIAS = "voxflow-rewrite"
 
 def attach_to_job(process) -> None:
     """Put the server in a Windows job that closes with VoxFlow, so a crash never leaves it running."""
-    if sys.platform != "win32":
-        return
-    kernel32 = ctypes.WinDLL("kernel32", use_last_error=True)
-
-    class BasicLimits(ctypes.Structure):
-        _fields_ = [("PerProcessUserTimeLimit", ctypes.c_int64), ("PerJobUserTimeLimit", ctypes.c_int64),
-                    ("LimitFlags", ctypes.c_uint32), ("MinimumWorkingSetSize", ctypes.c_size_t),
-                    ("MaximumWorkingSetSize", ctypes.c_size_t), ("ActiveProcessLimit", ctypes.c_uint32),
-                    ("Affinity", ctypes.c_size_t), ("PriorityClass", ctypes.c_uint32),
-                    ("SchedulingClass", ctypes.c_uint32)]
-
-    class IoCounters(ctypes.Structure):
-        _fields_ = [(name, ctypes.c_uint64) for name in (
-            "ReadOperationCount", "WriteOperationCount", "OtherOperationCount",
-            "ReadTransferCount", "WriteTransferCount", "OtherTransferCount")]
-
-    class ExtendedLimits(ctypes.Structure):
-        _fields_ = [("BasicLimitInformation", BasicLimits), ("IoInfo", IoCounters),
-                    ("ProcessMemoryLimit", ctypes.c_size_t), ("JobMemoryLimit", ctypes.c_size_t),
-                    ("PeakProcessMemoryUsed", ctypes.c_size_t), ("PeakJobMemoryUsed", ctypes.c_size_t)]
-
-    kernel32.CreateJobObjectW.restype = ctypes.c_void_p
-    job = kernel32.CreateJobObjectW(None, None)
-    if not job:
-        return
-    limits = ExtendedLimits()
-    limits.BasicLimitInformation.LimitFlags = 0x2000  # JOB_OBJECT_LIMIT_KILL_ON_JOB_CLOSE
-    kernel32.SetInformationJobObject(ctypes.c_void_p(job), 9, ctypes.byref(limits), ctypes.sizeof(limits))
-    kernel32.AssignProcessToJobObject(ctypes.c_void_p(job), ctypes.c_void_p(int(process._handle)))
-    process._voxflow_job = job  # keep the handle open for the life of VoxFlow
+    job = kill_on_close_job(int(process._handle))
+    if job:
+        process._voxflow_job = job  # keep the handle open for the life of VoxFlow
 
 
 class LocalRewriteServer:

@@ -15,6 +15,7 @@ from PySide6.QtWidgets import (
 from .hotkeys import ACTIONS, DEFAULTS as DEFAULT_HOTKEYS, parse as parse_hotkey, saved as saved_hotkey
 from .appearance import DEFAULT_BACKGROUND, DEFAULT_CAPSULE, DEFAULT_FONT, DEFAULT_TEXT_SIZE, saved_color
 from .i18n import LANGUAGE_CHOICES, describe_error, resolve, set_language, tr
+from .paths import APP_ROOT
 from .model_catalog import LocalModel, describe as describe_model, discover_models, quant_of
 from .rewriter import RewriteConfig
 from .settings_theme import THEME_CHOICES, Theme, current_theme, stylesheet
@@ -23,7 +24,7 @@ from .settings_widgets import (
 )
 from .ui_icons import app_icon, line_icon
 
-REPO_ROOT = Path(__file__).resolve().parents[1]
+REPO_ROOT = APP_ROOT
 BROWSE = "__browse__"
 CATEGORIES = (("settings", "category.general"), ("personalize", "category.appearance"), ("smart", "category.smart"),
               ("shortcuts", "category.shortcuts"), ("about", "category.about"))

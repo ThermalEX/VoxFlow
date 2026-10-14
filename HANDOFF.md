@@ -6,7 +6,7 @@
 
 VoxFlow 是 Windows 上的本地语音输入原型，目前完成 **ASR → 预览/编辑 → 确认粘贴** 的闭环。托盘常驻；`Ctrl+Shift+Space`（可在设置 › 快捷键中更换）、胶囊或麦克风按钮控制录音，`Ctrl+Alt+Shift+Space` 或“继续说”按钮接着已有文字继续口述。录音时底部透明浮层显示实时草稿、蓝色柔光与随声音变化的粒子；停录后展示最终文字，用户可编辑并确认输入到先前应用。预览高度随文字行数增长，最多占当前屏幕可用高度的一半，超出部分滚动。设置是独立白色窗口，可从托盘或浮层打开。
 
-已有智能编辑（本地微调模型整理口语、执行语音指令、给出改写建议，默认开启）、中英双语界面、可自定义的全局快捷键与“继续说”。尚无意图识别、云端同步。识别中英混说的质量尚未建立真实语料基准；不要把未来模型或产品方向写成已完成。
+已有智能编辑（本地微调模型整理口语、执行语音指令、给出改写建议，默认开启）、中英双语界面、可自定义的全局快捷键与“继续说”、Windows 安装包。尚无意图识别、云端同步、自动更新。识别中英混说的质量尚未建立真实语料基准；不要把未来模型或产品方向写成已完成。
 
 ## 2. 在新环境运行
 
@@ -20,6 +20,8 @@ py -3.12 -m venv .venv
 ```
 
 日常后台启动：`.\.venv\Scripts\pythonw.exe -m voxflow`。无麦克风时可运行 `.\.venv\Scripts\python.exe -m voxflow --file path\to\speech.wav` 验证识别。手动麦克风与窗口集成检查：`.\.venv\Scripts\python.exe scripts\smoke_microphone.py`，运行前确认麦克风可用；脚本录制约两秒，不保存音频。
+
+**安装包（2026-10-14）**：`packaging/build.py` 用 PyInstaller（`packaging/voxflow.spec`，入口 `packaging/launcher.py`，需 `multiprocessing.freeze_support()` 才能启动语音子进程）生成 `dist/VoxFlow/`，再拷入语音模型（仅 onnx、tokens、许可）、llama.cpp 中 llama-server 所需文件和最新 Q8 GGUF（放到 `runtime/models/`），最后用 Inno Setup（`packaging/voxflow.iss`，简体中文语言文件为官方仓库的非官方翻译）生成 `dist/VoxFlow-Setup-<版本>.exe`。打包后路径以 exe 所在目录为根（`voxflow/paths.py`）；安装版首次启动时保存的模型路径不存在，会自动切到 `runtime/models/` 里的模型（与源码版共用注册表设置，互相切换时会自动回退，不会报错）。主进程启动时把自己加入“关闭即结束”的作业对象（`voxflow/process_guard.py`），语音子进程和 llama-server 都会随应用退出或崩溃一起结束。已验证：静默安装、启动（ASR 子进程、llama-server 加载模型、改写请求正常）、强制结束无残留、静默卸载无残留。未人工验证：图形安装向导界面、开始菜单与开机启动快捷方式、在没有 Python 环境的其他电脑上安装。
 
 模型为 `models/sherpa-onnx-sense-voice-zh-en-ja-ko-yue-int8-2024-07-17/` 下的 SenseVoiceSmall INT8 ONNX，约 240 MB。`models/` 不进 Git，新机器需单独下载。`scripts/download_model.py` 固定来源与 SHA-256；模型许可遵循模型目录和 README 中链接的原始许可。当前机器保留已解压模型及附带的测试音频，以便继续运行真实模型测试。
 

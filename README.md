@@ -36,9 +36,21 @@ py -3.12 -m venv .venv
 
 “Test connection” 可检查当前配置。实时草稿不做改写。
 
+## 打包安装程序
+
+在已能从源码运行（语音模型已下载、`runtime/llama.cpp/` 已就位、已训练导出改写模型）的机器上：
+
+```powershell
+.\.venv\Scripts\python.exe -m pip install -e ".[build]"
+winget install JRSoftware.InnoSetup --scope user      # 只需一次
+.\.venv\Scripts\python.exe packaging\build.py         # 可加 --model 指定 GGUF，--skip-installer 只生成便携文件夹
+```
+
+输出 `dist\VoxFlow\`（便携版，可直接运行 `VoxFlow.exe`）和 `dist\VoxFlow-Setup-<版本>.exe`（约 2.6 GB）。安装程序内含程序、SenseVoice 语音模型、llama-server（CUDA 版）和 Q8 改写模型，默认装到当前用户目录（不需要管理员权限），可选桌面图标和开机启动；安装或卸载前会自动结束正在运行的 VoxFlow。第三方许可见安装目录的 `THIRD_PARTY.txt`。改写模型需要 NVIDIA 显卡（约 2.5 GB 显存）；设置保存在注册表，卸载后保留。
+
 ## 当前模型
 
-使用 [SenseVoiceSmall](https://github.com/QwenAudio/SenseVoice) 的 [sherpa-onnx INT8 转换版本](https://github.com/k2-fsa/sherpa-onnx/releases/tag/asr-models)，本地 CPU 推理；模型约 240 MB，首次单独下载，文件不会进入 Git。该模型是离线整段识别；窗口将长录音按约 20 秒分段，缓存已完成片段，只反复识别当前片段来更新临时草稿，并非模型原生流式输出。中英混说质量尚需真实语料评测。模型权重遵循其[模型卡中的许可条款](https://huggingface.co/FunAudioLLM/SenseVoiceSmall)。
+使用 [SenseVoiceSmall](https://github.com/QwenAudio/SenseVoice) 的 [sherpa-onnx INT8 转换版本](https://github.com/k2-fsa/sherpa-onnx/releases/tag/asr-models)，本地 CPU 推理；模型约 240 MB，首次单独下载，文件不会进入 Git。该模型是离线整段识别；窗口将长录音按约 6–10 秒的安静处分段，缓存已完成片段，只反复识别当前片段来更新临时草稿，并非模型原生流式输出。中英混说质量尚需真实语料评测。模型权重遵循其[模型卡中的许可条款](https://huggingface.co/FunAudioLLM/SenseVoiceSmall)。
 
 ## 已知边界
 

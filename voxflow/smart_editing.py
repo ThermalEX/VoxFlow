@@ -11,9 +11,10 @@ from .edit_diff import frame_html, same_text
 from .i18n import describe_error, tr
 from .local_server import LocalRewriteServer
 from .overlay_widgets import PillButton
+from .paths import APP_ROOT
 from .rewriter import LOCAL_ENDPOINT, RewriteClient, RewriteConfig, RewriteError
 
-REPO_ROOT = Path(__file__).resolve().parents[1]
+REPO_ROOT = APP_ROOT
 EDIT_ANIMATION_MS = 800
 # Suggestions are requested only after the polished text has been on screen a moment, so a quick
 # confirm never leaves a slow suggestion request queued ahead of the next sentence.
