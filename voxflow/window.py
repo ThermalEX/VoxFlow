@@ -31,7 +31,8 @@ from .recognizer import initialize_worker, transcribe_in_worker, worker_ready
 from .scheduler import RecognitionJob, RecognitionScheduler
 from .model_catalog import replace_missing_model
 from .rewriter import migrate_settings
-from .settings_window import REPO_ROOT, SettingsWindow
+from .paths import DATA_ROOT
+from .settings_window import SettingsWindow
 from .smart_editing import SmartEditor
 from .ui_icons import app_icon
 
@@ -52,7 +53,7 @@ class VoxFlowWindow(QWidget):
         self.settings = settings if settings is not None else QSettings("VoxFlow", "VoxFlow")
         set_language(resolve(str(self.settings.value("ui/language", "system"))))
         migrate_settings(self.settings)
-        replace_missing_model(self.settings, REPO_ROOT)
+        replace_missing_model(self.settings, DATA_ROOT)
         self.hotkey_api = hotkey_api if hotkey_api is not None else Win32Hotkeys()
         self.hotkeys = {action: saved_hotkey(self.settings, action) for action in ACTIONS}
         self.hotkey_failures: list[str] = []

@@ -10,7 +10,7 @@ import soundfile as sf
 from PySide6.QtWidgets import QApplication, QMenu, QSystemTrayIcon
 
 from .i18n import tr
-from .paths import APP_ROOT
+from .paths import DATA_ROOT
 from .process_guard import end_children_with_this_process
 from .recognizer import SenseVoiceRecognizer
 from .ui_icons import app_icon
@@ -18,7 +18,7 @@ from .window import VoxFlowWindow
 
 
 MODEL_NAME = "sherpa-onnx-sense-voice-zh-en-ja-ko-yue-int8-2024-07-17"
-DEFAULT_MODEL_DIR = APP_ROOT / "models" / MODEL_NAME
+DEFAULT_MODEL_DIR = DATA_ROOT / "models" / MODEL_NAME
 
 
 def main() -> int:

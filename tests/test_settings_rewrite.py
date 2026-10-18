@@ -80,7 +80,7 @@ def test_local_model_dropdown_lists_found_models_and_browses(tmp_path, monkeypat
     make_gguf(gguf / "voxflow-rewrite-q8_0.gguf")
     make_gguf(gguf / "voxflow-rewrite-q4_k_m.gguf")
     outside = make_gguf(tmp_path / "elsewhere" / "custom.gguf")
-    monkeypatch.setattr(module, "REPO_ROOT", tmp_path)
+    monkeypatch.setattr(module, "DATA_ROOT", tmp_path)
     window, settings = make(tmp_path)
     box = window.rewrite_model_path
     labels = [box.itemText(i) for i in range(box.count())]
@@ -100,7 +100,7 @@ def test_local_model_dropdown_lists_found_models_and_browses(tmp_path, monkeypat
 def test_missing_configured_model_is_still_shown(tmp_path, monkeypatch):
     from voxflow import settings_window as module
 
-    monkeypatch.setattr(module, "REPO_ROOT", tmp_path)
+    monkeypatch.setattr(module, "DATA_ROOT", tmp_path)
     QApplication.instance() or QApplication([])
     settings = QSettings(str(tmp_path / "s.ini"), QSettings.Format.IniFormat)
     RewriteConfig(model_path="gone/old.gguf").save(settings)

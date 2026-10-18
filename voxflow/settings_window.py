@@ -15,7 +15,7 @@ from PySide6.QtWidgets import (
 from .hotkeys import ACTIONS, DEFAULTS as DEFAULT_HOTKEYS, parse as parse_hotkey, saved as saved_hotkey
 from .appearance import DEFAULT_BACKGROUND, DEFAULT_CAPSULE, DEFAULT_FONT, DEFAULT_TEXT_SIZE, saved_color
 from .i18n import LANGUAGE_CHOICES, describe_error, resolve, set_language, tr
-from .paths import APP_ROOT
+from .paths import DATA_ROOT
 from .model_catalog import LocalModel, describe as describe_model, discover_models, quant_of
 from .rewriter import RewriteConfig
 from .settings_theme import THEME_CHOICES, Theme, current_theme, stylesheet
@@ -24,7 +24,6 @@ from .settings_widgets import (
 )
 from .ui_icons import app_icon, line_icon
 
-REPO_ROOT = APP_ROOT
 BROWSE = "__browse__"
 CATEGORIES = (("settings", "category.general"), ("personalize", "category.appearance"), ("smart", "category.smart"),
               ("shortcuts", "category.shortcuts"), ("about", "category.about"))
@@ -41,10 +40,10 @@ def app_version() -> str:
         return "dev"
 
 
-def _repo_relative(path: str | Path) -> str:
+def _data_relative(path: str | Path) -> str:
     resolved = Path(path).expanduser().resolve()
     try:
-        return resolved.relative_to(REPO_ROOT).as_posix()
+        return resolved.relative_to(DATA_ROOT).as_posix()
     except ValueError:
         return str(resolved)
 
@@ -52,7 +51,7 @@ def _repo_relative(path: str | Path) -> str:
 def _same_path(first: str, second: str) -> bool:
     def absolute(value: str) -> Path:
         path = Path(value).expanduser()
-        return (path if path.is_absolute() else REPO_ROOT / path).resolve()
+        return (path if path.is_absolute() else DATA_ROOT / path).resolve()
 
     return bool(first) and bool(second) and absolute(first) == absolute(second)
 
@@ -569,14 +568,14 @@ class SettingsWindow(QWidget):
         combo = self.rewrite_model_path
         combo.blockSignals(True)
         combo.clear()
-        for model in discover_models(REPO_ROOT):
+        for model in discover_models(DATA_ROOT):
             key, values = describe_model(model)
-            combo.addItem(tr(key, **values), _repo_relative(model.path))
+            combo.addItem(tr(key, **values), _data_relative(model.path))
             combo.setItemData(combo.count() - 1, str(model.path), Qt.ItemDataRole.ToolTipRole)
         index = next((i for i in range(combo.count()) if _same_path(str(combo.itemData(i)), selected)), -1)
         if index < 0 and selected:
             path = Path(selected).expanduser()
-            path = path if path.is_absolute() else REPO_ROOT / path
+            path = path if path.is_absolute() else DATA_ROOT / path
             if path.is_file():
                 key, values = describe_model(LocalModel(path, quant_of(path), path.stat().st_size))
                 combo.addItem(tr(key, **values), selected)
@@ -593,9 +592,9 @@ class SettingsWindow(QWidget):
             self._last_model_index = index
             self._save_rewrite()
             return
-        chosen = self.choose_file(tr("dialog.choose_model"), str(REPO_ROOT), tr("filter.gguf"))
+        chosen = self.choose_file(tr("dialog.choose_model"), str(DATA_ROOT), tr("filter.gguf"))
         if chosen:
-            self._populate_local_models(_repo_relative(chosen))
+            self._populate_local_models(_data_relative(chosen))
             self._save_rewrite()
         else:
             self.rewrite_model_path.blockSignals(True)
@@ -603,9 +602,9 @@ class SettingsWindow(QWidget):
             self.rewrite_model_path.blockSignals(False)
 
     def _browse_server(self) -> None:
-        chosen = self.choose_file(tr("dialog.choose_server"), str(REPO_ROOT), tr("filter.exe"))
+        chosen = self.choose_file(tr("dialog.choose_server"), str(DATA_ROOT), tr("filter.exe"))
         if chosen:
-            self.rewrite_server_path.setText(_repo_relative(chosen))
+            self.rewrite_server_path.setText(_data_relative(chosen))
             self.rewrite_server_path.setCursorPosition(0)
             self._save_rewrite()
 

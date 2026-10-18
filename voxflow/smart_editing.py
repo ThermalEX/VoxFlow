@@ -11,10 +11,9 @@ from .edit_diff import frame_html, same_text
 from .i18n import describe_error, tr
 from .local_server import LocalRewriteServer
 from .overlay_widgets import PillButton
-from .paths import APP_ROOT
+from .paths import DATA_ROOT
 from .rewriter import LOCAL_ENDPOINT, RewriteClient, RewriteConfig, RewriteError
 
-REPO_ROOT = APP_ROOT
 EDIT_ANIMATION_MS = 800
 # Suggestions are requested only after the polished text has been on screen a moment, so a quick
 # confirm never leaves a slow suggestion request queued ahead of the next sentence.
@@ -28,15 +27,15 @@ SERVER_FIELDS = ("provider", "server_path", "model_path")
 HEALTH_URL = LOCAL_ENDPOINT.removesuffix("/v1") + "/health"
 
 
-def _repo_path(value: str) -> Path:
+def _data_path(value: str) -> Path:
     path = Path(value).expanduser()
-    return path if path.is_absolute() else REPO_ROOT / path
+    return path if path.is_absolute() else DATA_ROOT / path
 
 
 def default_server_factory(config: RewriteConfig) -> LocalRewriteServer:
-    server_path, model_path = _repo_path(config.server_path), _repo_path(config.model_path)
+    server_path, model_path = _data_path(config.server_path), _data_path(config.model_path)
     return LocalRewriteServer(LocalRewriteServer.llama_command(server_path, model_path), HEALTH_URL,
-                              REPO_ROOT / "runtime" / "llama-server.log",
+                              DATA_ROOT / "runtime" / "llama-server.log",
                               required=[("missing_server", server_path), ("missing_model", model_path)])
 
 
