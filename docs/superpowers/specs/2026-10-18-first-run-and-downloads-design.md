@@ -54,7 +54,7 @@
 | 组件 | 是否必需 | 来源 |
 | --- | --- | --- |
 | 语音识别模型 SenseVoice INT8（`model.int8.onnx` 239 MB + `tokens.txt` + `LICENSE`） | 必需，没有它无法录音识别 | Hugging Face `csukuangfj/sherpa-onnx-sense-voice-zh-en-ja-ko-yue-2024-07-17`（sherpa-onnx 作者维护，`model.int8.onnx` 与现用文件哈希一致），固定到某个提交 |
-| llama.cpp **Vulkan 版** b11596（下载 30 MB，解压 88 MB；支持 NVIDIA / AMD / Intel 显卡） | 本地智能编辑必需 | 用户决定：不打包，在软件里下载。版本与来源见 §7.5 |
+| llama.cpp b11596，两个版本由用户选一个：**通用版（Vulkan）**下载 30 MB / 解压 88 MB，支持 NVIDIA / AMD / Intel 显卡；**NVIDIA 加速版（CUDA）**下载 625 MB / 解压 1.2 GB，只支持 NVIDIA | 本地智能编辑必需（二选一） | 用户决定：不打包，在软件里下载，两个版本都提供并注明效果。见 §7.5 |
 | 改写模型 GGUF（v4 Q8 1.9 GB 推荐 / v4 Q4 1.2 GB） | 可选 | Hugging Face `ThermalEX/voxflow-rewrite`，固定标签 `v4`（已上传） |
 
 国内镜像：把下载地址的 `huggingface.co` 换成 `hf-mirror.com`，路径不变（已验证两者对 v4 文件都返回 200）。
@@ -127,21 +127,27 @@
 - 没有语音模型：浮层状态显示“需要先下载语音识别模型”，点击打开下载界面；不再提示运行 `scripts/download_model.py`（源码开发仍可用该脚本）。
 - 没有 llama.cpp 或改写模型：智能编辑状态显示“未安装”，旁边“去下载”按钮跳到下载列表；录音和输入照常可用。
 
-### 7.5 llama.cpp 用 Vulkan 版，并转存到我们的 Hugging Face 仓库
+### 7.5 llama.cpp 两个版本都提供（用户决定），并转存到我们的 Hugging Face 仓库
 
-2026-10-18 在本机（RTX 3060 Laptop）用 v4 Q8、测试集 v4 实测：
+2026-10-18 在本机（RTX 3060 Laptop）用 v4 Q8、测试集 v4 实测（两者在相同条件下测，后台其他程序约占 2 GB 显存）：
 
-| | CUDA 版 | Vulkan 版 |
+| | 通用版（Vulkan） | NVIDIA 加速版（CUDA） |
 | --- | --- | --- |
-| 单句延迟中位数 | 0.149 s | 0.151 s |
-| 字符错误率 / 反例保留 / 翻译 chrF | 0.198 / 95% / 64.8 | 0.202 / 95% / 65.0 |
-| 显存 | 基准 | 少约 0.4 GB |
-| 服务启动 | 4.1 s | 8.2 s |
-| 下载 / 解压 | 625 MB / 1.2 GB | 30 MB / 88 MB |
+| 单句延迟中位数 | 0.150 s | 0.154 s |
+| 字符错误率 / 反例保留 / 翻译 chrF | 0.202 / 95% / 65.0 | 0.198 / 95% / 64.8 |
+| 服务占用显存 | 约 2.0 GB | 约 2.1 GB |
+| 服务启动（连续 3 次） | 4.0 / 4.1 / 4.0 s；首次运行约 8 s（编译显卡着色器，之后有缓存） | 4.1 / 4.1 / 4.0 s |
+| 下载 / 解压 | 30 MB / 88 MB | 625 MB / 1.2 GB |
+| 支持的显卡 | NVIDIA / AMD / Intel | 仅 NVIDIA |
 
-速度和质量相同，Vulkan 版小 20 倍且不限显卡厂商，所以清单只提供 Vulkan 版，不再提供 CUDA 版。启动多 4 秒对“打开软件时后台加载”影响不大。
+用户决定两个版本都放进下载列表，由用户选择，并注明效果：
 
-llama.cpp 官方只在 GitHub 发布，国内镜像对它无效，所以把 `llama-b11596-bin-win-vulkan-x64.zip` 原样上传到 `ThermalEX/voxflow-rewrite` 的 `runtime/` 目录（MIT 许可允许再分发，一并上传 LICENSE），与模型走同一个下载源。下载后只解压 llama-server 需要的文件（与 `packaging/build.py` 现有的筛选规则一致）。没有可用 Vulkan 显卡时 llama.cpp 会回退到 CPU，速度较慢但可用；设置页模型状态里提示即可。
+- **通用版（Vulkan）· 推荐**：“30 MB · NVIDIA / AMD / Intel 显卡都能用 · 第一次启动稍慢（约 8 秒），之后与加速版相同”。
+- **NVIDIA 加速版（CUDA）**：“625 MB · 仅 NVIDIA 显卡 · 实测速度与通用版相同，体积大 20 倍”。
+
+两者装在同一位置，二选一：装其中一个时替换另一个（勾选框按单选处理）。检测不到 NVIDIA 显卡时，加速版显示“需要 NVIDIA 显卡”且不能勾选。
+
+llama.cpp 官方只在 GitHub 发布，国内镜像对它无效，所以把 `llama-b11596-bin-win-vulkan-x64.zip`、`llama-b11596-bin-win-cuda-12.4-x64.zip` 和 `cudart-llama-bin-win-cuda-12.4-x64.zip` 原样上传到 `ThermalEX/voxflow-rewrite` 的 `runtime/` 目录（MIT 许可允许再分发，一并上传 LICENSE），与模型走同一个下载源。下载后只解压 llama-server 需要的文件（与 `packaging/build.py` 现有的筛选规则一致）。没有可用 Vulkan 显卡时 llama.cpp 会回退到 CPU，速度较慢但可用；设置页模型状态里提示即可。
 
 ### 7.6 卸载
 
