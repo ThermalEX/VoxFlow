@@ -92,15 +92,26 @@ def test_restore_defaults_even_when_the_custom_keys_are_swapped(tmp_path):
     window.close()
 
 
-def test_about_page_shows_the_app_and_reserves_release_features(tmp_path):
+def test_about_page_shows_the_app_and_reserves_update_features(tmp_path):
     window, _settings = make(tmp_path)
     assert window.about_name.text() == "VoxFlow"
     assert window.about_version.text().startswith("Version 0.")
     assert window.about_author.text() == "Author ThermalEX"
-    for control in (window.about_repo_button, window.update_channel, window.update_on_start,
-                    window.update_check_button):
+    for control in (window.update_channel, window.update_on_start, window.update_check_button):
         assert not control.isEnabled()
-    assert window.about_repo_button.toolTip() == "Available after the first public release"
+    window.close()
+
+
+def test_about_page_links_open_github_and_hugging_face(tmp_path):
+    window, _settings = make(tmp_path)
+    opened = []
+    window.open_url = opened.append
+    assert window.about_repo_button.text() == "View on GitHub"
+    assert window.about_model_button.text() == "Models on Hugging Face"
+    window.about_repo_button.click()
+    window.about_model_button.click()
+    assert opened == ["https://github.com/ThermalEX/VoxFlow", "https://huggingface.co/ThermalEX/voxflow-rewrite"]
+    assert window.about_model_button.toolTip() == "https://huggingface.co/ThermalEX/voxflow-rewrite"
     window.close()
 
 

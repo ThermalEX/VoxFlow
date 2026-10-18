@@ -4,8 +4,8 @@ from importlib.metadata import PackageNotFoundError, version as package_version
 from pathlib import Path
 
 import PySide6
-from PySide6.QtCore import QEasingCurve, QPropertyAnimation, QSettings, QSize, Qt, Signal, qVersion
-from PySide6.QtGui import QColor, QFont, QGuiApplication, QIcon, QPainter, QPixmap
+from PySide6.QtCore import QEasingCurve, QPropertyAnimation, QSettings, QSize, Qt, QUrl, Signal, qVersion
+from PySide6.QtGui import QColor, QDesktopServices, QFont, QGuiApplication, QIcon, QPainter, QPixmap
 from PySide6.QtWidgets import (
     QAbstractSpinBox, QApplication, QColorDialog, QFileDialog, QFrame, QGraphicsOpacityEffect, QHBoxLayout,
     QLabel, QLineEdit, QListWidget, QListWidgetItem, QPushButton, QScrollArea, QSpinBox, QStackedWidget,
@@ -31,6 +31,7 @@ CATEGORIES = (("settings", "category.general"), ("personalize", "category.appear
 HOTKEY_FIELDS = {"record": "field.hotkey_record", "continue": "field.hotkey_continue"}
 AUTHOR = "ThermalEX"
 REPO_URL = "https://github.com/ThermalEX/VoxFlow"
+MODELS_URL = "https://huggingface.co/ThermalEX/voxflow-rewrite"
 
 
 def app_version() -> str:
@@ -78,6 +79,8 @@ class SettingsWindow(QWidget):
         self._hotkey_message: tuple[str, dict] = ("hotkey.help", {})
         self._cards: list[SettingsCard] = []
         self.theme = current_theme(self._theme_choice())
+        # Links open through this hook so tests can catch them instead of launching a browser.
+        self.open_url = lambda url: QDesktopServices.openUrl(QUrl(url))
         # File pickers go through this hook so tests can answer them.
         self.choose_file = lambda title, start, file_filter: QFileDialog.getOpenFileName(
             self, title, start, file_filter)[0]
@@ -482,17 +485,17 @@ class SettingsWindow(QWidget):
         self.about_author = QLabel()
         self.about_author.setObjectName("rowDesc")
         self._bind(self.about_author.setText, "about.author", author=AUTHOR)
-        self.about_repo_button = QPushButton()
-        self.about_repo_button.setObjectName("link")
-        self.about_repo_button.setCursor(Qt.CursorShape.PointingHandCursor)
-        self._bind(self.about_repo_button.setText, "about.repo")
-        # Reserved until the first public release: the repository link opens REPO_URL then.
-        self.about_repo_button.setEnabled(False)
-        self._bind(self.about_repo_button.setToolTip, "about.coming")
+        self.about_repo_button = self._link("about.repo", REPO_URL)
+        self.about_model_button = self._link("about.models", MODELS_URL)
         for widget in (self.about_name, self.about_version, self.about_author):
             column.addWidget(widget)
         column.addSpacing(6)
-        column.addWidget(self.about_repo_button, 0, Qt.AlignmentFlag.AlignLeft)
+        links = QHBoxLayout()
+        links.setSpacing(18)
+        links.addWidget(self.about_repo_button)
+        links.addWidget(self.about_model_button)
+        links.addStretch(1)
+        column.addLayout(links)
         hero_layout.addLayout(column, 1)
         self._section(layout).add_row(hero)
 
@@ -526,6 +529,15 @@ class SettingsWindow(QWidget):
         layout.addWidget(note)
         layout.addStretch()
         return page
+
+    def _link(self, key: str, url: str) -> QPushButton:
+        button = QPushButton()
+        button.setObjectName("link")
+        button.setCursor(Qt.CursorShape.PointingHandCursor)
+        button.setToolTip(url)
+        self._bind(button.setText, key)
+        button.clicked.connect(lambda: self.open_url(url))
+        return button
 
     @staticmethod
     def _value(text: str) -> QLabel:

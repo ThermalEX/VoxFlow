@@ -179,7 +179,7 @@ STRINGS: dict[str, tuple[str, str]] = {
     "about.version": ("Version {version}", "版本 {version}"),
     "about.author": ("Author {author}", "作者 {author}"),
     "about.repo": ("View on GitHub", "查看 GitHub 仓库"),
-    "about.coming": ("Available after the first public release", "正式发布后开放"),
+    "about.models": ("Models on Hugging Face", "Hugging Face 模型"),
     "section.components": ("Components", "组件"),
     "about.asr": ("Speech recognition", "语音识别"),
     "about.rewrite": ("Smart editing", "智能编辑"),
