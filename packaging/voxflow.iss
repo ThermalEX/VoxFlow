@@ -38,16 +38,16 @@ chinesesimp.StartWithWindows=开机时自动启动 VoxFlow
 english.StartWithWindows=Start VoxFlow when Windows starts
 chinesesimp.LaunchNow=立即启动 VoxFlow
 english.LaunchNow=Launch VoxFlow now
+chinesesimp.DeleteDownloads=是否同时删除已下载的模型和组件？%n%n位置：%1%n%n选“否”可在重新安装后直接使用。
+english.DeleteDownloads=Also delete the downloaded models and components?%n%nLocation: %1%n%nChoose No to keep them for a reinstall.
 
 [Tasks]
 Name: "desktopicon"; Description: "{cm:CreateDesktopIcon}"; GroupDescription: "{cm:AdditionalIcons}"
 Name: "startup"; Description: "{cm:StartWithWindows}"; GroupDescription: "{cm:AdditionalIcons}"; Flags: unchecked
 
 [Files]
-; Models are already compressed; storing them as-is keeps the build fast.
-Source: "..\dist\VoxFlow\*"; DestDir: "{app}"; Excludes: "*.gguf,*.onnx"; Flags: ignoreversion recursesubdirs createallsubdirs
-Source: "..\dist\VoxFlow\models\*.onnx"; DestDir: "{app}\models"; Flags: ignoreversion recursesubdirs nocompression
-Source: "..\dist\VoxFlow\runtime\models\*.gguf"; DestDir: "{app}\runtime\models"; Flags: ignoreversion nocompression
+; The app only: models and llama.cpp are downloaded inside VoxFlow into %LOCALAPPDATA%\VoxFlow.
+Source: "..\dist\VoxFlow\*"; DestDir: "{app}"; Flags: ignoreversion recursesubdirs createallsubdirs
 
 [Icons]
 Name: "{autoprograms}\VoxFlow"; Filename: "{app}\VoxFlow.exe"
@@ -56,9 +56,6 @@ Name: "{userstartup}\VoxFlow"; Filename: "{app}\VoxFlow.exe"; Tasks: startup
 
 [Run]
 Filename: "{app}\VoxFlow.exe"; Description: "{cm:LaunchNow}"; Flags: nowait postinstall skipifsilent
-
-[UninstallDelete]
-Type: files; Name: "{app}\runtime\llama-server.log"
 
 [Code]
 // End a running VoxFlow before files are replaced or removed; its job object ends the speech worker and
@@ -78,7 +75,18 @@ begin
 end;
 
 procedure CurUninstallStepChanged(CurUninstallStep: TUninstallStep);
+var
+  DataDir: String;
 begin
   if CurUninstallStep = usUninstall then
     StopVoxFlow();
+  if CurUninstallStep = usPostUninstall then
+  begin
+    DataDir := ExpandConstant('{localappdata}\VoxFlow');
+    // Silent uninstalls (/SUPPRESSMSGBOXES) keep the downloads, like answering No.
+    if DirExists(DataDir) and
+       (SuppressibleMsgBox(FmtMessage(CustomMessage('DeleteDownloads'), [DataDir]), mbConfirmation,
+                           MB_YESNO or MB_DEFBUTTON2, IDNO) = IDYES) then
+      DelTree(DataDir, True, True, True);
+  end;
 end;

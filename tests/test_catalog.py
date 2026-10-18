@@ -96,3 +96,13 @@ def test_a_recorded_variant_hides_its_sibling(tmp_path):
     server.write_bytes(b"")
     ids = installed_ids(builtin_catalog(), tmp_path)
     assert "llama-cuda" in ids and "llama-vulkan" not in ids
+
+
+def test_builtin_catalog_is_complete():
+    import re
+
+    for item in builtin_catalog():
+        for file in item.files:
+            assert file.size > 0, (item.id, file.path)
+            assert re.fullmatch(r"[0-9a-f]{64}", file.sha256), (item.id, file.path)
+            assert "//" not in file_url(file, "huggingface").split("://", 1)[1]

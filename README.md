@@ -2,51 +2,68 @@
 
 开发交接与代码结构见 [HANDOFF.md](HANDOFF.md)。
 
-当前阶段实现 Windows 本地麦克风识别。程序常驻系统托盘，唤起后只在屏幕下方显示透明背景上的一排控件。开始录音时，蓝色柔光和粒子从胶囊轮廓向外展开；粒子会随声音活动变化，也会对鼠标靠近作出反应。胶囊待机及录音静音时只有轻微的蓝色波面，录音声音增大时起伏更明显。停录后浮层保持展开，最终文字到达时向上扩展；长内容可滚动查看和编辑。界面支持中文和英文（设置 → 应用设置 → 界面语言，默认跟随系统），识别结果保留原语种。按确认键或回车会将编辑后的结果粘贴到呼出浮层前使用的应用中；关闭浮层会清空本次结果。暂未实现智能编辑、翻译或建议。
+VoxFlow 是 Windows 上的本地语音输入工具：按一下快捷键说话，识别出的文字经本地小模型整理（去掉口气词、按改口修改、执行“翻译成英文”“正式一点”等语音指令）后，输入到你正在用的应用里。语音识别和智能编辑都在本机运行，默认不保存录音。界面支持中文和英文，识别结果保留原语种。
 
-## 运行
+## 安装与首次使用
 
-需要 Windows 和 Python 3.12。首次安装：
+运行安装程序 `VoxFlow-Setup-<版本>.exe`（只含程序本体，装在当前用户目录，不需要管理员权限）。第一次打开会出现新手教程：
+
+1. 选择界面语言。
+2. 选择颜色模式（跟随系统 / 浅色 / 深色）和配色主题，右侧实时预览语音浮层。
+3. 选择麦克风，对着说话可看到音量条跳动（只在本机计算音量，不录音）。
+4. 下载组件：语音识别模型（必需，约 230 MB）、llama.cpp（运行智能编辑）和智能编辑模型。默认勾选推荐项，点“下载所选”才开始；也可以跳过，之后在 设置 › 智能编辑 中下载。
+5. 动手试一次。
+6. 小技巧。
+
+教程可在 设置 › 关于 › 重新开始教程 再次打开。
+
+**下载**：可下载的内容来自 [Hugging Face](https://huggingface.co/ThermalEX/voxflow-rewrite)，下载源可选“自动 / Hugging Face / 国内镜像（hf-mirror.com）”；“自动”在连不上或太慢时切换到镜像。下载支持断点续传，校验 SHA-256 后才安装，存放在 `%LOCALAPPDATA%\VoxFlow`，重装软件不用重新下载；卸载时会询问是否一并删除。llama.cpp 有两个版本可选：
+
+- **通用版（Vulkan）**：30 MB，NVIDIA / AMD / Intel 显卡都能用，第一次启动约 8 秒，之后与加速版一样快（推荐）。
+- **NVIDIA 加速版（CUDA）**：625 MB，仅 NVIDIA 显卡，实测速度与通用版相同。
+
+## 使用
+
+先聚焦目标应用的输入框，按 `Ctrl+Shift+Space` 开始录音，再按一次停止；中央胶囊和右侧麦克风按钮也可操作录音。停录后浮层展示最终文字，可直接编辑；按回车或左侧确认键，程序会回到之前的应用并粘贴文字（编辑时用 `Shift+Enter` 换行）。若目标窗口无法重新获得焦点，浮层会保留结果并复制文字，供手动粘贴。按 `Esc` 或右侧关闭按钮隐藏浮层并丢弃本次内容。结果出来后可点“继续说”或按 `Ctrl+Alt+Shift+Space` 接着已有文字继续口述，新内容会和原文一起再整理一次。单次录音上限 5 分钟。
+
+设置窗口可从托盘或浮层左侧的设置图标打开：
+
+- **常规**：界面语言、麦克风、文字对齐。
+- **外观**：颜色模式、配色主题（6 个预设 + 自定义，统一浮层柔光和设置界面的颜色）、文字字体和字号。
+- **智能编辑**：开关、模型来源、已安装的模型、下载模型。
+- **快捷键**：录音和“继续说”两个全局快捷键可录制更换；被其他程序占用时会提示并保留原来的键。
+- **关于**：版本、GitHub 与 Hugging Face 链接、重新开始教程。
+
+## 智能编辑
+
+默认开启。打开 VoxFlow 时会在后台启动本地模型（约 4 秒就绪），停录得到的最终文字交给改写模型整理，以一次修改动画替换原文；鼠标悬停“撤回修改”可预览原文，点击撤回或恢复；下方还会浮动 0–3 个改写建议，点击即采用。模型出错、超时或未就绪时保留原文，不影响正常使用。实时草稿不做改写。
+
+- **VoxFlow 本地模型**：VoxFlow 直接启动 llama.cpp 的 `llama-server.exe` 加载 GGUF 模型（运行时不需要 WSL）。缺少 llama.cpp 或模型时，状态会显示“未安装”，点“去下载”跳到下载列表。也可以选择本机已有的 GGUF 文件。
+- **自定义 OpenAI 兼容接口**：填写地址、模型名和可选 API Key，可接 LM Studio、Ollama、llama.cpp server 或云端服务。API Key 以明文保存在本机设置中。
+
+## 从源码运行
+
+需要 Windows 和 Python 3.12：
 
 ```powershell
 py -3.12 -m venv .venv
 .\.venv\Scripts\python.exe -m pip install -e ".[test]"
-.\.venv\Scripts\python.exe scripts\download_model.py
 .\.venv\Scripts\python.exe -m voxflow
 ```
 
-日常使用可运行 `.\.venv\Scripts\pythonw.exe -m voxflow`，不会弹出终端窗口。
-
-首次启动后可点击托盘图标打开浮层。左侧设置图标或托盘里的 Settings 可直接打开独立的白色设置窗口，不会唤起浮层。Personalization 中可设置识别文字的字体、字号、背景柔光颜色和胶囊颜色；App settings 中可选择麦克风及文字左、中、右对齐。改动即时生效并自动保存，外观可恢复默认。先聚焦目标应用的输入框，再按 `Ctrl+Shift+Space` 开始录音；再按一次停止，等待最终文本。中央胶囊和右侧麦克风按钮也可操作录音。检查或编辑结果后按回车或左侧确认键，程序会回到之前的应用并粘贴文字（编辑时用 `Shift+Enter` 换行）；若目标窗口无法重新获得焦点，浮层会保留结果并复制文字，供手动粘贴。按 `Esc` 或右侧关闭按钮隐藏浮层，并丢弃正在进行的录音和未确认的文字；从托盘菜单退出程序。结果出来后可点“继续说”或按 `Ctrl+Alt+Shift+Space` 接着已有文字继续口述，新内容会和原文一起再整理一次。两个全局快捷键都可在 设置 › 快捷键 中更换；如被其他程序占用，浮层和托盘会提示，仍可通过托盘菜单操作。设置 › 关于 显示版本和组件信息（GitHub 链接与更新检查在正式发布前保留为占位）。单次录音上限 5 分钟，默认不保存录音。录音中的长文本会跟随最新内容滚动；长录音按短片段识别，停止后合并结果。
-
-也可用音频文件验证识别：
-
-```powershell
-.\.venv\Scripts\python.exe -m voxflow --file path\to\speech.wav
-```
-
-测试：`.\.venv\Scripts\python.exe -m pytest -q`。
-
-## 智能编辑（试用）
-
-智能编辑默认开启：打开 VoxFlow 时会在后台自动启动本地模型（约 4 秒就绪，设置的“智能编辑”页可查看模型状态），停录得到的最终文字会交给改写模型整理：去掉口气词、按改口和“去掉……/换成……”修改前文，执行“翻译成英文”“正式一点”等语音指令。整理结果以一次修改动画替换原文；鼠标悬停 “Undo edits” 可预览原文，点击撤回或恢复；下方还会浮动 0–3 个改写建议，点击即采用。确认或回车只上屏当前文字。模型出错、超时或未就绪时保留原文，不影响正常使用。
-
-- **VoxFlow local model**：VoxFlow 直接启动 Windows 版 llama.cpp `llama-server.exe`（不需要 WSL），加载本仓库训练并导出的 GGUF 模型，约 4 秒就绪，每句整理约 0.25 秒。默认路径：程序 `runtime/llama.cpp/llama-server.exe`（从 llama.cpp 发布页下载 Windows CUDA 版及对应 cudart 解压到此），模型 `training/rewrite/runs/qwen3.5-2b/gguf/voxflow-rewrite-q8_0.gguf`（由 `training.rewrite.export_gguf` 导出）。两者都不进 Git，可在设置中改为其他位置。
-- **Custom OpenAI-compatible endpoint**：填写地址、模型名和可选 API Key，可接 LM Studio、Ollama、llama.cpp server 或云端服务。API Key 以明文保存在本机设置中。
-
-“Test connection” 可检查当前配置。实时草稿不做改写。
+从源码运行时，模型和 llama.cpp 都放在仓库目录（`models/`、`runtime/llama.cpp/`、`runtime/models/`），可以在软件里下载，也可以用 `scripts/download_model.py` 下载语音模型。日常使用可运行 `.\.venv\Scripts\pythonw.exe -m voxflow`，不会弹出终端窗口。用音频文件验证识别：`.\.venv\Scripts\python.exe -m voxflow --file path\to\speech.wav`。测试：`.\.venv\Scripts\python.exe -m pytest -q`。
 
 ## 打包安装程序
-
-在已能从源码运行（语音模型已下载、`runtime/llama.cpp/` 已就位、已训练导出改写模型）的机器上：
 
 ```powershell
 .\.venv\Scripts\python.exe -m pip install -e ".[build]"
 winget install JRSoftware.InnoSetup --scope user      # 只需一次
-.\.venv\Scripts\python.exe packaging\build.py         # 可加 --model 指定 GGUF，--skip-installer 只生成便携文件夹
+.\.venv\Scripts\python.exe packaging\build.py         # --skip-installer 只生成便携文件夹
 ```
 
-输出 `dist\VoxFlow\`（便携版，可直接运行 `VoxFlow.exe`）和 `dist\VoxFlow-Setup-<版本>.exe`（约 2.6 GB）。安装程序内含程序、SenseVoice 语音模型、llama-server（CUDA 版）和 Q8 改写模型，默认装到当前用户目录（不需要管理员权限），可选桌面图标和开机启动；安装或卸载前会自动结束正在运行的 VoxFlow。第三方许可见安装目录的 `THIRD_PARTY.txt`。改写模型需要 NVIDIA 显卡（约 2.5 GB 显存）；设置保存在注册表，卸载后保留。
+输出 `dist\VoxFlow\`（便携版）和 `dist\VoxFlow-Setup-<版本>.exe`。安装程序只含程序本体，可选桌面图标和开机启动；安装或卸载前会自动结束正在运行的 VoxFlow。第三方许可见安装目录的 `THIRD_PARTY.txt`。
+
+发布新的 llama.cpp 版本或更新下载清单：`.\.venv\Scripts\python.exe packaging\publish_runtime.py`（需要 `gh` 和 `hf auth login`），它把 llama.cpp 的 Windows 版本转存到 Hugging Face 仓库的 `runtime/`，并更新 `catalog.json` 与内置清单 `voxflow/assets/catalog.json`。上传新的改写模型后，在清单里加一项即可让已安装的软件看到它。
 
 ## 当前模型
 

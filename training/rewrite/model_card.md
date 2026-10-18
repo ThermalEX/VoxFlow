@@ -49,6 +49,8 @@ VoxFlow 的本地智能编辑模型：把语音识别得到的口语原文，整
 | `voxflow-rewrite-q8_0.gguf` | 1.9 GB | 推荐。显存约 2.5 GB，质量与原始权重一致 |
 | `voxflow-rewrite-q4_k_m.gguf` | 1.2 GB | 显存更省，质量略低 |
 
+`runtime/` 目录里是 VoxFlow 软件内下载用的 llama.cpp b11596 Windows 版本（通用 Vulkan 版、NVIDIA CUDA 版及其 CUDA 运行库），从 [llama.cpp 官方发布页](https://github.com/ggml-org/llama.cpp/releases/tag/b11596) 原样转存（MIT 许可，见 `runtime/LICENSE-llama.cpp`），以便国内镜像也能下载；`catalog.json` 是软件读取的下载清单。
+
 每个训练版本都打了标签（如 `v4`）。下载时固定标签，以后更新模型也不会影响已发布的版本：
 
 ```
