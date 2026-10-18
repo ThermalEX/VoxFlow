@@ -1,0 +1,85 @@
+{
+  "version": 1,
+  "items": [
+    {
+      "id": "asr-sensevoice",
+      "kind": "asr",
+      "required": true,
+      "recommended": true,
+      "title": {"en": "Speech recognition model", "zh": "语音识别模型"},
+      "desc": {"en": "SenseVoice · Chinese, English, Japanese, Korean, Cantonese · required for voice input",
+               "zh": "SenseVoice · 中、英、日、韩、粤语 · 语音输入必需"},
+      "check": "models/sherpa-onnx-sense-voice-zh-en-ja-ko-yue-int8-2024-07-17/model.int8.onnx",
+      "files": [
+        {"repo": "csukuangfj/sherpa-onnx-sense-voice-zh-en-ja-ko-yue-2024-07-17",
+         "revision": "2365baeacb507f821a0c8120fcee3d484dba7a07", "path": "model.int8.onnx", "size": 239233841,
+         "sha256": "c71f0ce00bec95b07744e116345e33d8cbbe08cef896382cf907bf4b51a2cd51",
+         "dest": "models/sherpa-onnx-sense-voice-zh-en-ja-ko-yue-int8-2024-07-17/model.int8.onnx"},
+        {"repo": "csukuangfj/sherpa-onnx-sense-voice-zh-en-ja-ko-yue-2024-07-17",
+         "revision": "2365baeacb507f821a0c8120fcee3d484dba7a07", "path": "tokens.txt", "size": 315894,
+         "sha256": "f449eb28dc567533d7fa59be34e2abca8784f771850c78a47fb731a31429a1dc",
+         "dest": "models/sherpa-onnx-sense-voice-zh-en-ja-ko-yue-int8-2024-07-17/tokens.txt"},
+        {"repo": "csukuangfj/sherpa-onnx-sense-voice-zh-en-ja-ko-yue-2024-07-17",
+         "revision": "2365baeacb507f821a0c8120fcee3d484dba7a07", "path": "LICENSE", "size": 71,
+         "sha256": "221c6df10b0931a5629adad671ea48fb7747e034c414b6d2bfa275bc3dd4ea17",
+         "dest": "models/sherpa-onnx-sense-voice-zh-en-ja-ko-yue-int8-2024-07-17/LICENSE"}
+      ]
+    },
+    {
+      "id": "llama-vulkan",
+      "kind": "runtime",
+      "group": "llama",
+      "recommended": true,
+      "title": {"en": "llama.cpp · Universal (Vulkan)", "zh": "llama.cpp · 通用版（Vulkan）"},
+      "desc": {"en": "Runs smart editing · NVIDIA, AMD and Intel graphics · first start takes about 8 s, then as fast as the NVIDIA build",
+               "zh": "运行智能编辑 · NVIDIA / AMD / Intel 显卡都能用 · 第一次启动约 8 秒，之后与加速版一样快"},
+      "check": "runtime/llama.cpp/ggml-vulkan.dll",
+      "files": [
+        {"repo": "ThermalEX/voxflow-rewrite", "revision": "main", "path": "runtime/llama-b11596-bin-win-vulkan-x64.zip",
+         "size": 32128506, "sha256": "67eb3043f1070dba2021c5b9bd279041c003866548edfc6d5bfbd81842780811",
+         "dest": "runtime/llama.cpp", "extract": true}
+      ]
+    },
+    {
+      "id": "llama-cuda",
+      "kind": "runtime",
+      "group": "llama",
+      "needs_nvidia": true,
+      "title": {"en": "llama.cpp · NVIDIA build (CUDA)", "zh": "llama.cpp · NVIDIA 加速版（CUDA）"},
+      "desc": {"en": "Runs smart editing · NVIDIA graphics only · measured as fast as the universal build, 20× larger",
+               "zh": "运行智能编辑 · 仅 NVIDIA 显卡 · 实测速度与通用版相同，体积大 20 倍"},
+      "check": "runtime/llama.cpp/ggml-cuda.dll",
+      "files": [
+        {"repo": "ThermalEX/voxflow-rewrite", "revision": "main", "path": "runtime/llama-b11596-bin-win-cuda-12.4-x64.zip",
+         "size": 0, "sha256": "", "dest": "runtime/llama.cpp", "extract": true},
+        {"repo": "ThermalEX/voxflow-rewrite", "revision": "main", "path": "runtime/cudart-llama-bin-win-cuda-12.4-x64.zip",
+         "size": 0, "sha256": "", "dest": "runtime/llama.cpp", "extract": true}
+      ]
+    },
+    {
+      "id": "rewrite-v4-q8",
+      "kind": "rewrite",
+      "recommended": true,
+      "title": {"en": "Smart editing model v4 · Q8", "zh": "智能编辑模型 v4 · Q8"},
+      "desc": {"en": "Recommended · needs about 2.5 GB of graphics memory", "zh": "推荐 · 约需 2.5 GB 显存"},
+      "check": "runtime/models/voxflow-rewrite-v4-q8_0.gguf",
+      "files": [
+        {"repo": "ThermalEX/voxflow-rewrite", "revision": "v4", "path": "voxflow-rewrite-q8_0.gguf",
+         "size": 2076674496, "sha256": "0d07504034d1fbea23dcf64466c6ca31cd2593ba9a17c8c9443d51fe75d447b5",
+         "dest": "runtime/models/voxflow-rewrite-v4-q8_0.gguf"}
+      ]
+    },
+    {
+      "id": "rewrite-v4-q4",
+      "kind": "rewrite",
+      "title": {"en": "Smart editing model v4 · Q4", "zh": "智能编辑模型 v4 · Q4"},
+      "desc": {"en": "Less graphics memory · slightly lower quality", "zh": "更省显存 · 质量略低"},
+      "check": "runtime/models/voxflow-rewrite-v4-q4_k_m.gguf",
+      "files": [
+        {"repo": "ThermalEX/voxflow-rewrite", "revision": "v4", "path": "voxflow-rewrite-q4_k_m.gguf",
+         "size": 1312164288, "sha256": "94b067f09a653d126fedb21356039ee94dd9f05b172b52fc447056bc879f9d84",
+         "dest": "runtime/models/voxflow-rewrite-v4-q4_k_m.gguf"}
+      ]
+    }
+  ]
+}
