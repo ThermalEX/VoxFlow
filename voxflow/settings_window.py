@@ -19,6 +19,7 @@ from .i18n import LANGUAGE_CHOICES, describe_error, resolve, set_language, tr
 from .paths import DATA_ROOT
 from .catalog import builtin_catalog, read_installed
 from .download_panel import DownloadPanel
+from .microphones import MICROPHONE_ROLE, microphone_label
 from .model_catalog import LocalModel, describe as describe_model, discover_models, quant_of
 from .rewriter import RewriteConfig
 from .settings_theme import THEME_CHOICES, Theme, current_theme, stylesheet, with_accent
@@ -227,6 +228,8 @@ class SettingsWindow(QWidget):
         for index, key in enumerate(("align.left", "align.center", "align.right")):
             self.alignment_box.setItemText(index, tr(key))
         self.language_box.setItemText(0, tr("language.system"))
+        for index in range(self.device_box.count()):
+            self.device_box.setItemText(index, microphone_label(self.device_box.itemData(index, MICROPHONE_ROLE)))
         for index, (_value, key) in enumerate(THEME_CHOICES):
             self.theme_box.setItemText(index, tr(key))
         for key, fallback in (("background", DEFAULT_BACKGROUND), ("capsule", DEFAULT_CAPSULE)):

@@ -155,3 +155,16 @@ def test_mic_meter_reports_level_without_saving_audio(tmp_path):
     assert levels and levels[-1] > 0.1
     meter.stop()
     assert list(tmp_path.iterdir()) == []
+
+
+def test_mic_meter_opens_the_device_at_its_own_rate():
+    from voxflow.microphones import SYSTEM_DEFAULT
+
+    QApplication.instance() or QApplication([])
+    FakeStream.opened.clear()
+    meter = MicMeter(stream_factory=FakeStream)
+    meter.start(SYSTEM_DEFAULT)
+    kwargs = FakeStream.opened[-1].kwargs
+    assert kwargs["device"] is None  # follow the Windows default
+    assert kwargs.get("samplerate") is None  # WASAPI shared mode only opens at the device's own rate
+    meter.stop()

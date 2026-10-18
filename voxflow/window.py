@@ -20,6 +20,10 @@ from PySide6.QtWidgets import (
 )
 
 from .audio import AudioBuffer
+from .microphones import (
+    MICROPHONE_ROLE, SYSTEM_DEFAULT, SYSTEM_SETTING, list_microphones, match_saved, microphone_label,
+    stream_device,
+)
 from .color_themes import migrate_color_theme, saved_color_theme
 from .downloads import DownloadManager
 from .edit_diff import join_continuation
@@ -282,7 +286,8 @@ class VoxFlowWindow(QWidget):
 
     def _save_device_setting(self, _index: int) -> None:
         if self.device_box.currentIndex() >= 0:
-            self.settings.setValue("microphone/name", self.device_box.currentText())
+            microphone = self.device_box.currentData(MICROPHONE_ROLE)
+            self.settings.setValue("microphone/name", microphone.name if microphone else SYSTEM_SETTING)
 
     def _sync_confirm_button(self) -> None:
         self.confirm_button.setEnabled(self.mode == "result" and bool(self.transcript.toPlainText().strip()))
@@ -743,20 +748,20 @@ class VoxFlowWindow(QWidget):
         return super().nativeEvent(event_type, message)
 
     def _load_devices(self) -> None:
+        """One entry per microphone, after "follow the system default"; the saved choice is restored by name."""
         try:
-            default_id = sd.default.device[0]
-            for index, device in enumerate(sd.query_devices()):
-                if device["max_input_channels"] > 0:
-                    host = sd.query_hostapis(device["hostapi"])["name"]
-                    self.device_box.addItem(f"{device['name']} · {host}", index)
-                    if index == default_id:
-                        self.device_box.setCurrentIndex(self.device_box.count() - 1)
-            saved_name = str(self.settings.value("microphone/name", ""))
-            saved_index = self.device_box.findText(saved_name)
-            if saved_index >= 0:
-                self.device_box.setCurrentIndex(saved_index)
+            microphones = list_microphones(list(sd.query_devices()), list(sd.query_hostapis()))
         except Exception as exc:
             self.show_status("status.mic_unavailable", error=exc)
+            return
+        self.device_box.blockSignals(True)
+        self.device_box.addItem(microphone_label(None), SYSTEM_DEFAULT)
+        for microphone in microphones:
+            self.device_box.addItem(microphone_label(microphone), microphone.index)
+            self.device_box.setItemData(self.device_box.count() - 1, microphone, MICROPHONE_ROLE)
+        position = match_saved(str(self.settings.value("microphone/name", SYSTEM_SETTING)), microphones)
+        self.device_box.setCurrentIndex(0 if position in (None, SYSTEM_DEFAULT) else position + 1)
+        self.device_box.blockSignals(False)
 
     def _start_worker(self) -> None:
         if not (self.model_dir / "model.int8.onnx").is_file():
@@ -811,7 +816,7 @@ class VoxFlowWindow(QWidget):
             return
         if not self.isVisible():
             self.reveal()
-        device_id = self.device_box.currentData()
+        device_id = stream_device(self.device_box.currentData())
         try:
             device = sd.query_devices(device_id, "input")
             sample_rate = round(device["default_samplerate"])

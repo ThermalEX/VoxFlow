@@ -4,8 +4,9 @@ import numpy as np
 import sounddevice as sd
 from PySide6.QtCore import QObject, Signal
 
-SAMPLE_RATE = 16000
-BLOCK = 800  # 50 ms
+from .microphones import stream_device
+
+BLOCK = 1024  # about 20-60 ms depending on the device rate
 GAIN = 6.0  # maps speech RMS (about 0.02-0.15) onto most of the 0-1 meter
 
 
@@ -21,8 +22,9 @@ class MicMeter(QObject):
     def start(self, device_id) -> None:
         self.stop()
         try:
-            self._stream = self._factory(device=device_id, channels=1, samplerate=SAMPLE_RATE, blocksize=BLOCK,
-                                         dtype="float32", callback=self._on_audio)
+            # samplerate None opens the device at its own rate, which WASAPI shared mode requires.
+            self._stream = self._factory(device=stream_device(device_id), channels=1, samplerate=None,
+                                         blocksize=BLOCK, dtype="float32", callback=self._on_audio)
             self._stream.start()
         except Exception as exc:  # no microphone, device busy, permission denied
             self._stream = None

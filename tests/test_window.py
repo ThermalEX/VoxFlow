@@ -353,22 +353,42 @@ def test_standalone_settings_saves_alignment_without_revealing_overlay(tmp_path)
 
 
 def test_settings_window_remembers_microphone(tmp_path, monkeypatch):
+    from voxflow import i18n
+    from voxflow.microphones import SYSTEM_DEFAULT
+
     QApplication.instance() or QApplication([])
     devices = [
+        {"name": "Microsoft Sound Mapper - Input", "hostapi": 0, "max_input_channels": 1},
         {"name": "First mic", "hostapi": 0, "max_input_channels": 1},
-        {"name": "Second mic", "hostapi": 0, "max_input_channels": 1},
+        {"name": "Steam Streaming Microphone", "hostapi": 1, "max_input_channels": 1},
+        {"name": "First mic", "hostapi": 1, "max_input_channels": 1},
+        {"name": "Second mic", "hostapi": 1, "max_input_channels": 1},
+        {"name": "Speakers", "hostapi": 1, "max_input_channels": 0},
     ]
+    apis = [{"name": "MME"}, {"name": "Windows WASAPI"}]
     monkeypatch.setattr(window_module.sd, "query_devices", lambda *_args: devices)
-    monkeypatch.setattr(window_module.sd, "query_hostapis", lambda _index: {"name": "WASAPI"})
+    monkeypatch.setattr(window_module.sd, "query_hostapis", lambda *args: apis[args[0]] if args else apis)
     settings = QSettings(str(tmp_path / "microphone.ini"), QSettings.Format.IniFormat)
     window = VoxFlowWindow(model_dir=tmp_path, start_worker=False, settings=settings)
-    window.device_box.setCurrentIndex(0)
-    window.device_box.setCurrentIndex(1)
-    assert settings.value("microphone/name") == "Second mic · WASAPI"
+    box = window.device_box
+    assert [box.itemText(i) for i in range(box.count())] == [
+        "Follow system default", "First mic", "Second mic", "Steam Streaming Microphone (virtual)"]
+    assert box.itemData(0) == SYSTEM_DEFAULT and box.itemData(2) == 4
+    assert box.currentIndex() == 0  # nothing saved yet: follow Windows
+    box.setCurrentIndex(2)
+    assert settings.value("microphone/name") == "Second mic"
+    window.settings_window.language_box.setCurrentIndex(window.settings_window.language_box.findData("zh"))
+    assert box.itemText(0) == "跟随系统默认"
+    assert box.itemText(3) == "Steam Streaming Microphone（虚拟）"
+    i18n.set_language("en")
     window.close()
     reopened = VoxFlowWindow(model_dir=tmp_path, start_worker=False, settings=settings)
-    assert reopened.device_box.currentIndex() == 1
+    assert reopened.device_box.currentIndex() == 2
     reopened.close()
+    settings.setValue("microphone/name", "First mic · MME")  # saved by the old list
+    migrated = VoxFlowWindow(model_dir=tmp_path, start_worker=False, settings=settings)
+    assert migrated.device_box.currentIndex() == 1
+    migrated.close()
 
 
 def test_personalization_preview_and_persistence(tmp_path):

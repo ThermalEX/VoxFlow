@@ -85,6 +85,8 @@ STRINGS: dict[str, tuple[str, str]] = {
     "field.language": ("Interface language", "界面语言"),
     "language.system": ("Follow system", "跟随系统"),
     "field.microphone": ("Microphone", "麦克风"),
+    "mic.system_default": ("Follow system default", "跟随系统默认"),
+    "mic.virtual": ("{name} (virtual)", "{name}（虚拟）"),
     "field.alignment": ("Transcript alignment", "文字对齐"),
     "align.left": ("Left", "左对齐"),
     "align.center": ("Center", "居中"),
