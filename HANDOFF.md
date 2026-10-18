@@ -43,7 +43,7 @@ py -3.12 -m venv .venv
 | `voxflow/smart_editing.py` | 智能编辑控制：最终文字提交改写、修改动画、撤回/悬停预览、建议按钮、过期结果丢弃、本地服务启停。 |
 | `voxflow/rewriter.py`, `voxflow/rewrite_prompts.py` | OpenAI 兼容接口客户端与 `rewrite/*` 设置；两个任务的系统提示（训练与服务共用）。 |
 | `voxflow/local_server.py` | 无窗口启动 `runtime/llama.cpp/llama-server.exe` 加载 GGUF 模型；用 Windows 作业对象保证 VoxFlow 退出或崩溃时服务一并结束。 |
-| `training/rewrite/export_gguf.py`, `training/rewrite/serve.py` | 在 WSL 训练环境中合并 LoRA 并转 GGUF（Q8/bf16，Q4 用 `llama-quantize.exe`）；`serve.py` 是 WSL 下的备用 Python 服务，软件不再使用。 |
+| `training/rewrite/export_gguf.py`, `training/rewrite/serve.py` | 在 WSL 训练环境中合并 LoRA 并转 GGUF（Q8/bf16，Q4 用 `runtime/llama-tools/llama-quantize.exe`。源码运行时数据目录就是仓库，软件内下载 llama.cpp 会整体替换 `runtime/llama.cpp/` 且只保留 llama-server 所需文件，所以量化等开发工具放在单独的 `runtime/llama-tools/`，取自 llama.cpp 官方完整压缩包）；`serve.py` 是 WSL 下的备用 Python 服务，软件不再使用。 |
 | `voxflow/edit_diff.py` | 原文与改写结果的按字/按词差异及动画帧 HTML。 |
 
 `sounddevice` 的回调把音频写入 `AudioBuffer`。主窗口通过 `RecognitionScheduler` 约每 1.2 秒提交一次任务，由单独的 `ProcessPoolExecutor` 加载并运行 ASR；识别器把长录音按约 6–10 秒的安静边界分段，已完成片段缓存，临时结果可能修订。停录后请求最终结果并保留可编辑预览。若最终识别为空但已有临时草稿，`apply_transcript()` 会保留草稿供用户确认。
