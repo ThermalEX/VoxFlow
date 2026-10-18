@@ -11,9 +11,8 @@ CATEGORIES = frozenset({
     "edit_delete", "edit_replace", "edit_insert", "implicit_reason",
     "spoken_format", "instr_translate", "instr_style", "instr_combo",
     "neg_instruction_like", "neg_code_switch", "neg_clean",
-    "fix_fixed_expression", "neg_homophone",
 })
-NEGATIVE_CATEGORIES = frozenset({"neg_instruction_like", "neg_code_switch", "neg_clean", "neg_homophone"})
+NEGATIVE_CATEGORIES = frozenset({"neg_instruction_like", "neg_code_switch", "neg_clean"})
 INSTRUCTION_CATEGORIES = frozenset({"instr_translate", "instr_style", "instr_combo"})
 INSTRUCTION_POSITIONS = frozenset({"prefix", "suffix", "infix"})
 SCENES = frozenset({

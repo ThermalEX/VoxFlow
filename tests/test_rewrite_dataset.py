@@ -327,22 +327,3 @@ def test_build_reports_lines_that_are_not_objects(tmp_path):
     with pytest.raises(build_dataset.DatasetError) as caught:
         build_dataset.build(tmp_path / "seeds", tmp_path / "out")
     assert any("JSON object" in error for error in caught.value.errors)
-
-
-def test_fixed_expression_corrections_and_ordinary_homophones():
-    fixed = clean_case(categories=["fix_fixed_expression"], raw="山重水复疑无路，柳暗花明又一春",
-                       output="山重水复疑无路，柳暗花明又一村。")
-    assert schema.validate_clean_case(fixed) == []
-    kept = clean_case(categories=["neg_homophone"], raw="这个模型在机器学系里很常用",
-                      output="这个模型在机器学系里很常用。")
-    assert schema.validate_clean_case(kept) == []
-    changed = {**kept, "output": "这个模型在机器学习里很常用。"}
-    assert any("unchanged" in error for error in schema.validate_clean_case(changed))
-
-
-def test_prompts_describe_fixed_expressions_and_new_suggestion_kinds():
-    from voxflow.rewrite_prompts import CLEAN_SYSTEM_PROMPT, SUGGEST_SYSTEM_PROMPT
-
-    assert "成语" in CLEAN_SYSTEM_PROMPT and "朱颜辞镜" not in CLEAN_SYSTEM_PROMPT  # the test line stays unseen
-    for kind in ("规范用语", "列成要点", "改正错别字"):
-        assert kind in SUGGEST_SYSTEM_PROMPT
