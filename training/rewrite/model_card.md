@@ -49,9 +49,20 @@ VoxFlow 的本地智能编辑模型：把语音识别得到的口语原文，整
 | `voxflow-rewrite-q8_0.gguf` | 1.9 GB | 推荐。显存约 2.5 GB，质量与原始权重一致 |
 | `voxflow-rewrite-q4_k_m.gguf` | 1.2 GB | 显存更省，质量略低 |
 
+根目录始终是当前推荐版本（现为 v4）。历代版本各放在自己的文件夹里，文件名带版本号，例如 `v1/voxflow-rewrite-v1-q8_0.gguf`：
+
+| 版本 | 日期 | 种子数据 | 主要改动 |
+| --- | --- | --- | --- |
+| [v1](https://huggingface.co/ThermalEX/voxflow-rewrite/tree/main/v1) | 2026-10-13 | 1230 条 | 初版，覆盖 14 类口语现象 |
+| [v2](https://huggingface.co/ThermalEX/voxflow-rewrite/tree/main/v2) | 2026-10-14 | 1269 条 | 中文姓名英译用“名 姓”顺序（王书涵 → Shuhan Wang），称呼写作 Xiao Li、Lao Wang |
+| [v3](https://huggingface.co/ThermalEX/voxflow-rewrite/tree/main/v3) | 2026-10-14 | 1321 条 | 姓名拼音：常见名字用字、多音字姓、复姓、隔音符号 |
+| [v4](https://huggingface.co/ThermalEX/voxflow-rewrite/tree/main/v4) | 2026-10-15 | 1427 条 | 针对 v3 弱点补数据：有意义的“然后/就是”保留、中英夹杂保留、按位置删句、时间推算、只改语气的委婉改写。**当前推荐** |
+
+各版本使用的测试集不同，指标不能直接横向比较；逐版本的评估见研究记录。
+
 `runtime/` 目录里是 VoxFlow 软件内下载用的 llama.cpp b11596 Windows 版本（通用 Vulkan 版、NVIDIA CUDA 版及其 CUDA 运行库），从 [llama.cpp 官方发布页](https://github.com/ggml-org/llama.cpp/releases/tag/b11596) 原样转存（MIT 许可，见 `runtime/LICENSE-llama.cpp`），以便国内镜像也能下载；`catalog.json` 是软件读取的下载清单。
 
-每个训练版本都打了标签（如 `v4`）。下载时固定标签，以后更新模型也不会影响已发布的版本：
+每个训练版本都打了标签（`v1`–`v4`）。下载时固定标签，以后更新模型也不会影响已发布的版本：
 
 ```
 https://huggingface.co/ThermalEX/voxflow-rewrite/resolve/v4/voxflow-rewrite-q8_0.gguf
