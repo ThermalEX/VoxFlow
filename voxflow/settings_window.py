@@ -70,6 +70,7 @@ class SettingsWindow(QWidget):
     hotkey_capture = Signal(bool)  # True while a shortcut is being recorded
     color_theme_changed = Signal(object)  # ColorTheme
     tutorial_requested = Signal()
+    palette_changed = Signal(object)  # the settings Theme with the color theme's accent
 
     def __init__(self, settings: QSettings, downloads=None) -> None:
         super().__init__()
@@ -168,6 +169,7 @@ class SettingsWindow(QWidget):
         theme = with_accent(theme, saved_color_theme(self.settings).accent(theme.name))
         self.theme = theme
         self.setStyleSheet(stylesheet(theme))
+        self.palette_changed.emit(theme)
         for kind in (SettingsComboBox, SettingsFontComboBox, ToggleSwitch, ThemeSwatch, CheckBox):
             for widget in self.findChildren(kind):
                 widget.set_theme(theme)

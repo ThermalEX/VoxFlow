@@ -10,6 +10,7 @@ import soundfile as sf
 from PySide6.QtWidgets import QApplication, QMenu, QSystemTrayIcon
 
 from .i18n import tr
+from .onboarding import OnboardingWindow, should_show_onboarding
 from .paths import DATA_ROOT
 from .process_guard import end_children_with_this_process
 from .recognizer import SenseVoiceRecognizer
@@ -68,6 +69,20 @@ def main() -> int:
     window.downloads.all_done.connect(lambda: tray.showMessage(tr("download.done_title"), tr("download.done_body")))
     tray.setContextMenu(menu)
     tray.activated.connect(lambda reason: window.reveal() if reason == QSystemTrayIcon.ActivationReason.Trigger else None)
+    tutorial: dict[str, OnboardingWindow] = {}
+
+    def open_tutorial() -> None:
+        current = tutorial.get("window")
+        if current is None or not current.isVisible():
+            current = OnboardingWindow(window.settings, window.settings_window, window.downloads)
+            tutorial["window"] = current
+        current.show()
+        current.raise_()
+        current.activateWindow()
+
+    window.settings_window.tutorial_requested.connect(open_tutorial)
+    if should_show_onboarding(window.settings):
+        open_tutorial()
     if QSystemTrayIcon.isSystemTrayAvailable():
         tray.show()
         if not window.register_hotkey():

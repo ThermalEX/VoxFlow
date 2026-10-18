@@ -111,14 +111,15 @@ class DownloadPanel(QWidget):
     installed = Signal(str)
     _loaded = Signal(object, bool)  # delivers the list from the loading thread
 
-    def __init__(self, settings: QSettings, manager, root=DATA_ROOT, fetch=fetch_catalog, has_nvidia=has_nvidia_gpu,
+    def __init__(self, settings: QSettings, manager, root=DATA_ROOT, fetch=None, has_nvidia=None,
                  compact: bool = False) -> None:
         super().__init__()
         self.settings = settings
         self.manager = manager
         self.root = root
-        self._fetch = fetch
-        self._has_nvidia = has_nvidia
+        self._fetch = fetch or (lambda source: fetch_catalog(source))
+        self._has_nvidia = has_nvidia or (lambda: has_nvidia_gpu())
+        self._pending_preselect: list[str] = []
         self.compact = compact
         self.items: list[CatalogItem] = []
         self.rows: dict[str, ItemRow] = {}
@@ -134,6 +135,7 @@ class DownloadPanel(QWidget):
         self.load_button.setObjectName("secondary")
         self.load_button.setCursor(Qt.CursorShape.PointingHandCursor)
         self.load_button.clicked.connect(self.load)
+        self.title.setVisible(not compact)  # the tutorial step already has its own heading
         header.addWidget(self.title)
         header.addStretch(1)
         header.addWidget(self.load_button)
@@ -205,11 +207,14 @@ class DownloadPanel(QWidget):
 
     # Loading ------------------------------------------------------------------------------------
 
-    def load(self) -> None:
+    def load(self, preselect: list[str] | None = None) -> None:
+        """Read the list in the background; `preselect` ticks those items once it arrives (nothing starts)."""
+        self._pending_preselect = list(preselect or [])
         self.load_button.setEnabled(False)
         self.load_button.setText(tr("download.loading"))
         source = self.source_control.value()
-        threading.Thread(target=lambda: self._loaded.emit(*self._fetch(source)), daemon=True).start()
+        fetch = self._fetch
+        threading.Thread(target=lambda: self._loaded.emit(*fetch(source)), daemon=True).start()
 
     def _show_items(self, items: list[CatalogItem], online: bool) -> None:
         selected = set(self.selected_ids())
@@ -239,6 +244,8 @@ class DownloadPanel(QWidget):
         self.notice.setVisible(not online)
         self.load_button.setEnabled(True)
         self.load_button.setText(tr("download.load"))
+        self.preselect(self._pending_preselect)
+        self._pending_preselect = []
         self._sync_footer()
 
     # Selection ----------------------------------------------------------------------------------
