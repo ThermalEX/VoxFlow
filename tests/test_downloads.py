@@ -244,3 +244,118 @@ def test_remove_deletes_files_and_record(tmp_path):
     manager.remove(item)
     assert not (tmp_path / "runtime/models/m.gguf").exists()
     assert "m" not in read_installed(tmp_path)
+
+
+def make_multi_item(item_id, files, check_index=0, kind="asr"):
+    entries = tuple(CatalogFile("ThermalEX/voxflow-rewrite", "v4", path, len(data), sha(data), dest)
+                    for path, data, dest in files)
+    return CatalogItem(item_id, kind, "", False, False, False, {"en": item_id, "zh": item_id},
+                       {"en": "", "zh": ""}, entries, files[check_index][2])
+
+
+def test_multi_file_item_is_installed_only_when_every_file_verifies(tmp_path):
+    from voxflow.catalog import installed_ids
+
+    model, tokens = b"m" * 200_000, b"t" * 200_000
+    item = make_multi_item("asr", [("model.onnx", model, "models/a/model.onnx"),
+                                   ("tokens.txt", tokens, "models/a/tokens.txt")])
+    net = FakeNet({"model.onnx": model, "tokens.txt": tokens}, fail_after={"tokens.txt": 50_000})
+    states, failures, _progress = run(DownloadManager(tmp_path, opener=net), [item])
+    assert states["asr"] == "failed"
+    assert not (tmp_path / "models/a/model.onnx").exists()  # nothing is placed until every file is verified
+    assert installed_ids([item], tmp_path) == set()
+    net.fail_after.clear()
+    states, failures, _progress = run(DownloadManager(tmp_path, opener=net), [item])
+    assert states["asr"] == "installed"
+    assert (tmp_path / "models/a/tokens.txt").read_bytes() == tokens
+
+
+def test_runtime_install_waits_for_the_server_to_be_released(tmp_path):
+    buffer = io.BytesIO()
+    with zipfile.ZipFile(buffer, "w") as archive:
+        archive.writestr("llama-server.exe", "new")
+    data = buffer.getvalue()
+    item = make_item("llama-vulkan", "runtime/llama.zip", data, "runtime/llama.cpp", group="llama", extract=True,
+                     kind="runtime")
+    manager = DownloadManager(tmp_path, opener=FakeNet({"runtime/llama.zip": data}))
+    order = []
+
+    def release():
+        order.append(("released", (tmp_path / "runtime/llama.cpp").exists()))
+        manager.runtime_released()
+
+    manager.release_runtime.connect(release)
+    manager.set_runtime_guard(True)
+    states, _failures, _progress = run(manager, [item])
+    assert states["llama-vulkan"] == "installed"
+    assert order == [("released", False)]
+
+
+def test_completed_archive_is_reused_on_retry(tmp_path):
+    buffer = io.BytesIO()
+    with zipfile.ZipFile(buffer, "w") as archive:
+        archive.writestr("llama-server.exe", "new")
+    data = buffer.getvalue()
+    kept = tmp_path / "downloads" / "llama.zip"
+    kept.parent.mkdir(parents=True)
+    kept.write_bytes(data)
+    net = FakeNet({"runtime/llama.zip": data})
+    item = make_item("llama-vulkan", "runtime/llama.zip", data, "runtime/llama.cpp", group="llama", extract=True,
+                     kind="runtime")
+    states, _failures, _progress = run(DownloadManager(tmp_path, opener=net), [item])
+    assert states["llama-vulkan"] == "installed"
+    assert net.requests == []
+
+
+def test_start_skips_items_already_queued_or_downloading(tmp_path):
+    data = b"q" * 1000
+    item = make_item("m", "m.gguf", data, "runtime/models/m.gguf")
+    net = FakeNet({"m.gguf": data}, pause=0.01)
+    manager = DownloadManager(tmp_path, opener=net)
+    QApplication.instance() or QApplication([])
+    manager.start([item], "huggingface")
+    manager.start([item], "huggingface")
+    assert manager.states()["m"] in ("queued", "downloading")
+    run(manager, [], timeout=5)
+    assert len(net.requests) == 1
+
+
+def test_new_work_is_picked_up_when_the_worker_is_just_exiting(tmp_path):
+    class ExitingThread:
+        def is_alive(self):
+            return True  # the old worker decided to stop but has not returned yet
+
+    data = b"w" * 1000
+    manager = DownloadManager(tmp_path, opener=FakeNet({"m.gguf": data}))
+    manager._thread = ExitingThread()
+    states, _failures, _progress = run(manager, [make_item("m", "m.gguf", data, "runtime/models/m.gguf")])
+    assert states["m"] == "installed"
+
+
+def test_unexpected_error_fails_the_item_and_keeps_the_worker_going(tmp_path):
+    data = b"e" * 1000
+    manager = DownloadManager(tmp_path, opener=FakeNet({"m.gguf": data, "n.gguf": data}))
+    original = manager._install
+
+    def broken_install(item):
+        if item.id == "m":
+            raise NotImplementedError("unsupported compression")
+        return original(item)
+
+    manager._install = broken_install
+    states, failures, _progress = run(manager, [make_item("m", "m.gguf", data, "runtime/models/m.gguf"),
+                                                make_item("n", "n.gguf", data, "runtime/models/n.gguf")])
+    assert states == {"m": "failed", "n": "installed"}
+    assert failures["m"] == "download.error.install"
+
+
+def test_record_keeps_kind_and_destinations(tmp_path):
+    data = b"r" * 1000
+    item = make_item("rewrite-v5-q8", "v5.gguf", data, "runtime/models/voxflow-rewrite-v5-q8_0.gguf")
+    manager = DownloadManager(tmp_path, opener=FakeNet({"v5.gguf": data}))
+    run(manager, [item])
+    record = read_installed(tmp_path)["rewrite-v5-q8"]
+    assert record["kind"] == "rewrite" and record["dest"] == ["runtime/models/voxflow-rewrite-v5-q8_0.gguf"]
+    manager.remove_installed("rewrite-v5-q8")
+    assert not (tmp_path / "runtime/models/voxflow-rewrite-v5-q8_0.gguf").exists()
+    assert "rewrite-v5-q8" not in read_installed(tmp_path)

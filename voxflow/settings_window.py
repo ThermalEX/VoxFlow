@@ -70,6 +70,8 @@ class SettingsWindow(QWidget):
     hotkey_capture = Signal(bool)  # True while a shortcut is being recorded
     color_theme_changed = Signal(object)  # ColorTheme
     tutorial_requested = Signal()
+    runtime_changed = Signal()  # llama.cpp or a model was installed: restart the local server
+    server_release_requested = Signal()  # stop llama-server so the model in use can be deleted
     palette_changed = Signal(object)  # the settings Theme with the color theme's accent
 
     def __init__(self, settings: QSettings, downloads=None) -> None:
@@ -681,45 +683,73 @@ class SettingsWindow(QWidget):
     # Downloads --------------------------------------------------------------------------------
 
     def show_downloads(self) -> None:
-        """Open settings on the smart editing page, scrolled to the download list."""
+        """Open settings on the smart editing page, scrolled to the download list (loading it if needed)."""
         self.show()
         self.raise_()
         self.activateWindow()
         self.categories.setCurrentRow(2)
         if self.download_panel is not None:
+            if not self.download_panel.rows:
+                self.download_panel.load()
             self.pages.widget(2).ensureWidgetVisible(self.download_panel)
 
-    def _downloaded_item_for(self, path: str):
-        """The catalog item that installed this model file, if the downloader put it there."""
-        recorded = read_installed(DATA_ROOT)
-        for item in builtin_catalog():
-            if item.kind == "rewrite" and item.id in recorded and _same_path(item.files[0].dest, path):
-                return item
+    @staticmethod
+    def _installed_record(item_id: str) -> tuple[str, list[str]]:
+        """(kind, destinations) of a downloaded item, from its record or, for older records, the built-in list."""
+        record = read_installed(DATA_ROOT).get(item_id)
+        if isinstance(record, dict) and record.get("kind") and record.get("dest"):
+            return str(record["kind"]), [str(dest) for dest in record["dest"]]
+        item = next((known for known in builtin_catalog() if known.id == item_id), None)
+        return (item.kind, [file.dest for file in item.files]) if item is not None else ("", [])
+
+    def _downloaded_item_for(self, path: str) -> str | None:
+        """The id of the downloaded smart editing model stored at this path, if the downloader put it there."""
+        if not path:
+            return None
+        for item_id in read_installed(DATA_ROOT):
+            kind, dests = self._installed_record(item_id)
+            if kind == "rewrite" and any(_same_path(dest, path) for dest in dests):
+                return item_id
         return None
 
     def _sync_delete_button(self) -> None:
         self.rewrite_delete_button.setEnabled(self._downloaded_item_for(self._selected_model_path()) is not None)
 
     def _delete_model(self) -> None:
-        item = self._downloaded_item_for(self._selected_model_path())
-        if item is None or self.downloads is None:
+        current = self._selected_model_path()
+        item_id = self._downloaded_item_for(current)
+        if item_id is None or self.downloads is None:
             return
-        self.downloads.remove(item)
-        remaining = [model for model in discover_models(DATA_ROOT) if model.path.is_file()]
-        self._populate_local_models(_data_relative(remaining[0].path) if remaining else item.files[0].dest)
-        self._save_rewrite()
+        # llama-server keeps the model open: switch to another model (or stop the server) before deleting.
+        remaining = [model for model in discover_models(DATA_ROOT)
+                     if model.path.is_file() and not _same_path(str(model.path), current)]
+        if remaining:
+            self._populate_local_models(_data_relative(remaining[0].path))
+            self._save_rewrite()
+        else:
+            self.server_release_requested.emit()
+        try:
+            self.downloads.remove_installed(item_id)
+        except OSError as exc:
+            self._show_test_result("download.error.delete", reason=exc.strerror or str(exc))
+            return
+        if not remaining:
+            self._populate_local_models(current)
+            self._save_rewrite()
+            self.runtime_changed.emit()
 
     def _component_state(self, item_id: str, state: str) -> None:
         if state != "installed":
             return
-        item = next((known for known in builtin_catalog() if known.id == item_id), None)
+        kind, dests = self._installed_record(item_id)
         current = self._selected_model_path()
         usable = bool(current) and (DATA_ROOT / current if not Path(current).is_absolute() else Path(current)).is_file()
-        if item is not None and item.kind == "rewrite" and not usable:
-            current = item.files[0].dest
+        if kind == "rewrite" and dests and not usable:
+            current = dests[0]
         self._populate_local_models(current)
-        if item is None or item.kind != "asr":
-            self._save_rewrite()  # restart the local model with the new file or runtime
+        if kind != "asr":
+            self._save_rewrite()
+            self.runtime_changed.emit()  # restart the local model with the new file or runtime
 
     def _show_test_result(self, key: str, **values) -> None:
         self._test_result = (key, values)

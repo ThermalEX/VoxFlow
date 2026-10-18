@@ -29,6 +29,9 @@ class FakeManager(QObject):
     def cancel_all(self):
         self.cancelled.append("*")
 
+    def states(self):
+        return dict(getattr(self, "current_states", {}))
+
     def is_busy(self):
         return self.busy
 
@@ -141,3 +144,14 @@ def test_preselect_checks_items_without_starting(tmp_path):
     panel.preselect(["asr-sensevoice", "llama-vulkan", "rewrite-v4-q8"])
     assert panel.selected_ids() == ["asr-sensevoice", "llama-vulkan", "rewrite-v4-q8"]
     assert manager.started == []
+
+
+def test_reloading_the_list_keeps_running_downloads(tmp_path):
+    panel, manager, _settings = make_panel(tmp_path)
+    manager.current_states = {"rewrite-v4-q8": "downloading", "rewrite-v4-q4": "queued"}
+    loaded(panel)
+    row = panel.rows["rewrite-v4-q8"]
+    assert not row.checkbox.isEnabled()
+    assert not row.cancel_button.isHidden()
+    assert not panel.cancel_all_button.isHidden()
+    assert panel.rows["rewrite-v4-q4"].status_label.text() == "Queued"

@@ -106,10 +106,14 @@ class SmartEditor(QObject):
     def active(self) -> bool:
         return self.config.enabled and self.client is not None
 
-    def reload(self) -> None:
+    def reload(self, force: bool = False) -> None:
+        """Apply the saved settings; `force` restarts the local server even if they did not change
+        (e.g. llama.cpp or the model file was just installed)."""
         config = RewriteConfig.from_settings(self.window.settings)
-        if config == self.config and (self.client is not None or not config.enabled):
+        if not force and config == self.config and (self.client is not None or not config.enabled):
             return
+        if force:
+            self.release_server()
         previous, self.config = self.config, config
         server_changed = any(getattr(previous, name) != getattr(config, name) for name in SERVER_FIELDS)
         if self.server is not None and (not config.enabled or server_changed):
@@ -126,6 +130,12 @@ class SmartEditor(QObject):
         if config.provider == "local" and self.server is None and self._server_factory is not None:
             self.server = self._server_factory(config)
             self.server.start()
+
+    def release_server(self) -> None:
+        """Stop llama-server so its program or model files can be replaced or deleted."""
+        if self.server is not None:
+            self.server.stop()
+            self.server = None
 
     def ready(self) -> bool:
         return self.active and (self.server is None or self.server.ready())

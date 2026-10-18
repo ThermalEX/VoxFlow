@@ -240,6 +240,9 @@ class DownloadPanel(QWidget):
             row.cancel_button.clicked.connect(lambda _checked=False, item_id=item.id: self.manager.cancel(item_id))
             self.list_layout.addWidget(row)
             self.rows[item.id] = row
+        for item_id, state in self.manager.states().items():
+            if state in ("queued", "downloading", "verifying"):
+                self._on_state(item_id, state)  # downloads started from another window keep their controls
         self.notice.setText(tr("download.offline"))
         self.notice.setVisible(not online)
         self.load_button.setEnabled(True)

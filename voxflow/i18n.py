@@ -246,6 +246,9 @@ STRINGS: dict[str, tuple[str, str]] = {
     "download.done_body": ("Open Settings › Smart editing to see the results.", "可在 设置 › 智能编辑 中查看结果。"),
     "download.error.network": ("Network interrupted · download again to resume", "网络中断 · 重新下载会从断点继续"),
     "download.error.hash": ("The file was damaged · download it again", "文件校验失败 · 请重新下载"),
+    "download.error.install": ("Could not install · close programs using these files and try again",
+                               "安装失败 · 请关闭正在使用这些文件的程序后重试"),
+    "download.error.delete": ("Could not delete the model · {reason}", "无法删除模型 · {reason}"),
     "download.error.disk": ("Could not save the file · check free disk space", "无法保存文件 · 请检查磁盘空间"),
     # First-run tutorial
     "onboarding.window_title": ("Welcome to VoxFlow", "欢迎使用 VoxFlow"),

@@ -18,6 +18,8 @@ PROGRESS_INTERVAL = 0.2  # seconds between progress signals
 SLOW_WINDOW = 10.0  # "auto" judges Hugging Face after this many seconds...
 SLOW_BYTES_PER_SECOND = 200 * 1024  # ...and switches to the mirror below this average speed
 DOWNLOADS_DIR = "downloads"  # archives wait here until they are unpacked
+RELEASE_TIMEOUT = 15.0  # seconds to wait for the app to stop llama-server before replacing it
+BUSY_STATES = ("queued", "downloading", "verifying")
 
 
 class _Cancelled(Exception):
@@ -33,6 +35,10 @@ class _NetworkError(Exception):
 
 
 class _HashError(Exception):
+    pass
+
+
+class _InstallError(Exception):
     pass
 
 
@@ -55,6 +61,7 @@ class DownloadManager(QObject):
     item_state = Signal(str, str)  # queued, downloading, verifying, installed, failed, cancelled
     item_failed = Signal(str, str)  # item id, i18n key of the reason
     all_done = Signal()
+    release_runtime = Signal()  # please stop llama-server; answer with runtime_released()
 
     def __init__(self, root: Path, opener=urllib.request.urlopen, clock=time.monotonic) -> None:
         super().__init__()
@@ -64,19 +71,40 @@ class DownloadManager(QObject):
         self._lock = threading.Lock()
         self._queue: list[tuple[CatalogItem, str]] = []
         self._cancelled: set[str] = set()
+        self._states: dict[str, str] = {}
+        self._current: str | None = None
+        self._running = False
         self._thread: threading.Thread | None = None
+        self._guard = False
+        self._released = threading.Event()
+        self._last_emit = float("-inf")
 
     # Public API ---------------------------------------------------------------------------------
 
     def start(self, items: list[CatalogItem], source: str) -> None:
+        """Queue items; ones already queued or downloading are left alone."""
+        queued = []
         with self._lock:
             for item in items:
+                if self._states.get(item.id) in BUSY_STATES:
+                    continue
                 self._cancelled.discard(item.id)
                 self._queue.append((item, source))
-                self.item_state.emit(item.id, "queued")
-            if self._thread is None or not self._thread.is_alive():
+                self._states[item.id] = "queued"
+                queued.append(item.id)
+            spawn = not self._running
+            if spawn:
+                self._running = True
                 self._thread = threading.Thread(target=self._work, name="voxflow-downloads", daemon=True)
-                self._thread.start()
+        for item_id in queued:
+            self.item_state.emit(item_id, "queued")
+        if spawn:
+            self._thread.start()
+
+    def states(self) -> dict[str, str]:
+        """The latest state of every item this session, so a newly opened list can show running downloads."""
+        with self._lock:
+            return dict(self._states)
 
     def cancel(self, item_id: str) -> None:
         with self._lock:
@@ -89,58 +117,82 @@ class DownloadManager(QObject):
                 self._cancelled.add(self._current)
 
     def is_busy(self) -> bool:
-        return self._thread is not None and self._thread.is_alive()
+        with self._lock:
+            return self._running
+
+    def set_runtime_guard(self, enabled: bool) -> None:
+        """When enabled, installing llama.cpp first asks (release_runtime) for llama-server to be stopped."""
+        self._guard = enabled
+
+    def runtime_released(self) -> None:
+        self._released.set()
 
     def remove(self, item: CatalogItem) -> None:
-        """Delete an installed item's files and forget it."""
-        for file in item.files:
-            target = self.root / file.dest
-            if target.is_dir():
-                shutil.rmtree(target, ignore_errors=True)
-            elif target.exists():
-                target.unlink()
-        record = read_installed(self.root)
-        record.pop(item.id, None)
-        self._write_record(record)
+        """Delete an installed item's files and forget it. Raises OSError when a file is in use."""
+        record = read_installed(self.root).get(item.id)
+        if isinstance(record, dict) and record.get("dest"):
+            self.remove_installed(item.id)
+            return
+        self._delete([file.dest for file in item.files])
+        self._forget(item.id)
+
+    def remove_installed(self, item_id: str) -> None:
+        """Delete what the downloader installed for an item, using its record (works for online-only items)."""
+        record = read_installed(self.root).get(item_id)
+        dests = record.get("dest") if isinstance(record, dict) else None
+        if not dests:  # records written before destinations were stored
+            known = next((item for item in builtin_catalog() if item.id == item_id), None)
+            dests = [file.dest for file in known.files] if known is not None else []
+        self._delete(dests)
+        self._forget(item_id)
 
     # Worker -------------------------------------------------------------------------------------
-
-    _current: str | None = None
 
     def _work(self) -> None:
         while True:
             with self._lock:
                 if not self._queue:
                     self._current = None
+                    self._running = False
                     break
                 item, source = self._queue.pop(0)
                 self._current = item.id
-            if item.id in self._cancelled:
-                self.item_state.emit(item.id, "cancelled")
+                cancelled = item.id in self._cancelled
+            if cancelled:
+                self._set_state(item.id, "cancelled")
                 continue
-            self._download_item(item, source)
+            try:
+                self._download_item(item, source)
+            except Exception:  # a bug or an unexpected archive must not stop the queue
+                self._fail(item, "download.error.install")
         self.all_done.emit()
 
+    def _set_state(self, item_id: str, state: str) -> None:
+        with self._lock:
+            self._states[item_id] = state
+        self.item_state.emit(item_id, state)
+
     def _download_item(self, item: CatalogItem, source: str) -> None:
-        self.item_state.emit(item.id, "downloading")
+        self._set_state(item.id, "downloading")
         total = item.size
         done_before = 0
         self._last_emit = float("-inf")
         try:
+            # Every file is fetched and verified first; nothing is placed until all of them are good.
             for file in item.files:
                 part = self._part_path(file)
+                self._reuse_finished_archive(file, part)
                 self._fetch(item, file, part, source, done_before, total)
-                self.item_state.emit(item.id, "verifying")
+                self._set_state(item.id, "verifying")
                 if self._sha256(part) != file.sha256:
                     part.unlink(missing_ok=True)
                     raise _HashError()
-                self._finish_file(file, part)
                 done_before += file.size
             self._install(item)
         except _Cancelled:
             for file in item.files:
                 self._part_path(file).unlink(missing_ok=True)
-            self.item_state.emit(item.id, "cancelled")
+            self._set_state(item.id, "cancelled")
             return
         except _HashError:
             self._fail(item, "download.error.hash")
@@ -148,20 +200,32 @@ class DownloadManager(QObject):
         except _NetworkError:
             self._fail(item, "download.error.network")
             return
-        except (_DiskError, OSError, zipfile.BadZipFile):
+        except _InstallError:
+            self._fail(item, "download.error.install")
+            return
+        except (_DiskError, OSError):
             self._fail(item, "download.error.disk")
             return
         self.progress.emit(item.id, total, total, 0.0)
-        self.item_state.emit(item.id, "installed")
+        self._set_state(item.id, "installed")
 
     def _fail(self, item: CatalogItem, key: str) -> None:
         self.item_failed.emit(item.id, key)
-        self.item_state.emit(item.id, "failed")
+        self._set_state(item.id, "failed")
 
     def _part_path(self, file: CatalogFile) -> Path:
         if file.extract:
             return self.root / DOWNLOADS_DIR / (Path(file.path).name + ".part")
         return self.root / (file.dest + ".part")
+
+    def _reuse_finished_archive(self, file: CatalogFile, part: Path) -> None:
+        """An archive left complete by a failed install is used again instead of downloading it twice."""
+        finished = part.with_name(part.name[: -len(".part")])
+        if file.extract and finished.is_file() and not part.exists():
+            try:
+                finished.replace(part)
+            except OSError as exc:
+                raise _DiskError() from exc
 
     def _fetch(self, item: CatalogItem, file: CatalogFile, part: Path, source: str, done_before: int,
                total: int) -> None:
@@ -242,35 +306,20 @@ class DownloadManager(QObject):
                 digest.update(block)
         return digest.hexdigest()
 
-    def _finish_file(self, file: CatalogFile, part: Path) -> None:
-        final = part.with_name(part.name[: -len(".part")])
+    def _install(self, item: CatalogItem) -> None:
+        """Place every verified file, then record the item."""
+        archives = [file for file in item.files if file.extract]
         try:
-            final.parent.mkdir(parents=True, exist_ok=True)
-            part.replace(final)
+            for file in item.files:
+                if not file.extract:
+                    part = self._part_path(file)
+                    final = self.root / file.dest
+                    final.parent.mkdir(parents=True, exist_ok=True)
+                    part.replace(final)
         except OSError as exc:
             raise _DiskError() from exc
-
-    def _install(self, item: CatalogItem) -> None:
-        archives = [file for file in item.files if file.extract]
         if archives:
-            dest = self.root / archives[0].dest
-            staging = dest.with_name(dest.name + ".new")
-            shutil.rmtree(staging, ignore_errors=True)
-            staging.mkdir(parents=True)
-            for file in archives:
-                archive_path = self.root / DOWNLOADS_DIR / Path(file.path).name
-                with zipfile.ZipFile(archive_path) as archive:
-                    for member in archive.infolist():
-                        name = Path(member.filename).name
-                        if member.is_dir() or not name or not _keep_server_file(name):
-                            continue
-                        with archive.open(member) as source, (staging / name).open("wb") as target:
-                            shutil.copyfileobj(source, target)
-            if dest.exists():
-                shutil.rmtree(dest)
-            staging.replace(dest)
-            for file in archives:
-                (self.root / DOWNLOADS_DIR / Path(file.path).name).unlink(missing_ok=True)
+            self._install_archives(item, archives)
         record = read_installed(self.root)
         if item.group:
             groups = {known.id: known.group for known in builtin_catalog()}
@@ -278,12 +327,60 @@ class DownloadManager(QObject):
                 other_group = record[other].get("group") if isinstance(record[other], dict) else groups.get(other)
                 if other != item.id and other_group == item.group:
                     del record[other]
-        record[item.id] = {"group": item.group, "sha256": [file.sha256 for file in item.files]}
+        record[item.id] = {"group": item.group, "kind": item.kind, "sha256": [file.sha256 for file in item.files],
+                           "dest": sorted({file.dest for file in item.files})}
         self._write_record(record)
+
+    def _install_archives(self, item: CatalogItem, archives: list[CatalogFile]) -> None:
+        dest = self.root / archives[0].dest
+        staging = dest.with_name(dest.name + ".new")
+        try:
+            shutil.rmtree(staging, ignore_errors=True)
+            staging.mkdir(parents=True)
+            for file in archives:
+                with zipfile.ZipFile(self._part_path(file)) as archive:
+                    for member in archive.infolist():
+                        name = Path(member.filename.replace("\\", "/")).name  # flatten; never leave the folder
+                        if member.is_dir() or not name or ":" in name or not _keep_server_file(name):
+                            continue
+                        with archive.open(member) as source, (staging / name).open("wb") as target:
+                            shutil.copyfileobj(source, target)
+        except (OSError, zipfile.BadZipFile) as exc:
+            shutil.rmtree(staging, ignore_errors=True)
+            raise _InstallError() from exc
+        if item.kind == "runtime" and self._guard:
+            self._released.clear()
+            self.release_runtime.emit()  # the app stops llama-server so its files can be replaced
+            self._released.wait(RELEASE_TIMEOUT)
+        try:
+            if dest.exists():
+                shutil.rmtree(dest)
+            staging.replace(dest)
+        except OSError as exc:
+            # Keep the verified archives so a retry does not download them again.
+            for file in archives:
+                part = self._part_path(file)
+                if part.exists():
+                    part.replace(part.with_name(part.name[: -len(".part")]))
+            raise _InstallError() from exc
+        for file in archives:
+            self._part_path(file).unlink(missing_ok=True)
+
+    def _delete(self, dests: list[str]) -> None:
+        for dest in dests:
+            target = self.root / dest
+            if target.is_dir():
+                shutil.rmtree(target)
+            elif target.exists():
+                target.unlink()
+
+    def _forget(self, item_id: str) -> None:
+        record = read_installed(self.root)
+        if record.pop(item_id, None) is not None:
+            self._write_record(record)
 
     def _write_record(self, record: dict) -> None:
         path = self.root / INSTALLED_FILE
         temporary = path.with_name(path.name + ".tmp")
         temporary.write_text(json.dumps(record, indent=2), encoding="utf-8")
         temporary.replace(path)
-

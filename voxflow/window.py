@@ -99,6 +99,8 @@ class VoxFlowWindow(QWidget):
         self.downloads = downloads if downloads is not None else DownloadManager(DATA_ROOT)
         self.settings_window = SettingsWindow(self.settings, downloads=self.downloads)
         self.downloads.item_state.connect(self._component_state)
+        self.downloads.set_runtime_guard(True)
+        self.downloads.release_runtime.connect(self._release_runtime)
         self.status_label.installEventFilter(self)
         self.device_box = self.settings_window.device_box
         self.alignment_box = self.settings_window.alignment_box
@@ -110,6 +112,8 @@ class VoxFlowWindow(QWidget):
         self.smart = SmartEditor(self, client=rewrite_client, server_factory=local_server_factory)
         self.edit_bar_slot.addWidget(self.smart.bar)
         self.settings_window.rewrite_changed.connect(self.smart.reload)
+        self.settings_window.runtime_changed.connect(lambda: self.smart.reload(force=True))
+        self.settings_window.server_release_requested.connect(self.smart.release_server)
         self.settings_window.set_rewrite_tester(self.smart.test_connection)
         self.settings_window.set_model_lister(self.smart.list_models)
         self.settings_window.language_changed.connect(lambda _choice: self.retranslate())
@@ -776,6 +780,10 @@ class VoxFlowWindow(QWidget):
     def _component_state(self, _item_id: str, state: str) -> None:
         if state == "installed":
             self.start_speech_worker()
+
+    def _release_runtime(self) -> None:
+        self.smart.release_server()
+        self.downloads.runtime_released()
 
     def open_downloads(self) -> None:
         self.settings_window.show_downloads()

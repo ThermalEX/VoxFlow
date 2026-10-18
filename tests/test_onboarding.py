@@ -32,6 +32,9 @@ class FakeManager(QObject):
     def cancel_all(self):
         pass
 
+    def states(self):
+        return dict(getattr(self, "current_states", {}))
+
     def is_busy(self):
         return False
 
