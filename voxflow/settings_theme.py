@@ -106,6 +106,23 @@ def stylesheet(theme: Theme) -> str:
             font-weight: 600; text-align: left; }}
         QPushButton#link:disabled {{ color: {t.muted}; }}
         QLabel#aboutName {{ font-size: 20px; font-weight: 650; }}
+        QPushButton#primary {{ background: {t.accent}; color: #FFFFFF; border: 1px solid {t.accent};
+            border-radius: 8px; padding: 6px 16px; min-height: 20px; font-weight: 600; }}
+        QPushButton#primary:disabled {{ background: {t.field}; color: {t.muted}; border-color: {t.border}; }}
+        QPushButton#segment {{ background: {t.field}; color: {t.text}; border: 1px solid {t.border};
+            padding: 6px 16px; min-height: 18px; border-radius: 0; }}
+        QPushButton#segment[position="first"] {{ border-top-left-radius: 8px; border-bottom-left-radius: 8px; }}
+        QPushButton#segment[position="last"] {{ border-top-right-radius: 8px; border-bottom-right-radius: 8px; }}
+        QPushButton#segment:hover:!checked {{ background: {t.hover}; }}
+        QPushButton#segment:checked {{ background: {t.accent}; color: #FFFFFF; border-color: {t.accent}; }}
+        QWidget#sourceBox {{ background: {t.hover}; border-top-left-radius: 14px; border-top-right-radius: 14px; }}
+        QCheckBox {{ color: {t.text}; spacing: 0; }}
+        QCheckBox::indicator {{ width: 16px; height: 16px; border-radius: 4px; border: 1.5px solid {t.muted};
+            background: {t.field}; }}
+        QCheckBox::indicator:checked {{ background: {t.accent}; border-color: {t.accent}; }}
+        QCheckBox::indicator:disabled {{ border-color: {t.border}; background: {t.hover}; }}
+        QProgressBar#downloadProgress {{ background: {t.border}; border: none; border-radius: 3px; }}
+        QProgressBar#downloadProgress::chunk {{ background: {t.accent}; border-radius: 3px; }}
         QLabel#rowValue {{ font-weight: 500; }}
         QScrollBar:vertical {{ background: transparent; width: 8px; margin: 2px; }}
         QScrollBar::handle:vertical {{ background: {t.border}; border-radius: 3px; min-height: 30px; }}

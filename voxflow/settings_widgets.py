@@ -364,3 +364,82 @@ class ThemeSwatch(QAbstractButton):
             painter.drawLine(QPointF(24, 17), QPointF(24, 31))
             painter.drawLine(QPointF(17, 24), QPointF(31, 24))
         painter.end()
+
+
+class SegmentedControl(QWidget):
+    """A row of joined buttons where exactly one is chosen, e.g. the download source."""
+
+    changed = Signal(str)
+
+    def __init__(self, choices: list[tuple[str, str]], parent: QWidget | None = None) -> None:
+        super().__init__(parent)
+        self.setObjectName("segmented")
+        layout = QHBoxLayout(self)
+        layout.setContentsMargins(0, 0, 0, 0)
+        layout.setSpacing(0)
+        self.buttons: dict[str, QPushButton] = {}
+        for index, (value, text) in enumerate(choices):
+            button = QPushButton(text)
+            button.setObjectName("segment")
+            button.setProperty("position", "first" if index == 0 else "last" if index == len(choices) - 1 else "middle")
+            button.setCheckable(True)
+            button.setAutoExclusive(True)
+            button.setCursor(Qt.CursorShape.PointingHandCursor)
+            button.clicked.connect(lambda _checked=False, chosen=value: self._choose(chosen))
+            layout.addWidget(button)
+            self.buttons[value] = button
+
+    def value(self) -> str:
+        return next((value for value, button in self.buttons.items() if button.isChecked()), "")
+
+    def set_value(self, value: str) -> None:
+        if value in self.buttons and value != self.value():
+            self.buttons[value].setChecked(True)
+            self.changed.emit(value)
+
+    def set_texts(self, texts: dict[str, str]) -> None:
+        for value, text in texts.items():
+            self.buttons[value].setText(text)
+
+    def _choose(self, value: str) -> None:
+        self.changed.emit(value)
+
+
+class CheckBox(QAbstractButton):
+    """A themed check box: a rounded square that fills with the accent and shows a check mark."""
+
+    def __init__(self, parent: QWidget | None = None) -> None:
+        super().__init__(parent)
+        self.setCheckable(True)
+        self.setCursor(Qt.CursorShape.PointingHandCursor)
+        self.setFixedSize(20, 20)
+        self.theme = LIGHT
+
+    def set_theme(self, theme: Theme) -> None:
+        self.theme = theme
+        self.update()
+
+    def paintEvent(self, _event) -> None:
+        painter = QPainter(self)
+        painter.setRenderHint(QPainter.RenderHint.Antialiasing)
+        box = QRectF(2, 2, 16, 16)
+        if not self.isEnabled():
+            painter.setPen(QPen(QColor(self.theme.border), 1.5))
+            painter.setBrush(QColor(self.theme.hover))
+        elif self.isChecked():
+            painter.setPen(QPen(QColor(self.theme.accent), 1.5))
+            painter.setBrush(QColor(self.theme.accent))
+        else:
+            painter.setPen(QPen(QColor(self.theme.muted), 1.5))
+            painter.setBrush(QColor(self.theme.field))
+        painter.drawRoundedRect(box, 4, 4)
+        if self.isChecked():
+            pen = QPen(QColor("#FFFFFF"), 2)
+            pen.setCapStyle(Qt.PenCapStyle.RoundCap)
+            pen.setJoinStyle(Qt.PenJoinStyle.RoundJoin)
+            painter.setPen(pen)
+            check = QPainterPath(QPointF(6, 10.5))
+            check.lineTo(8.8, 13.2)
+            check.lineTo(14, 7.5)
+            painter.drawPath(check)
+        painter.end()

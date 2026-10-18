@@ -61,7 +61,7 @@
       "kind": "rewrite",
       "recommended": true,
       "title": {"en": "Smart editing model v4 · Q8", "zh": "智能编辑模型 v4 · Q8"},
-      "desc": {"en": "Recommended · needs about 2.5 GB of graphics memory", "zh": "推荐 · 约需 2.5 GB 显存"},
+      "desc": {"en": "Needs about 2.5 GB of graphics memory", "zh": "约需 2.5 GB 显存"},
       "check": "runtime/models/voxflow-rewrite-v4-q8_0.gguf",
       "files": [
         {"repo": "ThermalEX/voxflow-rewrite", "revision": "v4", "path": "voxflow-rewrite-q8_0.gguf",

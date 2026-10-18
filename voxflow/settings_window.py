@@ -21,7 +21,7 @@ from .model_catalog import LocalModel, describe as describe_model, discover_mode
 from .rewriter import RewriteConfig
 from .settings_theme import THEME_CHOICES, Theme, current_theme, stylesheet, with_accent
 from .settings_widgets import (
-    HotkeyButton, SettingRow, SettingsCard, SettingsComboBox, SettingsFontComboBox, ThemeSwatch, ToggleSwitch,
+    CheckBox, HotkeyButton, SettingRow, SettingsCard, SettingsComboBox, SettingsFontComboBox, ThemeSwatch, ToggleSwitch,
 )
 from .ui_icons import app_icon, line_icon
 
@@ -163,7 +163,7 @@ class SettingsWindow(QWidget):
         theme = with_accent(theme, saved_color_theme(self.settings).accent(theme.name))
         self.theme = theme
         self.setStyleSheet(stylesheet(theme))
-        for kind in (SettingsComboBox, SettingsFontComboBox, ToggleSwitch, ThemeSwatch):
+        for kind in (SettingsComboBox, SettingsFontComboBox, ToggleSwitch, ThemeSwatch, CheckBox):
             for widget in self.findChildren(kind):
                 widget.set_theme(theme)
         for button in (self.restore_button, self.hotkey_restore_button):
