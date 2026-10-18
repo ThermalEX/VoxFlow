@@ -999,3 +999,79 @@
 {"id": "combo-0052", "categories": ["instr_combo", "implicit_reason"], "scene": "work_chat", "raw": "周五开评审会，哦周五老板不在，改下周一，翻译成英文", "output": "The review meeting is on Monday.", "instr_position": "suffix"}
 {"id": "combo-0053", "categories": ["instr_combo", "edit_replace"], "scene": "schedule", "raw": "会议十点开始，推后半小时，翻成英文", "output": "The meeting starts at 10:30.", "instr_position": "suffix"}
 {"id": "combo-0054", "categories": ["instr_combo", "filler"], "scene": "family_friends", "raw": "委婉一点，额，就是，你那个，借我的书该还了", "output": "我借你的那本书，方便的时候还我一下吧。", "instr_position": "prefix"}
+{"id": "fix-0001", "categories": ["fix_fixed_expression"], "scene": "social_media", "raw": "海内存知已，天涯若比临", "output": "海内存知己，天涯若比邻。"}
+{"id": "fix-0002", "categories": ["fix_fixed_expression"], "scene": "social_media", "raw": "会当临绝顶，一览众山小", "output": "会当凌绝顶，一览众山小。"}
+{"id": "fix-0003", "categories": ["fix_fixed_expression"], "scene": "school", "raw": "欲穷千里目，更上一成楼", "output": "欲穷千里目，更上一层楼。"}
+{"id": "fix-0004", "categories": ["fix_fixed_expression"], "scene": "family_friends", "raw": "但愿人长久，千里共蝉娟", "output": "但愿人长久，千里共婵娟。"}
+{"id": "fix-0005", "categories": ["fix_fixed_expression"], "scene": "social_media", "raw": "人生若只如初见，何事秋风悲画山", "output": "人生若只如初见，何事秋风悲画扇。"}
+{"id": "fix-0006", "categories": ["fix_fixed_expression"], "scene": "school", "raw": "落霞与孤雾齐飞，秋水共长天一色", "output": "落霞与孤鹜齐飞，秋水共长天一色。"}
+{"id": "fix-0007", "categories": ["fix_fixed_expression"], "scene": "work_chat", "raw": "长风破浪会有时，直挂云帆济苍海", "output": "长风破浪会有时，直挂云帆济沧海。"}
+{"id": "fix-0008", "categories": ["fix_fixed_expression"], "scene": "daily", "raw": "采菊东离下，悠然见南山", "output": "采菊东篱下，悠然见南山。"}
+{"id": "fix-0009", "categories": ["fix_fixed_expression"], "scene": "social_media", "raw": "曾经沧海难为水，除却无山不是云", "output": "曾经沧海难为水，除却巫山不是云。"}
+{"id": "fix-0010", "categories": ["fix_fixed_expression"], "scene": "family_friends", "raw": "两情若是久长时，又岂在朝朝慕慕", "output": "两情若是久长时，又岂在朝朝暮暮。"}
+{"id": "fix-0011", "categories": ["fix_fixed_expression"], "scene": "work_chat", "raw": "山重水复疑无路，柳暗花明又一春", "output": "山重水复疑无路，柳暗花明又一村。"}
+{"id": "fix-0012", "categories": ["fix_fixed_expression"], "scene": "social_media", "raw": "衣带渐宽终不悔，为伊消得人樵悴", "output": "衣带渐宽终不悔，为伊消得人憔悴。"}
+{"id": "fix-0013", "categories": ["fix_fixed_expression"], "scene": "family_friends", "raw": "莫愁前路无知己，天下谁人不识军", "output": "莫愁前路无知己，天下谁人不识君。"}
+{"id": "fix-0014", "categories": ["fix_fixed_expression"], "scene": "school", "raw": "路漫漫其修远兮，吾将上下而求所", "output": "路漫漫其修远兮，吾将上下而求索。"}
+{"id": "fix-0015", "categories": ["fix_fixed_expression"], "scene": "school", "raw": "先天下之优而优，后天下之乐而乐", "output": "先天下之忧而忧，后天下之乐而乐。"}
+{"id": "fix-0016", "categories": ["fix_fixed_expression"], "scene": "school", "raw": "少壮不努力，老大图伤悲", "output": "少壮不努力，老大徒伤悲。"}
+{"id": "fix-0017", "categories": ["fix_fixed_expression"], "scene": "daily", "raw": "不识卢山真面目，只缘身在此山中", "output": "不识庐山真面目，只缘身在此山中。"}
+{"id": "fix-0018", "categories": ["fix_fixed_expression"], "scene": "family_friends", "raw": "春风又绿江南岸，明月何时照我环", "output": "春风又绿江南岸，明月何时照我还。"}
+{"id": "fix-0019", "categories": ["fix_fixed_expression"], "scene": "family_friends", "raw": "海上生明月，天涯共此视", "output": "海上生明月，天涯共此时。"}
+{"id": "fix-0020", "categories": ["fix_fixed_expression"], "scene": "family_friends", "raw": "桃花潭水深千尺，不及王伦送我情", "output": "桃花潭水深千尺，不及汪伦送我情。"}
+{"id": "fix-0021", "categories": ["fix_fixed_expression"], "scene": "work_chat", "raw": "宝剑锋从磨砺出，梅花香自苦含来", "output": "宝剑锋从磨砺出，梅花香自苦寒来。"}
+{"id": "fix-0022", "categories": ["fix_fixed_expression"], "scene": "school", "raw": "纸上得来终觉浅，绝知此事要公行", "output": "纸上得来终觉浅，绝知此事要躬行。"}
+{"id": "fix-0023", "categories": ["fix_fixed_expression"], "scene": "school", "raw": "人生自古谁无死，留取单心照汗青", "output": "人生自古谁无死，留取丹心照汗青。"}
+{"id": "fix-0024", "categories": ["fix_fixed_expression"], "scene": "work_chat", "raw": "沉舟侧伴千帆过，病树前头万木春", "output": "沉舟侧畔千帆过，病树前头万木春。"}
+{"id": "fix-0025", "categories": ["fix_fixed_expression"], "scene": "school", "raw": "天行健，君子以自强不习", "output": "天行健，君子以自强不息。"}
+{"id": "fix-0026", "categories": ["fix_fixed_expression"], "scene": "family_friends", "raw": "谁言寸草心，报得三春灰", "output": "谁言寸草心，报得三春晖。"}
+{"id": "fix-0027", "categories": ["fix_fixed_expression"], "scene": "social_media", "raw": "千呼万唤始出来，犹抱琵琶半遮棉", "output": "千呼万唤始出来，犹抱琵琶半遮面。"}
+{"id": "fix-0028", "categories": ["fix_fixed_expression"], "scene": "daily", "raw": "小荷才露尖尖角，早有晴蜓立上头", "output": "小荷才露尖尖角，早有蜻蜓立上头。"}
+{"id": "fix-0029", "categories": ["fix_fixed_expression"], "scene": "work_chat", "raw": "这个项目我们一股作气做完它", "output": "这个项目我们一鼓作气做完它。"}
+{"id": "fix-0030", "categories": ["fix_fixed_expression"], "scene": "family_friends", "raw": "孩子迫不急待地想去游乐园", "output": "孩子迫不及待地想去游乐园。"}
+{"id": "fix-0031", "categories": ["fix_fixed_expression"], "scene": "work_chat", "raw": "大家辛苦了，再接再励", "output": "大家辛苦了，再接再厉！"}
+{"id": "fix-0032", "categories": ["fix_fixed_expression"], "scene": "work_chat", "raw": "按步就班地推进就行", "output": "按部就班地推进就行。"}
+{"id": "fix-0033", "categories": ["fix_fixed_expression"], "scene": "social_media", "raw": "这波操作我甘败下风", "output": "这波操作我甘拜下风。"}
+{"id": "fix-0034", "categories": ["fix_fixed_expression"], "scene": "daily", "raw": "他已经走头无路了", "output": "他已经走投无路了。"}
+{"id": "fix-0035", "categories": ["fix_fixed_expression"], "scene": "work_chat", "raw": "我们不能默守成规", "output": "我们不能墨守成规。"}
+{"id": "fix-0036", "categories": ["fix_fixed_expression"], "scene": "family_friends", "raw": "大家在饭桌上谈笑风声", "output": "大家在饭桌上谈笑风生。"}
+{"id": "fix-0037", "categories": ["fix_fixed_expression"], "scene": "work_chat", "raw": "这个问题我也一愁莫展", "output": "这个问题我也一筹莫展。"}
+{"id": "fix-0038", "categories": ["fix_fixed_expression"], "scene": "school", "raw": "诸葛亮鞠躬尽粹，死而后已", "output": "诸葛亮鞠躬尽瘁，死而后已。"}
+{"id": "fix-0039", "categories": ["fix_fixed_expression"], "scene": "social_media", "raw": "这个小镇简直是世外桃园", "output": "这个小镇简直是世外桃源。"}
+{"id": "fix-0040", "categories": ["fix_fixed_expression"], "scene": "school", "raw": "他这次考试名列前矛", "output": "他这次考试名列前茅。"}
+{"id": "fix-0041", "categories": ["fix_fixed_expression"], "scene": "social_media", "raw": "这个消息不径而走", "output": "这个消息不胫而走。"}
+{"id": "fix-0042", "categories": ["fix_fixed_expression"], "scene": "work_chat", "raw": "活动正在如火如茶地进行", "output": "活动正在如火如荼地进行。"}
+{"id": "fix-0043", "categories": ["fix_fixed_expression"], "scene": "social_media", "raw": "新装修的店美仑美奂", "output": "新装修的店美轮美奂。"}
+{"id": "fix-0044", "categories": ["fix_fixed_expression"], "scene": "social_media", "raw": "这个乐队最近声名雀起", "output": "这个乐队最近声名鹊起。"}
+{"id": "fix-0045", "categories": ["fix_fixed_expression"], "scene": "work_chat", "raw": "我们要出奇不意地发布", "output": "我们要出其不意地发布。"}
+{"id": "fix-0046", "categories": ["fix_fixed_expression"], "scene": "daily", "raw": "路上的车穿流不息", "output": "路上的车川流不息。"}
+{"id": "fix-0047", "categories": ["fix_fixed_expression"], "scene": "family_friends", "raw": "祝你金榜提名", "output": "祝你金榜题名！"}
+{"id": "fix-0048", "categories": ["fix_fixed_expression"], "scene": "daily", "raw": "骗子最后原形必露", "output": "骗子最后原形毕露。"}
+{"id": "fix-0049", "categories": ["fix_fixed_expression"], "scene": "work_chat", "raw": "这件事大家各持己见", "output": "这件事大家各执己见。"}
+{"id": "fix-0050", "categories": ["fix_fixed_expression"], "scene": "school", "raw": "他读书总是不求甚节", "output": "他读书总是不求甚解。"}
+{"id": "fix-0051", "categories": ["fix_fixed_expression"], "scene": "work_chat", "raw": "三个臭皮匠，顶个朱哥亮", "output": "三个臭皮匠，顶个诸葛亮。"}
+{"id": "fix-0052", "categories": ["fix_fixed_expression"], "scene": "family_friends", "raw": "失之东隅，收之桑鱼，别太难过", "output": "失之东隅，收之桑榆，别太难过。"}
+{"id": "fix-0053", "categories": ["fix_fixed_expression"], "scene": "work_chat", "raw": "磨刀不误砍柴功，先把需求理清楚", "output": "磨刀不误砍柴工，先把需求理清楚。"}
+{"id": "fix-0054", "categories": ["fix_fixed_expression"], "scene": "work_chat", "raw": "知己知彼，百战不怠", "output": "知己知彼，百战不殆。"}
+{"id": "fix-0055", "categories": ["fix_fixed_expression"], "scene": "daily", "raw": "不入虎穴，焉得虎仔", "output": "不入虎穴，焉得虎子。"}
+{"id": "fix-0056", "categories": ["fix_fixed_expression"], "scene": "school", "raw": "书山有路勤为径，学海无涯苦作周", "output": "书山有路勤为径，学海无涯苦作舟。"}
+{"id": "fix-0057", "categories": ["fix_fixed_expression", "filler"], "scene": "social_media", "raw": "额，今天的签名想写，那个，海内存知已，天涯若比临", "output": "今天的签名想写：海内存知己，天涯若比邻。"}
+{"id": "fix-0058", "categories": ["fix_fixed_expression", "instr_translate"], "scene": "school", "raw": "翻译成英文：路漫漫其修远兮，吾将上下而求所", "output": "The road ahead is long and far; I will search high and low.", "instr_position": "prefix"}
+{"id": "fix-0059", "categories": ["fix_fixed_expression", "immediate_correction"], "scene": "work_chat", "raw": "我们要一股作气，不对，要按步就班地来", "output": "我们要按部就班地来。"}
+{"id": "fix-0060", "categories": ["fix_fixed_expression", "filler"], "scene": "family_friends", "raw": "就是那个，祝你，嗯，金榜提名，前程似锦", "output": "祝你金榜题名，前程似锦！"}
+{"id": "neg-homo-0001", "categories": ["neg_homophone"], "scene": "tech", "raw": "这个模型在机器学系里很常用", "output": "这个模型在机器学系里很常用。"}
+{"id": "neg-homo-0002", "categories": ["neg_homophone"], "scene": "work_chat", "raw": "我们明天在讨论一下这个方案", "output": "我们明天在讨论一下这个方案。"}
+{"id": "neg-homo-0003", "categories": ["neg_homophone"], "scene": "school", "raw": "老师让我们准备一下期末考式", "output": "老师让我们准备一下期末考式。"}
+{"id": "neg-homo-0004", "categories": ["neg_homophone"], "scene": "shopping", "raw": "帮我买一个无线鼠标和一个优盘", "output": "帮我买一个无线鼠标和一个优盘。"}
+{"id": "neg-homo-0005", "categories": ["neg_homophone"], "scene": "work_chat", "raw": "这个功能的入口在设制页面", "output": "这个功能的入口在设制页面。"}
+{"id": "neg-homo-0006", "categories": ["neg_homophone"], "scene": "daily", "raw": "周末一起去公园散布吧", "output": "周末一起去公园散布吧。"}
+{"id": "neg-homo-0007", "categories": ["neg_homophone"], "scene": "social_media", "raw": "新开的服装店叫衣衣不舍，名字挺可爱", "output": "新开的服装店叫衣衣不舍，名字挺可爱。"}
+{"id": "neg-homo-0008", "categories": ["neg_homophone"], "scene": "shopping", "raw": "楼下那家自行车店叫骑乐无穷", "output": "楼下那家自行车店叫骑乐无穷。"}
+{"id": "neg-homo-0009", "categories": ["neg_homophone"], "scene": "social_media", "raw": "这个蚊香的广告词是默默无蚊", "output": "这个蚊香的广告词是默默无蚊。"}
+{"id": "neg-homo-0010", "categories": ["neg_homophone"], "scene": "social_media", "raw": "我们的口号是百衣百顺", "output": "我们的口号是百衣百顺。"}
+{"id": "neg-clean-0084", "categories": ["neg_clean"], "scene": "school", "raw": "床前明月光，疑是地上霜", "output": "床前明月光，疑是地上霜。"}
+{"id": "neg-clean-0085", "categories": ["neg_clean"], "scene": "family_friends", "raw": "独在异乡为异客，每逢佳节倍思亲", "output": "独在异乡为异客，每逢佳节倍思亲。"}
+{"id": "neg-clean-0086", "categories": ["neg_clean"], "scene": "social_media", "raw": "春眠不觉晓，处处闻啼鸟", "output": "春眠不觉晓，处处闻啼鸟。"}
+{"id": "neg-clean-0087", "categories": ["neg_clean"], "scene": "work_chat", "raw": "千里之行，始于足下", "output": "千里之行，始于足下。"}
+{"id": "neg-clean-0088", "categories": ["neg_clean"], "scene": "school", "raw": "学而时习之，不亦说乎", "output": "学而时习之，不亦说乎？"}
+{"id": "neg-clean-0089", "categories": ["neg_clean"], "scene": "daily", "raw": "野火烧不尽，春风吹又生", "output": "野火烧不尽，春风吹又生。"}
