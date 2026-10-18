@@ -1,7 +1,7 @@
 """Building blocks for the settings window: rows grouped in cards, switches, themed dropdowns and a key recorder."""
 
 from PySide6.QtCore import QEasingCurve, QPointF, QRectF, QSize, Qt, QVariantAnimation, Signal
-from PySide6.QtGui import QColor, QPainter, QPainterPath, QPen
+from PySide6.QtGui import QColor, QLinearGradient, QPainter, QPainterPath, QPen
 from PySide6.QtWidgets import (
     QAbstractButton, QComboBox, QFontComboBox, QFrame, QHBoxLayout, QLabel, QListView, QPushButton, QStyle,
     QStyledItemDelegate, QVBoxLayout, QWidget,
@@ -322,3 +322,45 @@ class HotkeyButton(QPushButton):
     def focusOutEvent(self, event) -> None:
         self.stop_capture()
         super().focusOutEvent(event)
+
+
+class ThemeSwatch(QAbstractButton):
+    """A rounded color chip for a color theme: background-to-capsule gradient, ringed when selected."""
+
+    def __init__(self, background: str, capsule: str, dashed: bool = False, parent: QWidget | None = None) -> None:
+        super().__init__(parent)
+        self.setCheckable(True)
+        self.setCursor(Qt.CursorShape.PointingHandCursor)
+        self.setFixedSize(48, 48)
+        self.theme = LIGHT
+        self.dashed = dashed  # the "custom" chip
+        self.set_colors(background, capsule)
+
+    def set_colors(self, background: str, capsule: str) -> None:
+        self.colors = (QColor(background), QColor(capsule))
+        self.update()
+
+    def set_theme(self, theme: Theme) -> None:
+        self.theme = theme
+        self.update()
+
+    def paintEvent(self, _event) -> None:
+        painter = QPainter(self)
+        painter.setRenderHint(QPainter.RenderHint.Antialiasing)
+        if self.isChecked():
+            painter.setPen(QPen(QColor(self.theme.text), 2))
+            painter.setBrush(Qt.BrushStyle.NoBrush)
+            painter.drawRoundedRect(QRectF(1, 1, 46, 46), 14, 14)
+        gradient = QLinearGradient(QPointF(6, 6), QPointF(42, 42))
+        gradient.setColorAt(0, self.colors[0])
+        gradient.setColorAt(1, self.colors[1])
+        painter.setPen(Qt.PenStyle.NoPen)
+        painter.setBrush(gradient)
+        painter.drawRoundedRect(QRectF(6, 6, 36, 36), 10, 10)
+        if self.dashed:
+            pen = QPen(QColor(self.theme.knob), 2)
+            pen.setCapStyle(Qt.PenCapStyle.RoundCap)
+            painter.setPen(pen)
+            painter.drawLine(QPointF(24, 17), QPointF(24, 31))
+            painter.drawLine(QPointF(17, 24), QPointF(31, 24))
+        painter.end()

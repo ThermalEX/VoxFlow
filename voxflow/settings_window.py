@@ -7,20 +7,21 @@ import PySide6
 from PySide6.QtCore import QEasingCurve, QPropertyAnimation, QSettings, QSize, Qt, QUrl, Signal, qVersion
 from PySide6.QtGui import QColor, QDesktopServices, QFont, QGuiApplication, QIcon, QPainter, QPixmap
 from PySide6.QtWidgets import (
-    QAbstractSpinBox, QApplication, QColorDialog, QFileDialog, QFrame, QGraphicsOpacityEffect, QHBoxLayout,
+    QAbstractSpinBox, QApplication, QButtonGroup, QColorDialog, QFileDialog, QFrame, QGraphicsOpacityEffect, QHBoxLayout,
     QLabel, QLineEdit, QListWidget, QListWidgetItem, QPushButton, QScrollArea, QSpinBox, QStackedWidget,
     QVBoxLayout, QWidget,
 )
 
 from .hotkeys import ACTIONS, DEFAULTS as DEFAULT_HOTKEYS, parse as parse_hotkey, saved as saved_hotkey
 from .appearance import DEFAULT_BACKGROUND, DEFAULT_CAPSULE, DEFAULT_FONT, DEFAULT_TEXT_SIZE, saved_color
+from .color_themes import CUSTOM, DEFAULT_THEME, PRESETS, SETTING as COLOR_THEME_SETTING, saved_color_theme
 from .i18n import LANGUAGE_CHOICES, describe_error, resolve, set_language, tr
 from .paths import DATA_ROOT
 from .model_catalog import LocalModel, describe as describe_model, discover_models, quant_of
 from .rewriter import RewriteConfig
-from .settings_theme import THEME_CHOICES, Theme, current_theme, stylesheet
+from .settings_theme import THEME_CHOICES, Theme, current_theme, stylesheet, with_accent
 from .settings_widgets import (
-    HotkeyButton, SettingRow, SettingsCard, SettingsComboBox, SettingsFontComboBox, ToggleSwitch,
+    HotkeyButton, SettingRow, SettingsCard, SettingsComboBox, SettingsFontComboBox, ThemeSwatch, ToggleSwitch,
 )
 from .ui_icons import app_icon, line_icon
 
@@ -65,6 +66,7 @@ class SettingsWindow(QWidget):
     rewrite_changed = Signal()
     language_changed = Signal(str)
     hotkey_capture = Signal(bool)  # True while a shortcut is being recorded
+    color_theme_changed = Signal(object)  # ColorTheme
 
     def __init__(self, settings: QSettings) -> None:
         super().__init__()
@@ -157,9 +159,11 @@ class SettingsWindow(QWidget):
             super().keyPressEvent(event)
 
     def apply_theme(self, theme: Theme) -> None:
+        """Use a light or dark palette, with the accent of the current color theme."""
+        theme = with_accent(theme, saved_color_theme(self.settings).accent(theme.name))
         self.theme = theme
         self.setStyleSheet(stylesheet(theme))
-        for kind in (SettingsComboBox, SettingsFontComboBox, ToggleSwitch):
+        for kind in (SettingsComboBox, SettingsFontComboBox, ToggleSwitch, ThemeSwatch):
             for widget in self.findChildren(kind):
                 widget.set_theme(theme)
         for button in (self.restore_button, self.hotkey_restore_button):
@@ -340,6 +344,7 @@ class SettingsWindow(QWidget):
         self.theme_box.currentIndexChanged.connect(self._set_theme)
         card = self._section(layout, "section.theme")
         self._row(card, "field.theme", "desc.theme", self._sized(self.theme_box, 220))
+        card.add_row(self._color_theme_row())
 
         self.font_box = SettingsFontComboBox()
         self.font_box.setCurrentFont(QFont(str(self.settings.value("appearance/font", DEFAULT_FONT))))
@@ -362,8 +367,11 @@ class SettingsWindow(QWidget):
         self.background_button = self._color_button("background", DEFAULT_BACKGROUND)
         self.capsule_button = self._color_button("capsule", DEFAULT_CAPSULE)
         card = self._section(layout, "section.glow")
-        self._row(card, "field.background", "desc.background", self._sized(self.background_button, 170))
-        self._row(card, "field.capsule", "desc.capsule", self._sized(self.capsule_button, 170))
+        self._glow_card = card
+        self.background_button_row = self._row(card, "field.background", "desc.background",
+                                               self._sized(self.background_button, 170))
+        self.capsule_button_row = self._row(card, "field.capsule", "desc.capsule", self._sized(self.capsule_button, 170))
+        self._sync_custom_rows()
 
         self.restore_button = self._button("button.restore", self._reset_appearance)
         self.restore_button.setIconSize(QSize(16, 16))
@@ -747,11 +755,85 @@ class SettingsWindow(QWidget):
             self.set_color(key, chosen)
 
     def set_color(self, key: str, color: QColor) -> None:
+        """Pick one of the custom glow colors; this makes the custom theme the current one."""
         if key not in {"background", "capsule"} or not color.isValid():
             raise ValueError("Unknown appearance color")
         self.settings.setValue(f"appearance/{key}_color", color.name())
         self._show_color(self.background_button if key == "background" else self.capsule_button, color)
-        (self.background_color_changed if key == "background" else self.capsule_color_changed).emit(color)
+        self.select_color_theme(CUSTOM)
+
+    # Color themes -----------------------------------------------------------------------------
+
+    def _color_theme_row(self) -> QWidget:
+        row = QWidget()
+        column = QVBoxLayout(row)
+        column.setContentsMargins(16, 12, 16, 14)
+        column.setSpacing(3)
+        title = QLabel()
+        title.setObjectName("rowTitle")
+        self._bind(title.setText, "field.color_theme")
+        desc = QLabel()
+        desc.setObjectName("rowDesc")
+        desc.setWordWrap(True)
+        self._bind(desc.setText, "desc.color_theme")
+        column.addWidget(title)
+        column.addWidget(desc)
+        column.addSpacing(8)
+        chips = QHBoxLayout()
+        chips.setSpacing(10)
+        self.color_theme_buttons: dict[str, ThemeSwatch] = {}
+        self._color_theme_group = QButtonGroup(self)
+        self._color_theme_group.setExclusive(True)
+        custom = self._custom_colors()
+        choices = [(t.id, t.name_key, t.background, t.capsule) for t in PRESETS]
+        choices.append((CUSTOM, "color.custom", custom[0], custom[1]))
+        for theme_id, name_key, background, capsule in choices:
+            swatch = ThemeSwatch(background, capsule, dashed=theme_id == CUSTOM)
+            self._bind(swatch.setToolTip, name_key)
+            self._bind(swatch.setAccessibleName, name_key)
+            swatch.clicked.connect(lambda _checked=False, value=theme_id: self.select_color_theme(value))
+            self._color_theme_group.addButton(swatch)
+            self.color_theme_buttons[theme_id] = swatch
+            label = QLabel()
+            label.setObjectName("rowDesc")
+            label.setAlignment(Qt.AlignmentFlag.AlignHCenter)
+            self._bind(label.setText, name_key)
+            cell = QVBoxLayout()
+            cell.setSpacing(2)
+            cell.addWidget(swatch, 0, Qt.AlignmentFlag.AlignHCenter)
+            cell.addWidget(label)
+            chips.addLayout(cell)
+        chips.addStretch(1)
+        column.addLayout(chips)
+        current = str(self.settings.value(COLOR_THEME_SETTING, DEFAULT_THEME.id))
+        self.color_theme_buttons.get(current, self.color_theme_buttons[DEFAULT_THEME.id]).setChecked(True)
+        return row
+
+    def _custom_colors(self) -> tuple[str, str]:
+        background = saved_color(self.settings.value("appearance/background_color", DEFAULT_BACKGROUND),
+                                 DEFAULT_BACKGROUND)
+        capsule = saved_color(self.settings.value("appearance/capsule_color", DEFAULT_CAPSULE), DEFAULT_CAPSULE)
+        return background.name(), capsule.name()
+
+    def select_color_theme(self, theme_id: str) -> None:
+        """Switch the color theme of the overlay, settings and tutorial together."""
+        self.settings.setValue(COLOR_THEME_SETTING, theme_id)
+        theme = saved_color_theme(self.settings)
+        self.color_theme_buttons[theme.id].setChecked(True)
+        self.color_theme_buttons[CUSTOM].set_colors(*self._custom_colors())
+        self._sync_custom_rows()
+        self.apply_theme(current_theme(self._theme_choice()))
+        self.background_color_changed.emit(QColor(theme.background))
+        self.capsule_color_changed.emit(QColor(theme.capsule))
+        self.color_theme_changed.emit(theme)
+
+    def _sync_custom_rows(self) -> None:
+        custom = str(self.settings.value(COLOR_THEME_SETTING, DEFAULT_THEME.id)) == CUSTOM
+        for row in (self.background_button_row, self.capsule_button_row):
+            row.setVisible(custom)
+        self._glow_card.setVisible(custom)
+        self._glow_card.title_label.setVisible(custom)
+        self._glow_card.refresh()
 
     def _set_font(self, font: QFont) -> None:
         family = font.family()
@@ -765,5 +847,7 @@ class SettingsWindow(QWidget):
     def _reset_appearance(self) -> None:
         self.font_box.setCurrentFont(QFont(DEFAULT_FONT))
         self.text_size_box.setValue(DEFAULT_TEXT_SIZE)
-        self.set_color("background", QColor(DEFAULT_BACKGROUND))
-        self.set_color("capsule", QColor(DEFAULT_CAPSULE))
+        for key, default in (("background", DEFAULT_BACKGROUND), ("capsule", DEFAULT_CAPSULE)):
+            self.settings.setValue(f"appearance/{key}_color", default)
+            self._show_color(self.background_button if key == "background" else self.capsule_button, QColor(default))
+        self.select_color_theme(DEFAULT_THEME.id)

@@ -20,10 +20,11 @@ from PySide6.QtWidgets import (
 )
 
 from .audio import AudioBuffer
+from .color_themes import migrate_color_theme, saved_color_theme
 from .edit_diff import join_continuation
 from .hotkeys import ACTIONS, HOTKEY_IDS, Win32Hotkeys, parse, saved as saved_hotkey
 from .i18n import resolve, set_language, tr
-from .appearance import DEFAULT_BACKGROUND, DEFAULT_CAPSULE, DEFAULT_FONT, DEFAULT_TEXT_SIZE, saved_color, tint
+from .appearance import DEFAULT_BACKGROUND, DEFAULT_FONT, DEFAULT_TEXT_SIZE, tint
 from .input_target import WindowsPasteTarget
 from .overlay_widgets import CircleIconButton, GlowCapsule
 from .particles import ParticleField
@@ -53,6 +54,7 @@ class VoxFlowWindow(QWidget):
         self.settings = settings if settings is not None else QSettings("VoxFlow", "VoxFlow")
         set_language(resolve(str(self.settings.value("ui/language", "system"))))
         migrate_settings(self.settings)
+        migrate_color_theme(self.settings)
         replace_missing_model(self.settings, DATA_ROOT)
         self.hotkey_api = hotkey_api if hotkey_api is not None else Win32Hotkeys()
         self.hotkeys = {action: saved_hotkey(self.settings, action) for action in ACTIONS}
@@ -111,8 +113,9 @@ class VoxFlowWindow(QWidget):
         self.settings_window.set_hotkey_applier(self.set_hotkey)
         self._refresh_hotkey_hints()
         self._apply_transcript_font()
-        self._set_background_color(saved_color(self.settings.value("appearance/background_color", DEFAULT_BACKGROUND), DEFAULT_BACKGROUND))
-        self.capsule.set_accent_color(saved_color(self.settings.value("appearance/capsule_color", DEFAULT_CAPSULE), DEFAULT_CAPSULE))
+        color_theme = saved_color_theme(self.settings)
+        self._set_background_color(QColor(color_theme.background))
+        self.capsule.set_accent_color(QColor(color_theme.capsule))
         self._load_devices()
         self.device_box.currentIndexChanged.connect(self._save_device_setting)
         self._set_mode("idle")

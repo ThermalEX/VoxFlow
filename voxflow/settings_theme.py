@@ -1,7 +1,7 @@
 """Light and dark palettes for the settings window, following the Windows color scheme."""
 
 import os
-from dataclasses import dataclass
+from dataclasses import dataclass, replace
 
 from PySide6.QtCore import Qt
 from PySide6.QtGui import QGuiApplication
@@ -36,6 +36,11 @@ DARK = Theme("dark", window="#212121", sidebar="#181818", card="#2A2A2A", border
              divider="#363636", text="#ECECEC", muted="#A3A3A3", accent="#3D8BFF", hover="#333333",
              selected="#383838", field="#303030", popup="#2E2E2E", switch_off="#5C5C5C", knob="#FFFFFF",
              icon="#B4B4B4", icon_active="#FFFFFF")
+
+
+def with_accent(theme: Theme, accent: str) -> Theme:
+    """The palette with the color theme's accent on switches, buttons, selections and links."""
+    return replace(theme, accent=accent)
 
 
 THEME_CHOICES = (("system", "theme.system"), ("light", "theme.light"), ("dark", "theme.dark"))

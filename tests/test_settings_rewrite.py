@@ -136,5 +136,5 @@ def test_switch_and_rows_follow_the_theme(tmp_path):
     window, _settings = make(tmp_path)
     window.apply_theme(settings_theme.DARK)
     assert settings_theme.DARK.window in window.styleSheet()
-    assert window.rewrite_enabled.theme is settings_theme.DARK
+    assert window.rewrite_enabled.theme == settings_theme.DARK  # the default color theme keeps the dark accent
     window.close()
