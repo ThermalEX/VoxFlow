@@ -151,6 +151,11 @@ class SmartEditor(QObject):
             return "model.off", {}
         if self.config.provider != "local":
             return "model.custom", {}
+        if not _data_path(self.config.model_path).is_file():
+            return "model.not_installed", {}
+        server_path = _data_path(self.config.server_path)
+        if not server_path.is_file():
+            return "model.missing_server", {"path": str(server_path)}
         if self.server is None:
             return "model.ready", {}
         problem = getattr(self.server, "problem", None)

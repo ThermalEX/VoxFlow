@@ -21,6 +21,7 @@ from PySide6.QtWidgets import (
 
 from .audio import AudioBuffer
 from .color_themes import migrate_color_theme, saved_color_theme
+from .downloads import DownloadManager
 from .edit_diff import join_continuation
 from .hotkeys import ACTIONS, HOTKEY_IDS, Win32Hotkeys, parse, saved as saved_hotkey
 from .i18n import resolve, set_language, tr
@@ -48,7 +49,7 @@ class VoxFlowWindow(QWidget):
 
     def __init__(self, model_dir: str | Path, start_worker: bool = True,
                  settings: QSettings | None = None, text_output: WindowsPasteTarget | None = None,
-                 rewrite_client=None, local_server_factory=None, hotkey_api=None) -> None:
+                 rewrite_client=None, local_server_factory=None, hotkey_api=None, downloads=None) -> None:
         super().__init__()
         self.model_dir = Path(model_dir)
         self.settings = settings if settings is not None else QSettings("VoxFlow", "VoxFlow")
@@ -95,7 +96,10 @@ class VoxFlowWindow(QWidget):
         self._place_at_bottom()
         self.particles.resize(self.width(), self.height())
         self._build_ui()
-        self.settings_window = SettingsWindow(self.settings)
+        self.downloads = downloads if downloads is not None else DownloadManager(DATA_ROOT)
+        self.settings_window = SettingsWindow(self.settings, downloads=self.downloads)
+        self.downloads.item_state.connect(self._component_state)
+        self.status_label.installEventFilter(self)
         self.device_box = self.settings_window.device_box
         self.alignment_box = self.settings_window.alignment_box
         self.settings_window.alignment_changed.connect(self.set_transcript_alignment)
@@ -624,6 +628,10 @@ class VoxFlowWindow(QWidget):
                 and not event.modifiers() & Qt.KeyboardModifier.ShiftModifier)
 
     def eventFilter(self, watched, event) -> bool:
+        if (watched is self.status_label and event.type() == QEvent.Type.MouseButtonRelease
+                and self._status[0] == "status.asr_needed"):
+            self.open_downloads()
+            return True
         # Enter confirms the result; Shift+Enter still inserts a line break while editing.
         if (watched is self.transcript and event.type() == QEvent.Type.KeyPress
                 and self._is_confirm_key(event)):
@@ -748,7 +756,7 @@ class VoxFlowWindow(QWidget):
 
     def _start_worker(self) -> None:
         if not (self.model_dir / "model.int8.onnx").is_file():
-            self.show_status("status.asr_missing")
+            self.show_status("status.asr_needed")
             return
         try:
             self.executor = ProcessPoolExecutor(
@@ -759,6 +767,18 @@ class VoxFlowWindow(QWidget):
             self.ready_future = self.executor.submit(worker_ready)
         except Exception as exc:
             self.show_status("status.asr_start_failed", error=exc)
+
+    def start_speech_worker(self) -> None:
+        """Start speech recognition once its model is there (e.g. right after it was downloaded)."""
+        if self.executor is None:
+            self._start_worker()
+
+    def _component_state(self, _item_id: str, state: str) -> None:
+        if state == "installed":
+            self.start_speech_worker()
+
+    def open_downloads(self) -> None:
+        self.settings_window.show_downloads()
 
     def toggle_recording(self) -> None:
         if self.stream is not None:

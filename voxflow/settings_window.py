@@ -17,6 +17,8 @@ from .appearance import DEFAULT_BACKGROUND, DEFAULT_CAPSULE, DEFAULT_FONT, DEFAU
 from .color_themes import CUSTOM, DEFAULT_THEME, PRESETS, SETTING as COLOR_THEME_SETTING, saved_color_theme
 from .i18n import LANGUAGE_CHOICES, describe_error, resolve, set_language, tr
 from .paths import DATA_ROOT
+from .catalog import builtin_catalog, read_installed
+from .download_panel import DownloadPanel
 from .model_catalog import LocalModel, describe as describe_model, discover_models, quant_of
 from .rewriter import RewriteConfig
 from .settings_theme import THEME_CHOICES, Theme, current_theme, stylesheet, with_accent
@@ -67,10 +69,13 @@ class SettingsWindow(QWidget):
     language_changed = Signal(str)
     hotkey_capture = Signal(bool)  # True while a shortcut is being recorded
     color_theme_changed = Signal(object)  # ColorTheme
+    tutorial_requested = Signal()
 
-    def __init__(self, settings: QSettings) -> None:
+    def __init__(self, settings: QSettings, downloads=None) -> None:
         super().__init__()
         self.settings = settings
+        self.downloads = downloads
+        self.download_panel: DownloadPanel | None = None
         self._texts: list[tuple] = []
         self._model_status: tuple[str, dict] | None = None
         self._test_result: tuple[str, dict] | None = None
@@ -166,8 +171,10 @@ class SettingsWindow(QWidget):
         for kind in (SettingsComboBox, SettingsFontComboBox, ToggleSwitch, ThemeSwatch, CheckBox):
             for widget in self.findChildren(kind):
                 widget.set_theme(theme)
-        for button in (self.restore_button, self.hotkey_restore_button):
+        for button in (self.restore_button, self.hotkey_restore_button, self.restart_tutorial_button):
             button.setIcon(line_icon("restore", theme.text))
+        if self.download_panel is not None:
+            self.download_panel.set_theme(theme)
         self._paint_category_icons(self.categories.currentRow())
 
     def _theme_choice(self) -> str:
@@ -230,6 +237,8 @@ class SettingsWindow(QWidget):
             self.update_channel.setItemText(index, tr(key))
         key, values = self._hotkey_message
         self._show_hotkey_message(key, **values)
+        if self.download_panel is not None:
+            self.download_panel.retranslate()
 
     def _set_language(self, _index: int) -> None:
         choice = str(self.language_box.currentData())
@@ -412,8 +421,9 @@ class SettingsWindow(QWidget):
         card = self._section(layout, "section.model")
         self._model_card = card
         self._row(card, "field.model_source", "desc.model_source", self._sized(self.rewrite_provider, 280))
+        self.rewrite_delete_button = self._button("button.delete_model", self._delete_model)
         self.rewrite_model_path_row = self._row(card, "field.local_model", "desc.local_model",
-                                                self._sized(self.rewrite_model_path, 280))
+                                                self._sized(self.rewrite_model_path, 280), self.rewrite_delete_button)
         self.rewrite_endpoint_row = self._row(card, "field.endpoint", "desc.endpoint",
                                               self._sized(self.rewrite_endpoint, 280))
         self.rewrite_model_row = self._row(card, "field.model", "desc.custom_model",
@@ -421,7 +431,10 @@ class SettingsWindow(QWidget):
         self.rewrite_api_key_row = self._row(card, "field.api_key", "desc.api_key",
                                              self._sized(self.rewrite_api_key, 280))
         self.rewrite_test_button = self._button("button.test", self._test_rewrite)
-        self.rewrite_model_status_row = self._row(card, "field.model_status", None, self.rewrite_test_button)
+        self.rewrite_download_button = self._button("button.go_download", self.show_downloads)
+        self.rewrite_download_button.hide()
+        self.rewrite_model_status_row = self._row(card, "field.model_status", None, self.rewrite_download_button,
+                                                  self.rewrite_test_button)
         self.rewrite_model_status = self.rewrite_model_status_row.desc
         self.rewrite_status = QLabel("")
         self.rewrite_status.setObjectName("rowDesc")
@@ -434,7 +447,13 @@ class SettingsWindow(QWidget):
         self._advanced_card = self._section(layout, "section.advanced")
         self.rewrite_server_path_row = self._row(self._advanced_card, "field.server_path", "desc.server_path",
                                                  self._sized(self.rewrite_server_path, 220), browse)
+        if self.downloads is not None:
+            layout.addSpacing(18)
+            self.download_panel = DownloadPanel(self.settings, self.downloads, root=DATA_ROOT)
+            layout.addWidget(self.download_panel)
+            self.downloads.item_state.connect(self._component_state)
         layout.addStretch()
+        self._sync_delete_button()
 
         self.rewrite_enabled.toggled.connect(self._save_rewrite)
         self.rewrite_provider.currentIndexChanged.connect(self._sync_rewrite_rows)
@@ -504,6 +523,9 @@ class SettingsWindow(QWidget):
         links.addStretch(1)
         column.addLayout(links)
         hero_layout.addLayout(column, 1)
+        self.restart_tutorial_button = self._button("about.restart_tutorial", self.tutorial_requested.emit)
+        self.restart_tutorial_button.setIconSize(QSize(16, 16))
+        hero_layout.addWidget(self.restart_tutorial_button, 0, Qt.AlignmentFlag.AlignVCenter)
         self._section(layout).add_row(hero)
 
         card = self._section(layout, "section.components")
@@ -638,6 +660,7 @@ class SettingsWindow(QWidget):
             card.refresh()
 
     def _save_rewrite(self) -> None:
+        self._sync_delete_button()
         self.rewrite_config().save(self.settings)
         self.rewrite_changed.emit()
 
@@ -650,6 +673,51 @@ class SettingsWindow(QWidget):
     def set_model_status(self, key: str, **values) -> None:
         self._model_status = (key, values)
         self.rewrite_model_status_row.set_desc(tr(key, **values))
+        self.rewrite_download_button.setVisible(key in ("model.not_installed", "model.missing_server")
+                                                and self.download_panel is not None)
+
+    # Downloads --------------------------------------------------------------------------------
+
+    def show_downloads(self) -> None:
+        """Open settings on the smart editing page, scrolled to the download list."""
+        self.show()
+        self.raise_()
+        self.activateWindow()
+        self.categories.setCurrentRow(2)
+        if self.download_panel is not None:
+            self.pages.widget(2).ensureWidgetVisible(self.download_panel)
+
+    def _downloaded_item_for(self, path: str):
+        """The catalog item that installed this model file, if the downloader put it there."""
+        recorded = read_installed(DATA_ROOT)
+        for item in builtin_catalog():
+            if item.kind == "rewrite" and item.id in recorded and _same_path(item.files[0].dest, path):
+                return item
+        return None
+
+    def _sync_delete_button(self) -> None:
+        self.rewrite_delete_button.setEnabled(self._downloaded_item_for(self._selected_model_path()) is not None)
+
+    def _delete_model(self) -> None:
+        item = self._downloaded_item_for(self._selected_model_path())
+        if item is None or self.downloads is None:
+            return
+        self.downloads.remove(item)
+        remaining = [model for model in discover_models(DATA_ROOT) if model.path.is_file()]
+        self._populate_local_models(_data_relative(remaining[0].path) if remaining else item.files[0].dest)
+        self._save_rewrite()
+
+    def _component_state(self, item_id: str, state: str) -> None:
+        if state != "installed":
+            return
+        item = next((known for known in builtin_catalog() if known.id == item_id), None)
+        current = self._selected_model_path()
+        usable = bool(current) and (DATA_ROOT / current if not Path(current).is_absolute() else Path(current)).is_file()
+        if item is not None and item.kind == "rewrite" and not usable:
+            current = item.files[0].dest
+        self._populate_local_models(current)
+        if item is None or item.kind != "asr":
+            self._save_rewrite()  # restart the local model with the new file or runtime
 
     def _show_test_result(self, key: str, **values) -> None:
         self._test_result = (key, values)

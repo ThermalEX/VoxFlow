@@ -65,6 +65,7 @@ def main() -> int:
     retranslate_tray()
     window.settings_window.language_changed.connect(lambda _choice: retranslate_tray())
     window.hotkeys_changed.connect(retranslate_tray)
+    window.downloads.all_done.connect(lambda: tray.showMessage(tr("download.done_title"), tr("download.done_body")))
     tray.setContextMenu(menu)
     tray.activated.connect(lambda reason: window.reveal() if reason == QSystemTrayIcon.ActivationReason.Trigger else None)
     if QSystemTrayIcon.isSystemTrayAvailable():
