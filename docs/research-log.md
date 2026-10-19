@@ -370,6 +370,9 @@ v2 对 v3 逐条比较：v3 明显更好的 16 条，明显更差的也是 16 �
 | v4 首次训练第 0 步即 OOM | 开训门槛设为“显存占用 < 1.5 GB”，但安卓模拟器仍在运行（占约 1.3 GB，GPU 利用率约 30%） | 门槛改为连续 2 分钟 < 1 GB；失败后等待显存空闲并从检查点续训，最多重试 6 次 | 训练前要确认 GPU 空闲，不能只看一个瞬时值 |
 | 重试脚本根本没有启动训练，日志里却是“显存不足” | 在 Git Bash 里用 `wsl.exe -- bash -c "…$PATH…"` 时，`$PATH` 被提前展开成含括号的 Windows 路径，WSL 的 bash 解析出错；日志文件是上一次失败留下的 | 把 WSL 侧命令写进脚本文件，用 `wsl.exe -- bash script.sh` 执行；每次启动前清空日志 | 跨 Windows/WSL 调用不要内联带变量的命令；判断成败要看本次输出，不能看旧日志 |
 | 是否用 QLoRA 省显存 | Unsloth 官方文档指出 Qwen3.5 的 4-bit 量化误差高于常规模型，不建议 QLoRA 训练（部分第三方教程仍推荐 QLoRA，以官方为准） | 改用 bf16 LoRA | 2B 模型 bf16 LoRA 在 6 GB 卡上可行；4B 在本机做 bf16 LoRA 大概率放不下，需要云端 GPU |
+| Gemma 4 E2B 训练第一步即报“No or negligible GPU memory available for fused cross entropy” | E2B 的“2B”不含逐层嵌入：文本部分共 3.95B 参数，其中逐层嵌入表 `embed_tokens_per_layer` 占 2.35B（bf16 4.4 GB），bitsandbytes 不量化嵌入层；加上 `text_only=True` 后 Unsloth 静默改为整模型 bf16 放在 CPU，训练时又被搬上 GPU | 不用预量化权重（其自带配置禁止任何模块放 CPU），改用原始权重加载时量化（`use_exact_model_name=True` + 自定 `BitsAndBytesConfig(llm_int8_enable_fp32_cpu_offload=True)`）；`device_map` 只把逐层嵌入表放 CPU；再去掉 accelerate 的卸载钩子，改成普通 CPU 模块：索引移到 CPU 查表、结果送回 GPU（accelerate 的 CPU 卸载会在每次前向时把整张表拷到 GPU） | 训练峰值显存 2.65 GB，桌面程序占 1.6 GB 时也能训练；约 10.5 s/步（Qwen3.5-2B 2.6 s/步）。“有效参数”小的模型不代表显存占用小，要先看各部分参数的实际位置和类型 |
+| Gemma 4 合并 LoRA 时 WSL 内存不足（Errno 12） | Unsloth 的 `save_pretrained_merged` 同时持有 bf16 模型和原始权重，超过 WSL 的 15 GB | 自写逐张量合并：从原始 safetensors 逐个读权重，命中的 205 个线性层加上 B·A·α/r（fp32 计算后转回 bf16），按 2 GB 分片写出，只占一个分片的内存 | llama.cpp 按 `Gemma4ForConditionalGeneration` 正常转换；合并到 bf16 原始权重而不是反量化的 4-bit 权重，是 QLoRA 的常规做法 |
+| Gemma 训练样本的结尾标记 | 原代码给答案末尾加 `tokenizer.eos_token`，对 Gemma 是 `<eos>`，但 Gemma 的对话模板用 `<turn|>` 结束模型的一轮 | Gemma 改用 `<turn|>`，与原生模板一致（Qwen 保持原样，保证 v4 可复现） | 结尾标记要和推理时模板一致，否则模型可能不停输出 |
 
 ### 7.2 部署
 
