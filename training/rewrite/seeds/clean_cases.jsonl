@@ -999,3 +999,99 @@
 {"id": "combo-0052", "categories": ["instr_combo", "implicit_reason"], "scene": "work_chat", "raw": "周五开评审会，哦周五老板不在，改下周一，翻译成英文", "output": "The review meeting is on Monday.", "instr_position": "suffix"}
 {"id": "combo-0053", "categories": ["instr_combo", "edit_replace"], "scene": "schedule", "raw": "会议十点开始，推后半小时，翻成英文", "output": "The meeting starts at 10:30.", "instr_position": "suffix"}
 {"id": "combo-0054", "categories": ["instr_combo", "filler"], "scene": "family_friends", "raw": "委婉一点，额，就是，你那个，借我的书该还了", "output": "我借你的那本书，方便的时候还我一下吧。", "instr_position": "prefix"}
+{"id": "edit-del-0062", "categories": ["edit_delete"], "scene": "customer_service", "raw": "这耳机戴着耳朵疼，音质也一般，帮我申请退货，前两句别发了。", "output": "帮我申请退货。"}
+{"id": "edit-del-0063", "categories": ["edit_delete"], "scene": "work_chat", "raw": "这个方案我真的看不下去，第三页的数据需要更新，前面那句删了。", "output": "第三页的数据需要更新。"}
+{"id": "edit-del-0064", "categories": ["edit_delete"], "scene": "family_friends", "raw": "我今天累死了，晚饭你们先吃，不用等我，第一句不要了。", "output": "晚饭你们先吃，不用等我。"}
+{"id": "edit-del-0065", "categories": ["edit_delete"], "scene": "work_chat", "raw": "接口文档我更新了，测试环境也部署好了，顺便吐槽一下这破电脑，最后一句删掉。", "output": "接口文档我更新了，测试环境也部署好了。"}
+{"id": "edit-del-0066", "categories": ["edit_delete"], "scene": "school", "raw": "老师，作业我已经交了，昨晚熬到三点，后面那句不要。", "output": "老师，作业我已经交了。"}
+{"id": "edit-del-0067", "categories": ["edit_delete"], "scene": "shopping", "raw": "老板，这件衣服有没有大一号的，你家东西是真的贵，后半句删了。", "output": "老板，这件衣服有没有大一号的？"}
+{"id": "edit-del-0068", "categories": ["edit_delete"], "scene": "social_media", "raw": "今天终于把论文交了，导师人真的很难搞，开心，中间那句去掉。", "output": "今天终于把论文交了，开心。"}
+{"id": "edit-del-0069", "categories": ["edit_delete"], "scene": "email", "raw": "王经理您好，合同已经盖章寄出，说实话这流程太折腾了，预计周三送达，第二句删掉。", "output": "王经理您好，合同已经盖章寄出，预计周三送达。"}
+{"id": "edit-del-0070", "categories": ["edit_delete"], "scene": "customer_service", "raw": "你们客服电话一直打不通，烦死了，我想改一下收货地址，烦死了那句删了。", "output": "你们客服电话一直打不通，我想改一下收货地址。"}
+{"id": "edit-del-0071", "categories": ["edit_delete"], "scene": "work_chat", "raw": "下午三点的会改到四点，会议室不变，会议室那句不用说了。", "output": "下午三点的会改到四点。"}
+{"id": "edit-del-0072", "categories": ["edit_delete"], "scene": "daily", "raw": "我到小区门口了，你下来拿一下，外面好冷，好冷那句去掉。", "output": "我到小区门口了，你下来拿一下。"}
+{"id": "edit-del-0073", "categories": ["edit_delete"], "scene": "tech", "raw": "这个bug是缓存没刷新导致的，我已经修好了，谁写的代码这么烂，最后那句删了。", "output": "这个bug是缓存没刷新导致的，我已经修好了。"}
+{"id": "edit-del-0074", "categories": ["edit_delete"], "scene": "family_friends", "raw": "妈，我下周回家，你别做太多菜，上次剩了好多，最后一句不要。", "output": "妈，我下周回家，你别做太多菜。"}
+{"id": "edit-del-0075", "categories": ["edit_delete"], "scene": "school", "raw": "我们小组的展示定在周五，PPT我来做，组长又不干活，最后一句删掉。", "output": "我们小组的展示定在周五，PPT我来做。"}
+{"id": "edit-del-0076", "categories": ["edit_delete"], "scene": "work_chat", "raw": "报销单我放你桌上了，记得签字，第一句删了。", "output": "记得签字。"}
+{"id": "edit-del-0077", "categories": ["edit_delete"], "scene": "shopping", "raw": "帮我下单两箱牛奶、一袋大米和一桶油，油不要了。", "output": "帮我下单两箱牛奶和一袋大米。"}
+{"id": "edit-del-0078", "categories": ["edit_delete"], "scene": "email", "raw": "Hi Tom, the invoice is attached, sorry it took forever, please confirm receipt. Delete the second sentence.", "output": "Hi Tom, the invoice is attached. Please confirm receipt."}
+{"id": "edit-del-0079", "categories": ["edit_delete"], "scene": "work_chat", "raw": "The build is green, I'm so done with this sprint, we can ship tomorrow. Drop the middle part.", "output": "The build is green, we can ship tomorrow."}
+{"id": "edit-del-0080", "categories": ["edit_delete"], "scene": "customer_service", "raw": "您好，订单号是八八二零一，东西还没收到，你们效率真低，最后一句删掉。", "output": "您好，订单号是88201，东西还没收到。"}
+{"id": "edit-del-0081", "categories": ["edit_delete"], "scene": "schedule", "raw": "周二看牙医，周三交房租，周四和小王吃饭，周三那个去掉。", "output": "周二看牙医，周四和小王吃饭。"}
+{"id": "corr-0051", "categories": ["immediate_correction"], "scene": "schedule", "raw": "明天上午九点，说错了，十点去体检。", "output": "明天上午十点去体检。"}
+{"id": "corr-0052", "categories": ["immediate_correction"], "scene": "work_chat", "raw": "这周五之前，哦不对，下周五之前把报告给我。", "output": "下周五之前把报告给我。"}
+{"id": "corr-0053", "categories": ["immediate_correction"], "scene": "shopping", "raw": "帮我买三斤，不是，五斤苹果。", "output": "帮我买五斤苹果。"}
+{"id": "corr-0054", "categories": ["immediate_correction"], "scene": "family_friends", "raw": "我们在二号门，不对不对，三号门等你。", "output": "我们在三号门等你。"}
+{"id": "corr-0055", "categories": ["immediate_correction"], "scene": "tech", "raw": "把超时时间设成三十秒，呃，六十秒吧。", "output": "把超时时间设成六十秒。"}
+{"id": "corr-0056", "categories": ["immediate_correction"], "scene": "school", "raw": "期末考试在十二月二十号，我记错了，是二十二号。", "output": "期末考试在十二月二十二号。"}
+{"id": "corr-0057", "categories": ["immediate_correction"], "scene": "work_chat", "raw": "让小李，哦不，让小张负责这个客户。", "output": "让小张负责这个客户。"}
+{"id": "corr-0058", "categories": ["immediate_correction"], "scene": "daily", "raw": "我坐地铁二号线，应该是四号线，到西单下车。", "output": "我坐地铁四号线，到西单下车。"}
+{"id": "corr-0059", "categories": ["immediate_correction"], "scene": "customer_service", "raw": "我的手机号是一三八，不对，一三九一二三四五六七八。", "output": "我的手机号是13912345678。"}
+{"id": "corr-0061", "categories": ["immediate_correction"], "scene": "email", "raw": "附件是第一季度，更正一下，第二季度的销售数据。", "output": "附件是第二季度的销售数据。"}
+{"id": "corr-0062", "categories": ["immediate_correction"], "scene": "schedule", "raw": "航班是下午两点，不，两点半起飞。", "output": "航班是下午两点半起飞。"}
+{"id": "corr-0063", "categories": ["immediate_correction"], "scene": "work_chat", "raw": "预算控制在五万以内，啊不是，八万以内。", "output": "预算控制在八万以内。"}
+{"id": "corr-0064", "categories": ["immediate_correction"], "scene": "family_friends", "raw": "生日聚会定在周六，改口一下，周日晚上。", "output": "生日聚会定在周日晚上。"}
+{"id": "corr-0065", "categories": ["immediate_correction"], "scene": "shopping", "raw": "要红色的，算了，还是黑色的吧。", "output": "要黑色的。"}
+{"id": "corr-0066", "categories": ["immediate_correction"], "scene": "schedule", "raw": "Let's meet at the cafe on Fifth, no, on Seventh Street.", "output": "Let's meet at the cafe on Seventh Street."}
+{"id": "corr-0067", "categories": ["immediate_correction"], "scene": "work_chat", "raw": "Our flight lands at gate 12, sorry, gate 21.", "output": "Our flight lands at gate 21."}
+{"id": "corr-0068", "categories": ["immediate_correction"], "scene": "tech", "raw": "Run it on port 8080, actually make that 9090.", "output": "Run it on port 9090."}
+{"id": "corr-0069", "categories": ["immediate_correction"], "scene": "family_friends", "raw": "I'll pick you up at six, wait, six thirty.", "output": "I'll pick you up at six thirty."}
+{"id": "corr-0070", "categories": ["immediate_correction"], "scene": "school", "raw": "第三章，不对，第四章的习题明天交。", "output": "第四章的习题明天交。"}
+{"id": "corr-0071", "categories": ["immediate_correction"], "scene": "customer_service", "raw": "收货人写王丽，哦写错了，是王莉，茉莉的莉。", "output": "收货人写王莉。"}
+{"id": "style-0158", "categories": ["instr_style"], "scene": "school", "raw": "Ask my advisor if we can move our meeting to Thursday, make it formal", "output": "Dear Professor, would it be possible to move our meeting to Thursday?", "instr_position": "suffix"}
+{"id": "style-0159", "categories": ["instr_style"], "scene": "email", "raw": "Tell the client the delivery will be two days late, make it polite", "output": "We're sorry, but the delivery will be two days late.", "instr_position": "suffix"}
+{"id": "style-0160", "categories": ["instr_style"], "scene": "work_chat", "raw": "Make it formal: can you send me the slides before the meeting", "output": "Could you please send me the slides before the meeting?", "instr_position": "prefix"}
+{"id": "style-0161", "categories": ["instr_style"], "scene": "customer_service", "raw": "Tell them I want a refund for the broken headphones, more polite", "output": "I would like to request a refund for the broken headphones, please.", "instr_position": "suffix"}
+{"id": "style-0162", "categories": ["instr_style"], "scene": "school", "raw": "Ask the TA if I can get an extension on the essay, formal", "output": "Would it be possible to get an extension on the essay?", "instr_position": "suffix"}
+{"id": "style-0163", "categories": ["instr_style"], "scene": "email", "raw": "Remind the landlord the heater is still broken, make it polite", "output": "Just a gentle reminder that the heater is still broken.", "instr_position": "suffix"}
+{"id": "style-0166", "categories": ["instr_style"], "scene": "work_chat", "raw": "跟领导说我明天想请一天假，正式一点", "output": "领导您好，我明天想请一天假，望批准。", "instr_position": "suffix"}
+{"id": "style-0170", "categories": ["instr_style"], "scene": "school", "raw": "问一下导师这周能不能见面聊论文，正式一点", "output": "老师您好，请问这周您方便见面聊一下论文吗？", "instr_position": "suffix"}
+{"id": "style-0172", "categories": ["instr_style"], "scene": "customer_service", "raw": "礼貌一点，这个商品支持七天无理由吗", "output": "您好，请问这个商品支持七天无理由退货吗？", "instr_position": "prefix"}
+{"id": "style-0173", "categories": ["instr_style"], "scene": "email", "raw": "跟客户说报价单下午发过去，正式一点", "output": "报价单将于今天下午发送给您。", "instr_position": "suffix"}
+{"id": "style-0174", "categories": ["instr_style"], "scene": "family_friends", "raw": "委婉一点，你上次借的书该还我了", "output": "上次借你的那本书，看完了方便还我吗？", "instr_position": "prefix"}
+{"id": "style-0176", "categories": ["instr_style"], "scene": "work_chat", "raw": "告诉同事会议纪要我已经发群里了，正式一点", "output": "会议纪要已发至群内，请查阅。", "instr_position": "suffix"}
+{"id": "style-0177", "categories": ["instr_style"], "scene": "email", "raw": "跟供应商说这批货有质量问题，要求退换，正式一点", "output": "这批货物存在质量问题，我们要求退换。", "instr_position": "suffix"}
+{"id": "style-0178", "categories": ["instr_style"], "scene": "school", "raw": "跟教务处说我选课系统登不上去，礼貌一点", "output": "您好，我的选课系统无法登录，麻烦帮忙看一下。", "instr_position": "suffix"}
+{"id": "style-0179", "categories": ["instr_style"], "scene": "work_chat", "raw": "简洁一点，就是那个，明天上午的培训取消了，大家不用去了，下午照常上班", "output": "明天上午培训取消，下午照常上班。", "instr_position": "prefix"}
+{"id": "style-0181", "categories": ["instr_style"], "scene": "customer_service", "raw": "跟买家说已经发货了，单号晚点给他，客气一点", "output": "您好，已经为您发货，单号稍后发给您。", "instr_position": "suffix"}
+{"id": "style-0182", "categories": ["instr_style"], "scene": "email", "raw": "跟HR说我接受这个offer，下个月一号入职，正式一点", "output": "我接受这份录用通知，将于下个月一号入职。", "instr_position": "suffix"}
+{"id": "style-0183", "categories": ["instr_style"], "scene": "family_friends", "raw": "跟房东说下个月房租晚几天交，委婉一点", "output": "下个月的房租可能要晚几天交，还请您谅解。", "instr_position": "suffix"}
+{"id": "neg-clean-0084", "categories": ["neg_clean"], "scene": "email", "raw": "您好，附件是修改后的合同，请您审阅。", "output": "您好，附件是修改后的合同，请您审阅。"}
+{"id": "neg-clean-0085", "categories": ["neg_clean"], "scene": "work_chat", "raw": "第一季度的销售额同比增长了百分之十二。", "output": "第一季度的销售额同比增长了百分之十二。"}
+{"id": "neg-clean-0086", "categories": ["neg_clean"], "scene": "customer_service", "raw": "非常抱歉给您带来不便，我们会尽快处理。", "output": "非常抱歉给您带来不便，我们会尽快处理。"}
+{"id": "neg-clean-0087", "categories": ["neg_clean"], "scene": "school", "raw": "请同学们下周一之前提交实验报告。", "output": "请同学们下周一之前提交实验报告。"}
+{"id": "neg-clean-0088", "categories": ["neg_clean"], "scene": "family_friends", "raw": "我到家了，你们早点休息。", "output": "我到家了，你们早点休息。"}
+{"id": "neg-clean-0091", "categories": ["neg_clean"], "scene": "tech", "raw": "新版本修复了登录页面的显示问题。", "output": "新版本修复了登录页面的显示问题。"}
+{"id": "neg-clean-0093", "categories": ["neg_clean"], "scene": "schedule", "raw": "周四下午两点在三楼会议室开项目例会。", "output": "周四下午两点在三楼会议室开项目例会。"}
+{"id": "neg-clean-0094", "categories": ["neg_clean"], "scene": "shopping", "raw": "这款洗衣机有没有现货？", "output": "这款洗衣机有没有现货？"}
+{"id": "neg-clean-0095", "categories": ["neg_clean"], "scene": "social_media", "raw": "新开的那家面馆味道不错，推荐给大家。", "output": "新开的那家面馆味道不错，推荐给大家。"}
+{"id": "neg-clean-0097", "categories": ["neg_clean"], "scene": "work_chat", "raw": "这个问题我需要和技术部门确认一下。", "output": "这个问题我需要和技术部门确认一下。"}
+{"id": "neg-clean-0099", "categories": ["neg_clean"], "scene": "email", "raw": "Thank you for your patience. We will get back to you within two business days.", "output": "Thank you for your patience. We will get back to you within two business days."}
+{"id": "neg-clean-0100", "categories": ["neg_clean"], "scene": "work_chat", "raw": "Please review the pull request when you have a moment.", "output": "Please review the pull request when you have a moment."}
+{"id": "neg-clean-0101", "categories": ["neg_clean"], "scene": "daily", "raw": "楼下的快递柜满了，我放在门卫室了。", "output": "楼下的快递柜满了，我放在门卫室了。"}
+{"id": "neg-clean-0102", "categories": ["neg_clean"], "scene": "customer_service", "raw": "您的退款已经原路退回，请注意查收。", "output": "您的退款已经原路退回，请注意查收。"}
+{"id": "neg-clean-0106", "categories": ["neg_clean"], "scene": "school", "raw": "论文的初稿我已经发到您的邮箱了。", "output": "论文的初稿我已经发到您的邮箱了。"}
+{"id": "neg-clean-0107", "categories": ["neg_clean"], "scene": "family_friends", "raw": "周末一起去爬山吧，天气预报说是晴天。", "output": "周末一起去爬山吧，天气预报说是晴天。"}
+{"id": "combo-0055", "categories": ["instr_combo", "immediate_correction"], "scene": "school", "raw": "Ask the dean's office if the form is due Monday, no, Tuesday, make it formal", "output": "Could you please confirm whether the form is due on Tuesday?", "instr_position": "suffix"}
+{"id": "combo-0056", "categories": ["instr_combo", "immediate_correction"], "scene": "work_chat", "raw": "发布会定在十号，说错了，十五号，翻译成英文", "output": "The press conference is on the 15th.", "instr_position": "suffix"}
+{"id": "combo-0057", "categories": ["instr_combo", "edit_delete"], "scene": "customer_service", "raw": "这家酒店隔音太差了，我想换个房间，第一句删了，正式一点", "output": "我希望更换一个房间。", "instr_position": "suffix"}
+{"id": "combo-0058", "categories": ["instr_combo", "immediate_correction"], "scene": "email", "raw": "跟客户说样品周一，哦周二寄出，正式一点", "output": "样品将于周二寄出。", "instr_position": "suffix"}
+{"id": "combo-0059", "categories": ["instr_combo", "edit_delete"], "scene": "family_friends", "raw": "我今晚不回来吃饭，加班加到吐，最后一句删了，翻译成英文", "output": "I won't be home for dinner tonight.", "instr_position": "suffix"}
+{"id": "combo-0060", "categories": ["instr_combo", "immediate_correction"], "scene": "school", "raw": "翻译成英文，作业截止到周五，不对，周日晚上", "output": "The homework is due Sunday night.", "instr_position": "prefix"}
+{"id": "combo-0062", "categories": ["instr_combo", "edit_delete"], "scene": "work_chat", "raw": "报告我改完了，熬了一整晚，第二句不要，正式一点", "output": "报告已修改完毕。", "instr_position": "suffix"}
+{"id": "combo-0063", "categories": ["instr_combo", "immediate_correction"], "scene": "customer_service", "raw": "Tell them I ordered size M, I mean L, make it polite", "output": "Hi, I ordered size L, could you please check?", "instr_position": "suffix"}
+{"id": "combo-0064", "categories": ["instr_combo", "edit_delete"], "scene": "email", "raw": "Let the team know the launch is Friday, this project has been a nightmare, drop the last part, make it formal", "output": "Please note that the launch is scheduled for Friday.", "instr_position": "suffix"}
+{"id": "combo-0065", "categories": ["instr_combo", "immediate_correction"], "scene": "shopping", "raw": "帮我问一下老板有没有四十码，不对，四十一码的，客气一点", "output": "老板您好，请问有四十一码的吗？", "instr_position": "suffix"}
+{"id": "combo-0066", "categories": ["instr_combo", "edit_delete"], "scene": "school", "raw": "老师我明天请假，我发烧了，难受死了，最后一句删了，正式一点", "output": "老师您好，我因发烧明天需要请假。", "instr_position": "suffix"}
+{"id": "combo-0068", "categories": ["instr_combo", "immediate_correction"], "scene": "tech", "raw": "翻译成英文，服务器每天凌晨两点，不是，三点重启", "output": "The server restarts at 3 a.m. every day.", "instr_position": "prefix"}
+{"id": "implicit-0078", "categories": ["implicit_reason"], "scene": "tech", "raw": "用Redis做缓存，哦数据要持久化，还是用MySQL吧。", "output": "用MySQL吧。"}
+{"id": "implicit-0079", "categories": ["implicit_reason"], "scene": "schedule", "raw": "周六去爬山，周六好像下雨，那就周日去。", "output": "周日去爬山。"}
+{"id": "implicit-0080", "categories": ["implicit_reason"], "scene": "shopping", "raw": "买那个白色的，白色容易脏，还是买灰色的。", "output": "买灰色的。"}
+{"id": "implicit-0081", "categories": ["implicit_reason"], "scene": "work_chat", "raw": "这个需求给小王做，小王这周请假了，那给小陈吧。", "output": "这个需求给小陈做。"}
+{"id": "implicit-0082", "categories": ["implicit_reason"], "scene": "family_friends", "raw": "晚上吃火锅，你嗓子不舒服，那就吃粥吧。", "output": "晚上吃粥吧。"}
+{"id": "implicit-0083", "categories": ["implicit_reason"], "scene": "tech", "raw": "前端用Vue，团队都熟React，那就用React。", "output": "前端用React。"}
+{"id": "implicit-0084", "categories": ["implicit_reason"], "scene": "daily", "raw": "打车去机场，早高峰太堵了，还是坐地铁吧。", "output": "坐地铁去机场吧。"}
+{"id": "implicit-0085", "categories": ["implicit_reason"], "scene": "school", "raw": "选修课报篮球，篮球满员了，那报羽毛球。", "output": "选修课报羽毛球。"}
+{"id": "implicit-0086", "categories": ["implicit_reason"], "scene": "work_chat", "raw": "Let's host it on AWS, oh the client requires Azure, so Azure then.", "output": "Let's host it on Azure."}
+{"id": "implicit-0087", "categories": ["implicit_reason"], "scene": "schedule", "raw": "We'll fly on Friday, flights are sold out, so Saturday it is.", "output": "We'll fly on Saturday."}
