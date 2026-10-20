@@ -347,6 +347,18 @@ STRINGS: dict[str, tuple[str, str]] = {
     "onboarding.try_keys": ("Press Enter to type it in, Esc to cancel.", "按 Enter 输入，Esc 取消。"),
     "onboarding.try_missing": ("You can try it as soon as the speech model has downloaded.",
                                "语音识别模型下载完成后即可试用。"),
+    "onboarding.memory_title": ("Memory (optional)", "记忆（可选）"),
+    "onboarding.memory_desc": ("VoxFlow can remember names, terms and plans from what you dictate: it then writes "
+                               "names the way you taught it, can fill in a meeting time you left out, and can "
+                               "summarize a day when you ask in Settings › Memory.",
+                               "VoxFlow 可以从你口述的内容里记住人名、专有名词和安排：之后按记住的写法纠正人名，"
+                               "能补上你漏说的会议时间，也可以在 设置 › 记忆 里按需生成每日总结。"),
+    "onboarding.memory_keep": ("Confirmed texts are kept for 7 days; say \"remember …\" to keep something forever. "
+                               "You can move anything between 7 days and forever, or delete it.",
+                               "确认发送的文字保留 7 天；说“记住……”的内容永久保留。任何一条都可以在 7 天和永久之间转移，或者删除。"),
+    "onboarding.memory_privacy": ("Everything stays on this computer while you use the local model. Off until you "
+                                  "turn it on; you can change this any time in Settings.",
+                                  "使用本地模型时，所有内容只保存在本机。打开之前不会记录任何内容，之后随时可以在设置里关闭。"),
     "onboarding.tips_title": ("You're all set", "准备好了"),
     "onboarding.tip_commands": ("Say “translate to English” or “make it more polite” and it happens.",
                                 "说“翻译成英文”“正式一点”，会直接执行。"),

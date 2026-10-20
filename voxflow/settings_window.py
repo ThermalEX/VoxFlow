@@ -479,6 +479,10 @@ class SettingsWindow(QWidget):
         """Show and manage what the overlay's memory keeps."""
         self.memory_page.set_memory(memory)
 
+    def set_memory_enabled(self, enabled: bool) -> None:
+        """Turn memory on or off from elsewhere (the tutorial), keeping this page's switch in step."""
+        self.memory_page.enabled.setChecked(enabled)
+
     def _build_shortcuts(self) -> QWidget:
         page, layout = self._page("category.shortcuts")
         card = self._section(layout, "section.global_shortcuts")

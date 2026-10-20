@@ -15,7 +15,7 @@ excludes = ["tkinter", "PySide6.QtWebEngineCore", "PySide6.QtWebEngineWidgets", 
             "PySide6.Qt3DCore", "PySide6.QtMultimedia", "PySide6.QtPdf", "PySide6.QtCharts", "PySide6.QtDataVisualization"]
 
 a = Analysis([str(root / "packaging" / "launcher.py")], pathex=[str(root)], binaries=binaries, datas=datas,
-             hiddenimports=["PySide6.QtSvg"], excludes=excludes)
+             hiddenimports=["PySide6.QtSvg", "pypinyin"], excludes=excludes)
 pyz = PYZ(a.pure)
 exe = EXE(pyz, a.scripts, [], exclude_binaries=True, name="VoxFlow", console=False,
           icon=str(build_dir / "voxflow.ico"), version=str(build_dir / "version.txt"))

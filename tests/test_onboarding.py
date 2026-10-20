@@ -79,15 +79,15 @@ def test_shows_on_first_run_only(tmp_path):
     assert not should_show_onboarding(settings)
 
 
-def test_walks_six_steps_and_marks_done(tutorial):
+def test_walks_seven_steps_and_marks_done(tutorial):
     window, settings, _settings_window, _manager = tutorial
     finished = []
     window.finished.connect(lambda: finished.append(True))
-    assert window.steps.count() == 6
+    assert window.steps.count() == 7
     assert not window.back_button.isEnabled()
-    for _ in range(5):
+    for _ in range(6):
         window.next_button.click()
-    assert window.steps.currentIndex() == 5
+    assert window.steps.currentIndex() == 6
     assert window.next_button.text() == "Get started"
     window.next_button.click()
     assert finished == [True]
@@ -168,3 +168,14 @@ def test_mic_meter_opens_the_device_at_its_own_rate():
     assert kwargs["device"] is None  # follow the Windows default
     assert kwargs.get("samplerate") is None  # WASAPI shared mode only opens at the device's own rate
     meter.stop()
+
+
+def test_the_memory_step_turns_memory_on_and_keeps_settings_in_step(tutorial):
+    window, settings, settings_window, _manager = tutorial
+    assert not window.memory_switch.isChecked()
+    assert not settings.value("memory/enabled", False, type=bool)
+    window.memory_switch.click()
+    assert settings.value("memory/enabled", False, type=bool)
+    assert settings_window.memory_page.enabled.isChecked()
+    window.memory_switch.click()
+    assert not settings.value("memory/enabled", False, type=bool)

@@ -16,7 +16,8 @@ llama.cpp (llama-server and ggml), %LOCALAPPDATA%\VoxFlow\runtime\llama.cpp\
 
 Python runtime and libraries
   Python (PSF License), PySide6 / Qt 6 (LGPL v3), sherpa-onnx and onnxruntime (Apache 2.0 / MIT),
-  NumPy (BSD), sounddevice and PortAudio (MIT), soundfile and libsndfile (BSD / LGPL).
+  NumPy (BSD), sounddevice and PortAudio (MIT), soundfile and libsndfile (BSD / LGPL),
+  pypinyin (MIT).
 
 Icons
   Google Material Symbols, Apache License 2.0 (voxflow\assets\icons\LICENSE).

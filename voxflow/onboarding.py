@@ -14,12 +14,12 @@ from .i18n import tr
 from .mic_meter import MicMeter
 from .paths import DATA_ROOT
 from .settings_theme import THEME_CHOICES, stylesheet
-from .settings_widgets import CheckBox, SegmentedControl, SettingsComboBox, ThemeSwatch
+from .settings_widgets import CheckBox, SegmentedControl, SettingsComboBox, ThemeSwatch, ToggleSwitch
 from .ui_icons import app_icon
 
 DONE_SETTING = "onboarding/done"
 PRESELECT = ["asr-sensevoice", "llama-vulkan", "rewrite-v4-q8"]
-STEPS = 6
+STEPS = 7
 
 
 def should_show_onboarding(settings: QSettings) -> bool:
@@ -118,7 +118,8 @@ class OnboardingWindow(QWidget):
 
         self.steps = QStackedWidget()
         for build in (self._step_welcome, self._step_look, self._step_microphone,
-                      lambda: self._step_downloads(downloads, has_nvidia), self._step_try, self._step_tips):
+                      lambda: self._step_downloads(downloads, has_nvidia), self._step_try, self._step_memory,
+                      self._step_tips):
             self.steps.addWidget(build())
         root.addWidget(self.steps, 1)
 
@@ -258,6 +259,23 @@ class OnboardingWindow(QWidget):
         layout.addStretch(1)
         return page
 
+    def _step_memory(self) -> QWidget:
+        page, layout = self._page("onboarding.memory_title", "onboarding.memory_desc")
+        row = QHBoxLayout()
+        row.setSpacing(12)
+        self.memory_switch = ToggleSwitch()
+        self.memory_switch.setChecked(self.settings.value("memory/enabled", False, type=bool))
+        self.memory_switch.toggled.connect(self.settings_window.set_memory_enabled)
+        self._bind(self.memory_switch.setAccessibleName, "field.memory_enable")
+        row.addWidget(self.memory_switch, 0, Qt.AlignmentFlag.AlignVCenter)
+        row.addWidget(self._label("field.memory_enable", "rowTitle", wrap=False), 0, Qt.AlignmentFlag.AlignVCenter)
+        row.addStretch(1)
+        layout.addLayout(row)
+        for key in ("onboarding.memory_keep", "onboarding.memory_privacy"):
+            layout.addWidget(self._label(key, "rowDesc"))
+        layout.addStretch(1)
+        return page
+
     def _step_tips(self) -> QWidget:
         page, layout = self._page("onboarding.tips_title", None)
         for key in ("onboarding.tip_commands", "onboarding.tip_continue", "onboarding.tip_undo",
@@ -341,7 +359,7 @@ class OnboardingWindow(QWidget):
     def apply_theme(self, theme) -> None:
         self.setStyleSheet(stylesheet(theme))
         self.dots.set_colors(theme.accent, theme.border)
-        for kind in (ThemeSwatch, CheckBox, SettingsComboBox):
+        for kind in (ThemeSwatch, CheckBox, SettingsComboBox, ToggleSwitch):
             for widget in self.findChildren(kind):
                 widget.set_theme(theme)
         self.download_panel.set_theme(theme)
