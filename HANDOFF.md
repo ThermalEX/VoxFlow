@@ -44,7 +44,11 @@ py -3.12 -m venv .venv
 | `voxflow/rewriter.py`, `voxflow/rewrite_prompts.py` | OpenAI 兼容接口客户端与 `rewrite/*` 设置；两个任务的系统提示（训练与服务共用）。 |
 | `voxflow/local_server.py` | 无窗口启动 `runtime/llama.cpp/llama-server.exe` 加载 GGUF 模型；用 Windows 作业对象保证 VoxFlow 退出或崩溃时服务一并结束。 |
 | `training/rewrite/export_gguf.py`, `training/rewrite/serve.py` | 在 WSL 训练环境中合并 LoRA 并转 GGUF（Q8/bf16，Q4 用 `runtime/llama-tools/llama-quantize.exe`。源码运行时数据目录就是仓库，软件内下载 llama.cpp 会整体替换 `runtime/llama.cpp/` 且只保留 llama-server 所需文件，所以量化等开发工具放在单独的 `runtime/llama-tools/`，取自 llama.cpp 官方完整压缩包）；`serve.py` 是 WSL 下的备用 Python 服务，软件不再使用。 |
-| `voxflow/edit_diff.py` | 原文与改写结果的按字/按词差异及动画帧 HTML。 |
+| `voxflow/edit_diff.py` | 原文与改写结果的按字/按词差异及动画帧 HTML；“记住”口令的强调色高亮帧。 |
+| `voxflow/memory.py` | 记忆服务：开关（`memory/enabled`，默认关）、“记住……”口令、人名纠正、确认时记录原文、浮层空闲时后台提取、补全用的相关记忆检索、手动每日总结。 |
+| `voxflow/memory_store.py` | SQLite 记忆库（`DATA_ROOT/memory/memory.db`）：`entries`（人名/术语/安排/事实，来源 explicit/auto/manual）、`records`（确认的原文）、`summaries`；每行 `week` 或 `forever`，可互转，`purge()` 删除 7 天前的 `week` 行。 |
+| `voxflow/memory_command.py`, `voxflow/memory_names.py`, `voxflow/memory_dates.py` | 规则部分，不用模型：识别句首“记住……”；按拼音（含多音字）纠正同音人名和术语；把“周三”“下周一”“11月3日”等说法换算成日期。 |
+| `voxflow/memory_page.py` | 设置“记忆”页：开关与隐私说明、在线模型提示、记忆表、按日期的原文与每日总结。 |
 
 `sounddevice` 的回调把音频写入 `AudioBuffer`。主窗口通过 `RecognitionScheduler` 约每 1.2 秒提交一次任务，由单独的 `ProcessPoolExecutor` 加载并运行 ASR；识别器把长录音按约 6–10 秒的安静边界分段，已完成片段缓存，临时结果可能修订。停录后请求最终结果并保留可编辑预览。若最终识别为空但已有临时草稿，`apply_transcript()` 会保留草稿供用户确认。
 
@@ -63,6 +67,8 @@ py -3.12 -m venv .venv
 **界面语言与默认开启（2026-10-13）**：`voxflow/i18n.py` 维护中英文字符串表，`tr(key)` 取当前语言；设置项 `ui/language`（system/en/zh，默认跟随系统），切换后设置窗口、浮层状态、按钮和托盘菜单即时更新（浮层状态按 key 保存，`VoxFlowWindow.show_status`）。智能编辑默认开启并随应用启动本地模型；旧版本保存的“关闭”会被 `rewriter.migrate_settings` 一次性改为开启。设置页显示本地模型状态（启动中/已就绪/缺少文件/已停止），连接测试与错误提示按类型本地化。测试固定英文界面（`VOXFLOW_LANG=en`）且默认不开启智能编辑，避免启动真实 llama-server。
 
 **设置窗口（2026-10-13 重做）**：参照 ChatGPT 设置的布局——左侧导航（常规/外观/智能编辑），右侧页面由“小节标题 + 圆角卡片 + 行（左标题说明、右控件）”组成；组件在 `voxflow/settings_widgets.py`（`ToggleSwitch`、`SettingRow`、`SettingsCard`、带勾选标记与圆角弹出列表的下拉框），配色在 `voxflow/settings_theme.py`，跟随 Windows 深浅色并随系统切换实时更新（测试可用 `VOXFLOW_THEME` 覆盖）。本地模型用下拉列表选择，由 `voxflow/model_catalog.py` 扫描 `training/rewrite/runs/*/gguf/*.gguf` 与 `runtime/models/*.gguf`，Q8 排第一并标“推荐”，末项“浏览…”；自定义接口的模型名可点“刷新”从 `/models` 拉取。
+
+**记忆（2026-10-20，分支 `feature/memory`）**：交互与隐私边界已和用户确认——默认关闭；确认的原文保存 7 天，“记住……”口令的内容永久保存，两档可互转；用于纠正人名、改写/建议时补全、记录与总结；每日总结只在设置里手动生成；在线模型也处理记忆（设置页提示内容会发出）。数据流：`window._confirm_text()` 粘贴前调用 `Memory.remember()` 写入原文（口令另写永久条目）；`SmartEditor.begin()` 识别口令、去掉口令词并播放约 0.9 s 高亮，整理结果出来后先经 `Memory.correct()` 纠正人名再进修改动画；建议返回后若有相关记忆（汉字二元组/英文词重合 ≥ 2）再请求 `RewriteClient.fill()`，结果作为“按记忆补全”建议；`Memory.poll()` 只在浮层 `idle` 且没有在途改写时逐条调用 `extract()`，模型连不上则 60 s 后重试，事件时间由 `memory_dates.resolve()` 换算日期存入 `detail.date`。三个新任务的系统提示与用户消息格式在 `rewrite_prompts.py`（与训练共用）；评测集在 `training/rewrite/memory_eval/`（不进训练，构建时用相似度检查防泄漏），训练种子在 `training/rewrite/seeds/memory.jsonl`，只进 train/valid，清理/建议测试集保持与 v4 逐字节相同。测试接缝：`VoxFlowWindow(..., memory_store=MemoryStore(...))`；conftest 把 `memory.DATA_ROOT` 指到临时目录。v4 零样本在新任务上不可用（见研究记录 §6.10），v6 在此基础上训练。未人工验证：高亮观感、真实麦克风下的口令识别、跨应用粘贴后的记录、设置页长列表在高 DPI 下的显示。
 
 ## 4. 验证与操作边界
 
