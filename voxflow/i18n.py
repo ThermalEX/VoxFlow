@@ -376,11 +376,9 @@ STRINGS: dict[str, tuple[str, str]] = {
     "model.missing_model": ("Model file not found: {path}", "找不到模型文件：{path}"),
     "model.failed": ("Stopped · {detail}", "已停止 · {detail}"),
     # Local model dropdown
-    "model.choice.q8": ("Q8 · {size} · Recommended", "Q8 · {size} · 推荐"),
-    "model.choice.q4": ("Q4 · {size} · Less GPU memory", "Q4 · {size} · 更省显存"),
-    "model.choice.bf16": ("BF16 · {size} · Full precision", "BF16 · {size} · 全精度"),
-    "model.choice.other": ("{name} · {size}", "{name} · {size}"),
-    "model.choice.archived": ("{quant} · {size} · archived {run}", "{quant} · {size} · 旧版 {run}"),
+    "model.note.recommended": ("Recommended", "推荐"),
+    "model.note.run": ("training run", "训练目录"),
+    "model.note.archived": ("archived", "旧版"),
     "model.choice.missing": ("{name} (not found)", "{name}（未找到）"),
     "model.browse": ("Browse…", "浏览…"),
     # Errors shown to the user

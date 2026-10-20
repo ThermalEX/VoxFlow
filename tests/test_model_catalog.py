@@ -10,9 +10,8 @@ def make_gguf(path: Path, size: int = 64) -> Path:
     return path
 
 
-def label(model: LocalModel) -> str:
-    key, values = describe(model)
-    return i18n.tr(key, **values)
+def label(model: LocalModel, recommended: bool = False) -> str:
+    return describe(model, recommended)
 
 
 def test_discovers_runs_and_runtime_models_recommended_first(tmp_path):
@@ -33,26 +32,48 @@ def test_sizes_read_like_a_file_manager():
     assert format_size(512_000_000) == "488 MB"
 
 
-def test_labels_explain_size_and_purpose():
-    q8 = LocalModel(Path("voxflow-rewrite-q8_0.gguf"), "q8_0", 2_076_674_496)
-    q4 = LocalModel(Path("voxflow-rewrite-q4_k_m.gguf"), "q4_k_m", 1_312_164_288)
+def test_labels_start_with_the_model_name_and_version():
+    downloaded = LocalModel(Path("runtime/models/voxflow-rewrite-v6-q8_0.gguf"), "q8_0", 2_076_674_496)
+    run = LocalModel(Path("runs/qwen3.5-2b-v6/gguf/voxflow-rewrite-q4_k_m.gguf"), "q4_k_m", 1_312_164_288,
+                     run="qwen3.5-2b-v6")
+    experiment = LocalModel(Path("runs/gemma-4-e2b-r2/gguf/voxflow-rewrite-q4_k_m.gguf"), "q4_k_m", 3_427_880_192,
+                            run="gemma-4-e2b-r2")
+    old = LocalModel(Path("archive/qwen3.5-2b-v1/gguf/voxflow-rewrite-bf16.gguf"), "bf16", 3_897_387_456,
+                     run="qwen3.5-2b-v1", archived=True)
     other = LocalModel(Path("my-model.gguf"), "other", 512_000_000)
-    assert label(q8) == "Q8 · 1.9 GB · Recommended"
+    assert label(downloaded, recommended=True) == "VoxFlow v6 · Q8 · 1.9 GB · Recommended"
+    assert label(run) == "VoxFlow v6 · Q4 · 1.2 GB · training run"
+    assert label(experiment) == "gemma-4-e2b-r2 · Q4 · 3.2 GB · training run"
+    assert label(old) == "VoxFlow v1 · BF16 · 3.6 GB · archived"
     assert label(other) == "my-model · 488 MB"
     i18n.set_language("zh")
     try:
-        assert label(q4) == "Q4 · 1.2 GB · 更省显存"
+        assert label(downloaded, recommended=True) == "VoxFlow v6 · Q8 · 1.9 GB · 推荐"
+        assert label(old) == "VoxFlow v1 · BF16 · 3.6 GB · 旧版"
     finally:
         i18n.set_language("en")
+
+
+def test_the_newest_version_comes_first_and_a_download_before_its_training_run(tmp_path):
+    runs = tmp_path / "training/rewrite/runs"
+    v6_run = make_gguf(runs / "qwen3.5-2b-v6/gguf/voxflow-rewrite-q8_0.gguf")
+    v6_q4 = make_gguf(runs / "qwen3.5-2b-v6/gguf/voxflow-rewrite-q4_k_m.gguf")
+    gemma = make_gguf(runs / "gemma-4-e2b/gguf/voxflow-rewrite-q8_0.gguf")
+    v4 = make_gguf(tmp_path / "runtime/models/voxflow-rewrite-v4-q8_0.gguf")
+    v6 = make_gguf(tmp_path / "runtime/models/voxflow-rewrite-v6-q8_0.gguf")
+    v3 = make_gguf(runs / "archive/qwen3.5-2b-v3/gguf/voxflow-rewrite-q8_0.gguf")
+    models = discover_models(tmp_path)
+    assert [model.path for model in models] == [v6, v6_run, v6_q4, v4, gemma, v3]
+    assert [model.version for model in models] == [6, 6, 6, 4, 0, 3]
 
 
 def test_archived_runs_are_listed_after_current_ones_with_their_name(tmp_path):
     make_gguf(tmp_path / "training/rewrite/runs/archive/qwen3.5-2b-v1/gguf/voxflow-rewrite-q8_0.gguf")
     current = make_gguf(tmp_path / "training/rewrite/runs/qwen3.5-2b/gguf/voxflow-rewrite-q4_k_m.gguf")
     models = discover_models(tmp_path)
-    assert models[0].path == current and models[0].run == ""
-    assert models[1].run == "qwen3.5-2b-v1"
-    assert label(models[1]) == f"Q8 · {format_size(64)} · archived qwen3.5-2b-v1"
+    assert models[0].path == current and models[0].run == "qwen3.5-2b" and not models[0].archived
+    assert models[1].run == "qwen3.5-2b-v1" and models[1].archived
+    assert label(models[1]) == f"VoxFlow v1 · Q8 · {format_size(64)} · archived"
 
 
 def test_a_missing_saved_model_is_replaced_by_the_best_one_found(tmp_path):

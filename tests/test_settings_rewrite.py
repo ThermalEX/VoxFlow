@@ -76,7 +76,7 @@ def make_gguf(path):
 def test_local_model_dropdown_lists_found_models_and_browses(tmp_path, monkeypatch):
     from voxflow import settings_window as module
 
-    gguf = tmp_path / "training/rewrite/runs/run/gguf"
+    gguf = tmp_path / "training/rewrite/runs/qwen3.5-2b-v6/gguf"
     make_gguf(gguf / "voxflow-rewrite-q8_0.gguf")
     make_gguf(gguf / "voxflow-rewrite-q4_k_m.gguf")
     outside = make_gguf(tmp_path / "elsewhere" / "custom.gguf")
@@ -84,9 +84,11 @@ def test_local_model_dropdown_lists_found_models_and_browses(tmp_path, monkeypat
     window, settings = make(tmp_path)
     box = window.rewrite_model_path
     labels = [box.itemText(i) for i in range(box.count())]
-    assert labels[0].startswith("Q8 ·") and labels[1].startswith("Q4 ·") and labels[-1] == "Browse…"
+    assert labels[0].startswith("VoxFlow v6 · Q8 ·") and "Recommended" in labels[0]
+    assert labels[1].startswith("VoxFlow v6 · Q4 ·") and "Recommended" not in labels[1]
+    assert labels[-1] == "Browse…"
     box.setCurrentIndex(1)
-    assert RewriteConfig.from_settings(settings).model_path == "training/rewrite/runs/run/gguf/voxflow-rewrite-q4_k_m.gguf"
+    assert RewriteConfig.from_settings(settings).model_path == "training/rewrite/runs/qwen3.5-2b-v6/gguf/voxflow-rewrite-q4_k_m.gguf"
     window.choose_file = lambda *_args: ""
     box.setCurrentIndex(box.count() - 1)
     assert box.currentIndex() == 1

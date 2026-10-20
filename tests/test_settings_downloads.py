@@ -93,6 +93,19 @@ def test_installing_a_model_selects_it_when_none_is_usable(data_root):
     window.close()
 
 
+def test_a_newly_downloaded_model_replaces_the_one_in_use(data_root):
+    v6 = "runtime/models/voxflow-rewrite-v6-q8_0.gguf"
+    install_models(data_root, (Q8, "rewrite-v4-q8"))
+    window, settings = make_window(data_root, rewrite=RewriteConfig(enabled=True, provider="local", model_path=Q8))
+    (data_root / v6).write_bytes(b"gguf")
+    (data_root / "installed.json").write_text(json.dumps({
+        "rewrite-v4-q8": {"group": "", "kind": "rewrite", "sha256": ["x"], "dest": [Q8]},
+        "rewrite-v6-q8": {"group": "", "kind": "rewrite", "sha256": ["y"], "dest": [v6]}}), encoding="utf-8")
+    window.downloads.item_state.emit("rewrite-v6-q8", "installed")
+    assert RewriteConfig.from_settings(settings).model_path == v6
+    window.close()
+
+
 def test_deleting_model_in_use_switches_or_disables(data_root):
     install_models(data_root, (Q8, "rewrite-v4-q8"), (Q4, "rewrite-v4-q4"))
     window, settings = make_window(data_root, rewrite=RewriteConfig(enabled=True, provider="local", model_path=Q8))

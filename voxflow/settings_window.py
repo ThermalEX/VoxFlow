@@ -21,7 +21,7 @@ from .catalog import builtin_catalog, read_installed
 from .download_panel import DownloadPanel
 from .memory_page import MemoryPage
 from .microphones import MICROPHONE_ROLE, microphone_label
-from .model_catalog import LocalModel, describe as describe_model, discover_models, quant_of
+from .model_catalog import describe as describe_model, discover_models, local_model
 from .rewriter import RewriteConfig
 from .settings_theme import THEME_CHOICES, Theme, current_theme, stylesheet, with_accent
 from .settings_widgets import (
@@ -619,17 +619,17 @@ class SettingsWindow(QWidget):
         combo = self.rewrite_model_path
         combo.blockSignals(True)
         combo.clear()
-        for model in discover_models(DATA_ROOT):
-            key, values = describe_model(model)
-            combo.addItem(tr(key, **values), _data_relative(model.path))
+        for index, model in enumerate(discover_models(DATA_ROOT)):
+            # Only the best model found (newest version, Q8) is marked as recommended.
+            recommended = index == 0 and model.quant == "q8_0" and model.version > 0
+            combo.addItem(describe_model(model, recommended), _data_relative(model.path))
             combo.setItemData(combo.count() - 1, str(model.path), Qt.ItemDataRole.ToolTipRole)
         index = next((i for i in range(combo.count()) if _same_path(str(combo.itemData(i)), selected)), -1)
         if index < 0 and selected:
             path = Path(selected).expanduser()
             path = path if path.is_absolute() else DATA_ROOT / path
             if path.is_file():
-                key, values = describe_model(LocalModel(path, quant_of(path), path.stat().st_size))
-                combo.addItem(tr(key, **values), selected)
+                combo.addItem(describe_model(local_model(DATA_ROOT, path)), selected)
             else:
                 combo.addItem(tr("model.choice.missing", name=path.name), selected)
             index = combo.count() - 1
@@ -760,9 +760,8 @@ class SettingsWindow(QWidget):
             return
         kind, dests = self._installed_record(item_id)
         current = self._selected_model_path()
-        usable = bool(current) and (DATA_ROOT / current if not Path(current).is_absolute() else Path(current)).is_file()
-        if kind == "rewrite" and dests and not usable:
-            current = dests[0]
+        if kind == "rewrite" and dests:
+            current = dests[0]  # the user just downloaded this model in order to use it
         self._populate_local_models(current)
         if kind != "asr":
             self._save_rewrite()
