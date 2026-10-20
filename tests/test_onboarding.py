@@ -129,7 +129,7 @@ def test_download_step_preselects_but_does_not_start(tutorial):
     while not panel.rows and time.monotonic() < deadline:
         QApplication.processEvents()
         time.sleep(0.01)
-    assert panel.selected_ids() == ["asr-sensevoice", "llama-vulkan", "rewrite-v4-q8"]
+    assert panel.selected_ids() == ["asr-sensevoice", "llama-vulkan", "rewrite-v6-q8"]
     assert manager.started == []
 
 

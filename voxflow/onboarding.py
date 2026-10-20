@@ -18,7 +18,7 @@ from .settings_widgets import CheckBox, SegmentedControl, SettingsComboBox, Them
 from .ui_icons import app_icon
 
 DONE_SETTING = "onboarding/done"
-PRESELECT = ["asr-sensevoice", "llama-vulkan", "rewrite-v4-q8"]
+PRESELECT = ["asr-sensevoice", "llama-vulkan", "rewrite-v6-q8"]
 STEPS = 7
 
 

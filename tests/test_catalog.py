@@ -28,10 +28,12 @@ def test_builtin_catalog_parses_and_has_required_speech_model():
     items = builtin_catalog()
     speech = item_by_id(items, "asr-sensevoice")
     assert speech.kind == "asr" and speech.required
-    assert {item.id for item in items} >= {"asr-sensevoice", "llama-vulkan", "llama-cuda", "rewrite-v4-q8", "rewrite-v4-q4"}
+    assert {item.id for item in items} >= {"asr-sensevoice", "llama-vulkan", "llama-cuda", "rewrite-v6-q8", "rewrite-v6-q4",
+                                        "rewrite-v4-q8", "rewrite-v4-q4"}
     assert item_by_id(items, "llama-cuda").needs_nvidia
     assert item_by_id(items, "llama-vulkan").group == item_by_id(items, "llama-cuda").group == "llama"
-    assert item_by_id(items, "rewrite-v4-q8").recommended
+    assert item_by_id(items, "rewrite-v6-q8").recommended and not item_by_id(items, "rewrite-v4-q8").recommended
+    assert item_by_id(items, "rewrite-v6-q8").files[0].revision == "v6"
     assert set(speech.title) == {"en", "zh"}
 
 

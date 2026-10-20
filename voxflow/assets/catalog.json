@@ -104,12 +104,58 @@
       ]
     },
     {
-      "id": "rewrite-v4-q8",
+      "id": "rewrite-v6-q8",
       "kind": "rewrite",
       "recommended": true,
       "title": {
-        "en": "Smart editing model v4 · Q8",
-        "zh": "智能编辑模型 v4 · Q8"
+        "en": "Smart editing model v6 · Q8",
+        "zh": "智能编辑模型 v6 · Q8"
+      },
+      "desc": {
+        "en": "Smart editing and memory · needs about 2.5 GB of graphics memory",
+        "zh": "智能编辑与记忆 · 约需 2.5 GB 显存"
+      },
+      "check": "runtime/models/voxflow-rewrite-v6-q8_0.gguf",
+      "files": [
+        {
+          "repo": "ThermalEX/voxflow-rewrite",
+          "revision": "v6",
+          "path": "voxflow-rewrite-q8_0.gguf",
+          "size": 2076674496,
+          "sha256": "7470f6aaea0dafefb6cff626686842d9de5f6a10c7666a2a43b05f6824ef0587",
+          "dest": "runtime/models/voxflow-rewrite-v6-q8_0.gguf"
+        }
+      ]
+    },
+    {
+      "id": "rewrite-v6-q4",
+      "kind": "rewrite",
+      "title": {
+        "en": "Smart editing model v6 · Q4",
+        "zh": "智能编辑模型 v6 · Q4"
+      },
+      "desc": {
+        "en": "Less graphics memory · slightly lower quality",
+        "zh": "更省显存 · 质量略低"
+      },
+      "check": "runtime/models/voxflow-rewrite-v6-q4_k_m.gguf",
+      "files": [
+        {
+          "repo": "ThermalEX/voxflow-rewrite",
+          "revision": "v6",
+          "path": "voxflow-rewrite-q4_k_m.gguf",
+          "size": 1312164288,
+          "sha256": "cf9af334b88247ac8af045dc663eb51be970bf72bdf99aeb729519f6112ba2b6",
+          "dest": "runtime/models/voxflow-rewrite-v6-q4_k_m.gguf"
+        }
+      ]
+    },
+    {
+      "id": "rewrite-v4-q8",
+      "kind": "rewrite",
+      "title": {
+        "en": "Smart editing model v4 (previous) · Q8",
+        "zh": "智能编辑模型 v4（上一版） · Q8"
       },
       "desc": {
         "en": "Needs about 2.5 GB of graphics memory",
@@ -131,8 +177,8 @@
       "id": "rewrite-v4-q4",
       "kind": "rewrite",
       "title": {
-        "en": "Smart editing model v4 · Q4",
-        "zh": "智能编辑模型 v4 · Q4"
+        "en": "Smart editing model v4 (previous) · Q4",
+        "zh": "智能编辑模型 v4（上一版） · Q4"
       },
       "desc": {
         "en": "Less graphics memory · slightly lower quality",

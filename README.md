@@ -82,6 +82,8 @@ winget install JRSoftware.InnoSetup --scope user      # 只需一次
 
 使用 [SenseVoiceSmall](https://github.com/QwenAudio/SenseVoice) 的 [sherpa-onnx INT8 转换版本](https://github.com/k2-fsa/sherpa-onnx/releases/tag/asr-models)，本地 CPU 推理；模型约 240 MB，首次单独下载，文件不会进入 Git。该模型是离线整段识别；窗口将长录音按约 6–10 秒的安静处分段，缓存已完成片段，只反复识别当前片段来更新临时草稿，并非模型原生流式输出。中英混说质量尚需真实语料评测。模型权重遵循其[模型卡中的许可条款](https://huggingface.co/FunAudioLLM/SenseVoiceSmall)。
 
+智能编辑与记忆使用 VoxFlow 改写模型 v6（基于 Qwen3.5-2B 微调，[Hugging Face](https://huggingface.co/ThermalEX/voxflow-rewrite)），下载列表默认推荐 v6 Q8，v4 仍可下载。下载完成后会自动切换到新模型；设置里的模型列表按“名称 版本 · 量化 · 大小”显示，最新版本排在最前并标“推荐”。
+
 ## 已知边界
 
 - 需要可用麦克风及录音权限；模型文件下载完成后识别可离线运行。
