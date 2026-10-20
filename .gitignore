@@ -1,5 +1,7 @@
 .venv/
 models/
+# Memory data when running from source (the app keeps it in %LOCALAPPDATA%\VoxFlow)
+memory/
 .pytest_cache/
 __pycache__/
 *.pyc

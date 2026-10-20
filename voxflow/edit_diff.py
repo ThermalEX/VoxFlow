@@ -55,6 +55,14 @@ def frame_html(old: str, new: str, progress: float, text_rgb, removed_rgb, added
     return f'<div style="white-space: pre-wrap;">{body}</div>'
 
 
+def highlight_html(text: str, progress: float, text_rgb, accent_rgb) -> str:
+    """One frame of the "remembered" pulse: the text glows in the accent color and fades back."""
+    progress = min(1.0, max(0.0, progress))
+    weight = 1 - abs(2 * progress - 1)  # 0 → 1 → 0
+    rgb = tuple(round(base + (accent - base) * weight) for base, accent in zip(text_rgb, accent_rgb))
+    return f'<div style="white-space: pre-wrap;">{_span(text, rgb, 1.0)}</div>'
+
+
 def same_text(first: str, second: str) -> bool:
     def key(text: str) -> str:
         text = unicodedata.normalize("NFKC", text).casefold()

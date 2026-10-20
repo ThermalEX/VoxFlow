@@ -31,6 +31,7 @@ from .hotkeys import ACTIONS, HOTKEY_IDS, Win32Hotkeys, parse, saved as saved_ho
 from .i18n import resolve, set_language, tr
 from .appearance import DEFAULT_BACKGROUND, DEFAULT_FONT, DEFAULT_TEXT_SIZE, tint
 from .input_target import WindowsPasteTarget
+from .memory import Memory
 from .overlay_widgets import CircleIconButton, GlowCapsule
 from .particles import ParticleField
 from .recognizer import initialize_worker, transcribe_in_worker, worker_ready
@@ -53,7 +54,8 @@ class VoxFlowWindow(QWidget):
 
     def __init__(self, model_dir: str | Path, start_worker: bool = True,
                  settings: QSettings | None = None, text_output: WindowsPasteTarget | None = None,
-                 rewrite_client=None, local_server_factory=None, hotkey_api=None, downloads=None) -> None:
+                 rewrite_client=None, local_server_factory=None, hotkey_api=None, downloads=None,
+                 memory_store=None) -> None:
         super().__init__()
         self.model_dir = Path(model_dir)
         self.settings = settings if settings is not None else QSettings("VoxFlow", "VoxFlow")
@@ -113,6 +115,7 @@ class VoxFlowWindow(QWidget):
         self.settings_window.text_size_changed.connect(lambda _size: self._apply_transcript_font())
         self.settings_window.background_color_changed.connect(self._set_background_color)
         self.settings_window.capsule_color_changed.connect(self.capsule.set_accent_color)
+        self.memory = Memory(self.settings, store=memory_store, parent=self)
         self.smart = SmartEditor(self, client=rewrite_client, server_factory=local_server_factory)
         self.edit_bar_slot.addWidget(self.smart.bar)
         self.settings_window.rewrite_changed.connect(self.smart.reload)
@@ -1002,7 +1005,9 @@ class VoxFlowWindow(QWidget):
         text = self.smart.current_text()
         if not text.strip():
             return
+        remember_request = self.smart.remember_request
         self.smart.reset()  # confirming ends the editing session; late rewrites must not replace it
+        self.memory.remember(text, explicit=remember_request)
         if self.text_output.paste(text):
             self.hide_overlay()
         else:
@@ -1022,4 +1027,5 @@ class VoxFlowWindow(QWidget):
         if self.executor is not None:
             self.executor.shutdown(wait=False, cancel_futures=True)
         self.smart.shutdown()
+        self.memory.close()
         super().closeEvent(event)

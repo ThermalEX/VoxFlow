@@ -35,3 +35,11 @@ def smart_editing_off_by_default(monkeypatch):
 
     monkeypatch.setattr(rewriter, "DEFAULT_ENABLED", False)
     i18n.set_language("en")
+
+
+@pytest.fixture(autouse=True)
+def memory_in_temp_dir(monkeypatch, tmp_path):
+    """Memory never opens the database of a developer running from source."""
+    from voxflow import memory
+
+    monkeypatch.setattr(memory, "DATA_ROOT", tmp_path / "data")

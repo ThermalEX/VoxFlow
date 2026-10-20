@@ -1,13 +1,19 @@
-"""Polish final transcripts with the rewrite model: one edit animation, undo with hover preview, suggestions."""
+"""Polish final transcripts with the rewrite model: one edit animation, undo with hover preview, suggestions.
+
+With memory on, a "remember …" request loses its request words and pulses once in the theme color, and names
+the user taught VoxFlow are written the remembered way.
+"""
 
 import html
 from concurrent.futures import Future, ThreadPoolExecutor
 from pathlib import Path
 
 from PySide6.QtCore import QEasingCurve, QObject, QTimer, QVariantAnimation
+from PySide6.QtGui import QColor
 from PySide6.QtWidgets import QHBoxLayout, QWidget
 
-from .edit_diff import frame_html, same_text
+from .color_themes import saved_color_theme
+from .edit_diff import frame_html, highlight_html, same_text
 from .i18n import describe_error, tr
 from .local_server import LocalRewriteServer
 from .overlay_widgets import PillButton
@@ -15,6 +21,7 @@ from .paths import DATA_ROOT
 from .rewriter import LOCAL_ENDPOINT, RewriteClient, RewriteConfig, RewriteError
 
 EDIT_ANIMATION_MS = 800
+REMEMBER_ANIMATION_MS = 900
 # Suggestions are requested only after the polished text has been on screen a moment, so a quick
 # confirm never leaves a slow suggestion request queued ahead of the next sentence.
 SUGGEST_DELAY_MS = 1200
@@ -64,6 +71,8 @@ class SmartEditor(QObject):
         self._hover_text: str | None = None
         self._programmatic = False
         self._suggestions: list[dict] = []
+        self.remember_request = False  # this dictation asked VoxFlow to remember it
+        self._pending_clean: str | None = None  # a rewrite that arrived while the remember pulse was playing
 
         self.animation = QVariantAnimation(self)
         self.animation.setDuration(EDIT_ANIMATION_MS)
@@ -72,6 +81,13 @@ class SmartEditor(QObject):
         self.animation.setEasingCurve(QEasingCurve.Type.InOutCubic)
         self.animation.valueChanged.connect(self._render_frame)
         self.animation.finished.connect(self._finish_animation)
+        self.highlight = QVariantAnimation(self)
+        self.highlight.setDuration(REMEMBER_ANIMATION_MS)
+        self.highlight.setStartValue(0.0)
+        self.highlight.setEndValue(1.0)
+        self.highlight.valueChanged.connect(self._render_highlight)
+        self.highlight.finished.connect(self._finish_highlight)
+        self._highlight_rgb = (255, 255, 255)
         self.suggest_delay_ms = SUGGEST_DELAY_MS
         self._suggest_timer = QTimer(self)
         self._suggest_timer.setSingleShot(True)
@@ -191,9 +207,18 @@ class SmartEditor(QObject):
     def begin(self, text: str, session: int) -> None:
         self.reset()
         self.session = session
+        memory = getattr(self.window, "memory", None)
+        request = memory.strip_command(text) if memory is not None else None
+        self.remember_request = request is not None
+        if request is not None:
+            text = request
+            self._set_plain(text)
         self.original_text = self.edited_text = text
         self._sync_bar()
+        if self.remember_request:
+            self._start_highlight()
         if not self.active:
+            self._apply_local_fixes()
             return
         if self.ready():
             self._submit("clean", text)
@@ -207,6 +232,13 @@ class SmartEditor(QObject):
         if self.future is not None and self.future.cancel():
             self.future = None
         self._suggest_timer.stop()
+        if self.highlight.state() == QVariantAnimation.State.Running:
+            self.highlight.stop()
+            if self.window.mode == "result":
+                self._set_plain(self.original_text)
+                self.transcript.setReadOnly(False)
+        self.remember_request = False
+        self._pending_clean = None
         if self.animation.state() == QVariantAnimation.State.Running:
             self.animation.stop()
             if self.window.mode == "result":
@@ -260,13 +292,27 @@ class SmartEditor(QObject):
         except Exception as exc:  # any backend failure keeps the original text
             if kind == "clean":
                 self._set_status("status.smart_failed", tooltip=str(exc), reason=describe_error(exc))
+                self._apply_local_fixes()
             return
         if kind == "clean":
             self._apply_clean(result)
         else:
             self._show_suggestions(result)
 
+    def _apply_local_fixes(self) -> None:
+        """Without a rewrite, still write remembered names the remembered way."""
+        memory = getattr(self.window, "memory", None)
+        fixed = memory.correct(self.original_text) if memory is not None else self.original_text
+        if fixed != self.original_text:
+            self._apply_clean(fixed)
+
     def _apply_clean(self, cleaned: str) -> None:
+        memory = getattr(self.window, "memory", None)
+        if memory is not None:
+            cleaned = memory.correct(cleaned)
+        if self.highlight.state() == QVariantAnimation.State.Running:
+            self._pending_clean = cleaned
+            return
         if self.transcript.toPlainText() != self.original_text:
             return
         if "".join(cleaned.split()) == "".join(self.original_text.split()):
@@ -289,6 +335,27 @@ class SmartEditor(QObject):
         self.window._expand_for_result()
         self._set_status("status.polished")
         self._suggest_timer.start(self.suggest_delay_ms)
+
+    # Remember pulse ----------------------------------------------------------------------------
+
+    def _start_highlight(self) -> None:
+        accent = QColor(saved_color_theme(self.window.settings).accent("dark")).lighter(135)
+        self._highlight_rgb = (accent.red(), accent.green(), accent.blue())
+        self._set_status("status.will_remember")
+        self.transcript.setReadOnly(True)
+        self.highlight.start()
+
+    def _render_highlight(self, value) -> None:
+        if self.highlight.state() == QVariantAnimation.State.Running:
+            self._set_html(highlight_html(self.original_text, float(value), TEXT_RGB, self._highlight_rgb))
+
+    def _finish_highlight(self) -> None:
+        self._set_plain(self.original_text)
+        self.transcript.setReadOnly(False)
+        self._sync_bar()
+        pending, self._pending_clean = self._pending_clean, None
+        if pending is not None and self._still_current():
+            self._apply_clean(pending)
 
     def _request_suggestions(self) -> None:
         if self.active and self._still_current():
@@ -355,8 +422,8 @@ class SmartEditor(QObject):
     # Helpers ----------------------------------------------------------------------------------
 
     def _sync_bar(self) -> None:
-        show_undo = (self.session is not None and not self._user_edited
-                     and self.animation.state() != QVariantAnimation.State.Running
+        animating = QVariantAnimation.State.Running in (self.animation.state(), self.highlight.state())
+        show_undo = (self.session is not None and not self._user_edited and not animating
                      and not same_text(self.edited_text, self.original_text))
         self.undo_button.setVisible(show_undo)
         for index, button in enumerate(self.suggestion_buttons):
@@ -366,8 +433,7 @@ class SmartEditor(QObject):
                 button.show()
             else:
                 button.hide()
-        show_continue = (self.session is not None and self.window.mode == "result"
-                         and self.animation.state() != QVariantAnimation.State.Running)
+        show_continue = self.session is not None and self.window.mode == "result" and not animating
         self.continue_button.setVisible(show_continue)
         visible = show_continue or show_undo or any(not button.isHidden() for button in self.suggestion_buttons)
         if visible != (not self.bar.isHidden()):

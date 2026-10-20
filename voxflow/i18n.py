@@ -43,6 +43,7 @@ STRINGS: dict[str, tuple[str, str]] = {
     "status.local_failed": ("Local model unavailable · kept the original", "本地模型不可用 · 已保留原文"),
     "status.suggestion_applied": ("Suggestion applied · Undo edits returns to the original",
                                   "已采用建议 · “撤回修改”可回到原文"),
+    "status.will_remember": ("Will remember this · saved when you confirm", "将记住这段内容 · 确认后保存"),
     # Overlay buttons and tooltips
     "button.continue": ("Continue", "继续说"),
     "button.undo_edits": ("Undo edits", "撤回修改"),
