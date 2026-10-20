@@ -65,3 +65,14 @@ def test_highlight_pulses_from_text_color_to_accent_and_back():
     assert "rgba(100,150,250" in highlight_html("记住", 0.5, text, accent)
     assert "rgba(240,240,240" in highlight_html("记住", 1.0, text, accent)
     assert "&lt;b&gt;" in highlight_html("<b>", 0.5, text, accent)
+
+
+def test_events_are_described_with_the_words_said_and_the_date_they_mean():
+    from voxflow.memory import describe_entry, describe_when
+    from voxflow.memory_store import Entry
+
+    assert describe_when({"time": "周三下午三点", "date": "2026-10-21"}) == "周三下午三点，10月21日周三"
+    assert describe_when({"date": "2026-10-21"}) == "10月21日周三"
+    assert describe_when({}) == ""
+    entry = Entry(1, "event", "评审会", "auto", "week", 0.0, 0.0, {"time": "周三下午三点", "date": "2026-10-21"})
+    assert describe_entry(entry) == "评审会（周三下午三点，10月21日周三）"

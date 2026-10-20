@@ -13,6 +13,7 @@ from pathlib import Path
 from PySide6.QtCore import QObject, QSettings, QTimer, Signal
 
 from .i18n import describe_error
+from .memory_dates import describe_date, resolve
 from .memory_command import strip_command
 from .memory_names import correct_names
 from .memory_store import FOREVER, WEEK, Entry, MemoryStore, Record, day_of
@@ -40,9 +41,18 @@ def _keys(text: str) -> set[str]:
     return keys
 
 
+def describe_when(detail: dict) -> str:
+    """When an event happens: the words that were said, with the date they point to."""
+    when = detail.get("time", "")
+    if detail.get("date"):
+        day = describe_date(date.fromisoformat(detail["date"]))
+        when = f"{when}，{day}" if when else day
+    return when
+
+
 def describe_entry(entry: Entry) -> str:
-    when = entry.detail.get("time")
-    return f"{entry.content}（{when}）" if when and when not in entry.content else entry.content
+    when = describe_when(entry.detail)
+    return f"{entry.content}（{when}）" if when else entry.content
 
 
 class Memory(QObject):
@@ -179,8 +189,14 @@ class Memory(QObject):
         if store is None or store.record(record.id) is None:
             return
         keep = FOREVER if record.explicit else WEEK
+        said_on = date.fromtimestamp(record.created_at)
         for item in items:
-            detail = {"time": item["time"]} if item.get("time") else None
+            detail = None
+            if item.get("time"):
+                detail = {"time": item["time"]}
+                day = resolve(item["time"], said_on)
+                if day is not None:
+                    detail["date"] = day.isoformat()
             store.add_entry(item["content"], kind=item["kind"], source="auto", keep=keep, detail=detail)
         store.mark_extracted(record.id)
         self.changed.emit()

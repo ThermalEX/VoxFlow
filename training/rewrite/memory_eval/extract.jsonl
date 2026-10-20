@@ -1,0 +1,36 @@
+{"id": "ext-001", "today": "2026-10-20", "text": "周三下午三点开评审会，记得带电脑。", "expected": [{"kind": "event", "content": "评审会", "time": ["周三下午三点", "10月21日"]}]}
+{"id": "ext-002", "today": "2026-10-20", "text": "王书涵明天上午十点来面试，你接待一下。", "expected": [{"kind": "person", "content": "王书涵"}, {"kind": "event", "content": "王书涵面试", "time": ["明天上午十点", "10月21日"]}]}
+{"id": "ext-003", "today": "2026-10-20", "text": "北极星项目下周一上线，大家把测试做完。", "expected": [{"kind": "term", "content": "北极星项目"}, {"kind": "event", "content": "北极星项目上线", "time": ["下周一", "10月26日"]}]}
+{"id": "ext-004", "today": "2026-10-20", "text": "好的，收到，谢谢！", "expected": []}
+{"id": "ext-005", "today": "2026-10-20", "text": "哈哈今天天气真好。", "expected": []}
+{"id": "ext-006", "today": "2026-10-20", "text": "我对芒果过敏，聚餐别点芒果。", "expected": [{"kind": "fact", "content": "对芒果过敏"}]}
+{"id": "ext-007", "today": "2026-10-20", "text": "周五晚上七点和欧阳小雨在海底捞吃饭。", "expected": [{"kind": "person", "content": "欧阳小雨"}, {"kind": "event", "content": "和欧阳小雨吃饭", "time": ["周五晚上七点", "10月23日"]}]}
+{"id": "ext-008", "today": "2026-10-20", "text": "客户是星河科技，对接人叫李铭。", "expected": [{"kind": "term", "content": "星河科技"}, {"kind": "person", "content": "李铭"}]}
+{"id": "ext-009", "today": "2026-10-20", "text": "房租每个月十五号交。", "expected": [{"kind": "fact", "content": "房租每月十五号交"}]}
+{"id": "ext-010", "today": "2026-10-20", "text": "我先去吃个饭，一会儿回来。", "expected": []}
+{"id": "ext-011", "today": "2026-10-20", "text": "10月28日之前把年度报告交给财务部。", "expected": [{"kind": "event", "content": "交年度报告", "time": ["10月28日"]}]}
+{"id": "ext-012", "today": "2026-10-20", "text": "下周三的周会取消了。", "expected": [{"kind": "event", "content": "周会取消", "time": ["下周三", "10月28日"]}]}
+{"id": "ext-013", "today": "2026-10-20", "text": "新来的实习生叫陈子墨，在设计组。", "expected": [{"kind": "person", "content": "陈子墨"}]}
+{"id": "ext-014", "today": "2026-10-20", "text": "我们用的数据库是PostgreSQL，别用MySQL。", "expected": [{"kind": "term", "content": "PostgreSQL"}]}
+{"id": "ext-015", "today": "2026-10-20", "text": "明天早上八点的高铁去上海，G102次。", "expected": [{"kind": "event", "content": "高铁去上海", "time": ["明天早上八点", "10月21日"]}, {"kind": "term", "content": "G102"}]}
+{"id": "ext-016", "today": "2026-10-20", "text": "太好了，终于下班了！", "expected": []}
+{"id": "ext-017", "today": "2026-10-20", "text": "我家的WiFi密码贴在冰箱上。", "expected": [{"kind": "fact", "content": "WiFi密码贴在冰箱上"}]}
+{"id": "ext-018", "today": "2026-10-20", "text": "张总说季度目标改成两百万。", "expected": [{"kind": "person", "content": "张总"}, {"kind": "fact", "content": "季度目标改成两百万"}]}
+{"id": "ext-019", "today": "2026-10-20", "text": "今天下午四点给牙医打电话改预约。", "expected": [{"kind": "event", "content": "给牙医打电话改预约", "time": ["今天下午四点", "10月20日"]}]}
+{"id": "ext-020", "today": "2026-10-20", "text": "嗯嗯，好的，没问题。", "expected": []}
+{"id": "ext-021", "today": "2026-10-20", "text": "Meeting with Sarah Chen on Thursday at 2pm about the Q4 budget.", "expected": [{"kind": "person", "content": "Sarah Chen"}, {"kind": "event", "content": "Meeting with Sarah Chen", "time": ["Thursday at 2pm", "10月22日"]}]}
+{"id": "ext-022", "today": "2026-10-20", "text": "Our staging server is called Atlas.", "expected": [{"kind": "term", "content": "Atlas"}]}
+{"id": "ext-023", "today": "2026-10-20", "text": "Thanks, see you tomorrow!", "expected": []}
+{"id": "ext-024", "today": "2026-10-20", "text": "The deadline for the grant application is November 3rd.", "expected": [{"kind": "event", "content": "Grant application deadline", "time": ["November 3rd", "11月3日"]}]}
+{"id": "ext-025", "today": "2026-10-20", "text": "I prefer meetings in the morning.", "expected": [{"kind": "fact", "content": "Prefers morning meetings"}]}
+{"id": "ext-026", "today": "2026-10-20", "text": "每周一早上九点开部门例会。", "expected": [{"kind": "event", "content": "部门例会", "time": ["每周一早上九点"]}]}
+{"id": "ext-027", "today": "2026-10-20", "text": "妈妈的生日是腊月初八。", "expected": [{"kind": "fact", "content": "妈妈的生日是腊月初八"}]}
+{"id": "ext-028", "today": "2026-10-20", "text": "把这个bug转给前端的赵一鸣。", "expected": [{"kind": "person", "content": "赵一鸣"}]}
+{"id": "ext-029", "today": "2026-10-20", "text": "今天中午吃什么好呢？", "expected": []}
+{"id": "ext-030", "today": "2026-10-20", "text": "下个月三号去杭州出差，住三天。", "expected": [{"kind": "event", "content": "去杭州出差", "time": ["下个月三号", "11月3日"]}]}
+{"id": "ext-031", "today": "2026-10-20", "text": "我们的App叫VoxFlow，别写成Voice Flow。", "expected": [{"kind": "term", "content": "VoxFlow"}]}
+{"id": "ext-032", "today": "2026-10-20", "text": "后天下午两点在三楼会议室面试候选人。", "expected": [{"kind": "event", "content": "面试候选人", "time": ["后天下午两点", "10月22日"]}]}
+{"id": "ext-033", "today": "2026-10-20", "text": "记得给小王回电话。", "expected": [{"kind": "person", "content": "小王"}]}
+{"id": "ext-034", "today": "2026-10-20", "text": "这周末不加班，好好休息。", "expected": []}
+{"id": "ext-035", "today": "2026-10-20", "text": "项目经理换成了孙佳怡。", "expected": [{"kind": "person", "content": "孙佳怡"}]}
+{"id": "ext-036", "today": "2026-10-20", "text": "公司地址是科技园南路88号。", "expected": [{"kind": "fact", "content": "公司地址是科技园南路88号"}]}

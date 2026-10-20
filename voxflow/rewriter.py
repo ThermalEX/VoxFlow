@@ -153,18 +153,8 @@ class RewriteClient:
 
     def extract(self, text: str, today: date) -> list[dict]:
         """Things worth remembering in a confirmed text, as {"kind", "content", "time"?} items."""
-        content = self._chat(MEMORY_EXTRACT_SYSTEM_PROMPT, memory_extract_message(text, today), MEMORY_TIMEOUT,
-                             EXTRACT_ANSWER_TOKENS)
-        items = []
-        for item in _json_list(content):
-            if not isinstance(item, dict) or not isinstance(item.get("content"), str) or not item["content"].strip():
-                continue
-            kind = item.get("kind") if item.get("kind") in MEMORY_KINDS else "fact"
-            entry = {"kind": kind, "content": item["content"].strip()}
-            if kind == "event" and isinstance(item.get("time"), str) and item["time"].strip():
-                entry["time"] = item["time"].strip()
-            items.append(entry)
-        return items
+        return parse_memory_items(self._chat(MEMORY_EXTRACT_SYSTEM_PROMPT, memory_extract_message(text, today),
+                                             MEMORY_TIMEOUT, EXTRACT_ANSWER_TOKENS))
 
     def fill(self, text: str, memories: list[str]) -> str:
         """The text with details it leaves out filled in from what the user asked VoxFlow to remember."""
@@ -197,3 +187,17 @@ def _json_list(content: str) -> list:
     except ValueError:
         return []
     return items if isinstance(items, list) else []
+
+
+def parse_memory_items(content: str) -> list[dict]:
+    """Well-formed items from an extraction answer; unknown kinds become facts, only events keep a time."""
+    items = []
+    for item in _json_list(content):
+        if not isinstance(item, dict) or not isinstance(item.get("content"), str) or not item["content"].strip():
+            continue
+        kind = item.get("kind") if item.get("kind") in MEMORY_KINDS else "fact"
+        entry = {"kind": kind, "content": item["content"].strip()}
+        if kind == "event" and isinstance(item.get("time"), str) and item["time"].strip():
+            entry["time"] = item["time"].strip()
+        items.append(entry)
+    return items

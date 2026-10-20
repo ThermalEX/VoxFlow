@@ -1,0 +1,20 @@
+{"id": "fill-001", "memories": ["评审会（10月21日周三下午三点）"], "text": "提醒大家参加评审会。", "expected": "提醒大家参加10月21日周三下午三点的评审会。"}
+{"id": "fill-002", "memories": ["部门例会（每周一早上九点）"], "text": "别忘了明天的部门例会。", "expected": "别忘了明天早上九点的部门例会。"}
+{"id": "fill-003", "memories": ["和欧阳小雨吃饭（周五晚上七点）", "欧阳小雨"], "text": "跟小雨确认一下吃饭的时间。", "expected": "跟小雨确认一下周五晚上七点吃饭的时间。"}
+{"id": "fill-004", "memories": ["公司地址是科技园南路88号"], "text": "快递寄到公司就行。", "expected": "快递寄到公司（科技园南路88号）就行。"}
+{"id": "fill-005", "memories": ["高铁去上海（10月21日早上八点）", "G102"], "text": "明天坐高铁去上海。", "expected": "明天早上八点坐G102高铁去上海。"}
+{"id": "fill-006", "memories": ["交年度报告（10月28日之前）"], "text": "年度报告记得交给财务部。", "expected": "年度报告记得在10月28日之前交给财务部。"}
+{"id": "fill-007", "memories": ["面试候选人（10月22日下午两点，三楼会议室）"], "text": "通知候选人来面试。", "expected": "通知候选人10月22日下午两点到三楼会议室面试。"}
+{"id": "fill-008", "memories": ["去杭州出差（11月3日，住三天）"], "text": "帮我订去杭州的酒店。", "expected": "帮我订11月3日去杭州的酒店，住三天。"}
+{"id": "fill-009", "memories": ["北极星项目上线（下周一）"], "text": "北极星项目上线前要做完测试。", "expected": "北极星项目下周一上线前要做完测试。"}
+{"id": "fill-010", "memories": ["Meeting with Sarah Chen (Thursday at 2pm)"], "text": "Remind me about the meeting with Sarah.", "expected": "Remind me about the meeting with Sarah Chen on Thursday at 2pm."}
+{"id": "fill-011", "memories": ["Grant application deadline (November 3rd)"], "text": "Finish the grant application before the deadline.", "expected": "Finish the grant application before the deadline on November 3rd."}
+{"id": "fill-012", "memories": ["给牙医打电话改预约（今天下午四点）"], "text": "记得给牙医打电话。", "expected": "记得今天下午四点给牙医打电话。"}
+{"id": "fill-013", "memories": ["评审会（10月21日周三下午三点）"], "text": "明天交房租。", "expected": "明天交房租。"}
+{"id": "fill-014", "memories": ["部门例会（每周一早上九点）"], "text": "部门例会改到十点了。", "expected": "部门例会改到十点了。"}
+{"id": "fill-015", "memories": ["评审会（10月21日周三下午三点）"], "text": "评审会周三下午三点开，别迟到。", "expected": "评审会周三下午三点开，别迟到。"}
+{"id": "fill-016", "memories": ["王书涵"], "text": "今天的晚霞真好看。", "expected": "今天的晚霞真好看。"}
+{"id": "fill-017", "memories": ["和欧阳小雨吃饭（周五晚上七点）"], "text": "吃饭改到周六了，跟小雨说一声。", "expected": "吃饭改到周六了，跟小雨说一声。"}
+{"id": "fill-018", "memories": ["对芒果过敏"], "text": "帮我点一份水果沙拉。", "expected": "帮我点一份水果沙拉。"}
+{"id": "fill-019", "memories": ["Atlas"], "text": "Deploy it to staging tonight.", "expected": "Deploy it to staging tonight."}
+{"id": "fill-020", "memories": ["交年度报告（10月28日之前）"], "text": "好的，收到。", "expected": "好的，收到。"}

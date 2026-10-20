@@ -212,7 +212,11 @@ def test_confirmed_texts_are_mined_for_entries_once_the_overlay_is_idle(tmp_path
     window._confirm_text()
     settle(app, window, lambda: not store.pending_records())
     entries = {entry.content: entry for entry in store.entries()}
-    assert entries["评审会"].detail == {"time": "周三下午三点"} and entries["评审会"].keep == WEEK
+    from datetime import date
+
+    detail = entries["评审会"].detail
+    assert detail["time"] == "周三下午三点" and entries["评审会"].keep == WEEK
+    assert date.fromisoformat(detail["date"]).weekday() == 2  # worked out by rule: the coming Wednesday
     assert entries["王书涵"].kind == "person" and entries["王书涵"].source == "auto"
     window.close()
 

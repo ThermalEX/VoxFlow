@@ -7,6 +7,7 @@ from PySide6.QtCore import QUrl, Qt
 from PySide6.QtWidgets import QInputDialog, QLabel, QLineEdit, QMessageBox, QPushButton, QWidget
 
 from .i18n import tr
+from .memory import describe_when
 from .memory_store import FOREVER, KEEPS, KINDS, WEEK
 from .settings_widgets import SegmentedControl, SettingRow, SettingsCard, SettingsComboBox, ToggleSwitch
 
@@ -154,8 +155,8 @@ class MemoryPage:
             return
         for entry in entries[:MAX_ROWS]:
             parts = [tr(f"memory.kind.{entry.kind}"), tr(f"memory.source.{entry.source}")]
-            if entry.detail.get("time"):
-                parts.append(tr("memory.time", time=entry.detail["time"]))
+            if describe_when(entry.detail):
+                parts.append(tr("memory.time", time=describe_when(entry.detail)))
             parts.append(_when(entry.updated_at))
             self.entry_card.add_row(self._text_row(
                 entry.content, " · ".join(parts), self._keep_control("entries", entry.id, entry.keep),
