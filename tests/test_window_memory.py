@@ -164,6 +164,7 @@ def test_a_rewrite_that_arrives_during_the_pulse_waits_for_it(tmp_path):
     assert client.calls == [] or client.calls[0] == ("clean", "额周三下午三点开评审会")
     settle(app, window, lambda: window.smart._pending_clean is not None)
     assert window.smart.animation.state() != window.smart.animation.State.Running
+    assert "Will remember" in window.status_label.text()  # not replaced by "Polishing…" mid-glow
     finish(app, window.smart.highlight)
     animation = window.smart.animation
     assert animation.state() == animation.State.Running
@@ -338,4 +339,36 @@ def test_asking_to_remember_with_memory_off_says_where_to_turn_it_on(tmp_path):
     assert output.calls == ["记住周三开会"]
     window.apply_transcript("final", "明天交房租。")
     assert "Memory is off" not in window.status_label.text()
+    window.close()
+
+
+def test_remembered_text_glows_in_the_theme_color_then_the_glow_goes_away(tmp_path):
+    from PySide6.QtGui import QColor
+    from PySide6.QtWidgets import QGraphicsDropShadowEffect
+
+    from voxflow.color_themes import PRESETS
+
+    store = MemoryStore(tmp_path / "m.db")
+    app, window, _output = make_window(tmp_path, store=store)
+    window.settings.setValue("ui/color_theme", "teal")
+    teal = next(theme for theme in PRESETS if theme.id == "teal")
+    window.apply_transcript("final", "记住张三下周一入职")
+    highlight = window.smart.highlight
+    highlight.setCurrentTime(highlight.duration() // 2)
+    glow = window.transcript.graphicsEffect()
+    assert isinstance(glow, QGraphicsDropShadowEffect)
+    assert glow.offset().x() == glow.offset().y() == 0 and glow.blurRadius() > 20
+    assert glow.color().name() == QColor(teal.accent("dark")).name() and glow.color().alpha() > 200
+    finish(app, highlight)
+    assert window.transcript.graphicsEffect() is None
+    window.close()
+
+
+def test_closing_the_overlay_mid_glow_removes_it(tmp_path):
+    store = MemoryStore(tmp_path / "m.db")
+    app, window, _output = make_window(tmp_path, store=store)
+    window.apply_transcript("final", "记住张三下周一入职")
+    assert window.transcript.graphicsEffect() is not None
+    window.hide_overlay()
+    assert window.transcript.graphicsEffect() is None
     window.close()

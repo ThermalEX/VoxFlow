@@ -5,12 +5,13 @@ the user taught VoxFlow are written the remembered way.
 """
 
 import html
+import math
 from concurrent.futures import Future, ThreadPoolExecutor
 from pathlib import Path
 
 from PySide6.QtCore import QEasingCurve, QObject, QTimer, QVariantAnimation
 from PySide6.QtGui import QColor
-from PySide6.QtWidgets import QHBoxLayout, QWidget
+from PySide6.QtWidgets import QGraphicsDropShadowEffect, QHBoxLayout, QWidget
 
 from .color_themes import saved_color_theme
 from .edit_diff import frame_html, highlight_html, same_text
@@ -21,7 +22,9 @@ from .paths import DATA_ROOT
 from .rewriter import LOCAL_ENDPOINT, RewriteClient, RewriteConfig, RewriteError
 
 EDIT_ANIMATION_MS = 800
-REMEMBER_ANIMATION_MS = 900
+REMEMBER_ANIMATION_MS = 1300
+GLOW_BLUR = 22  # radius of the halo around remembered text at its brightest
+GLOW_LIGHTER = 175  # the halo is a light tint of the theme color, so it shows on the overlay's own glow
 # Suggestions are requested only after the polished text has been on screen a moment, so a quick
 # confirm never leaves a slow suggestion request queued ahead of the next sentence.
 SUGGEST_DELAY_MS = 1200
@@ -90,6 +93,8 @@ class SmartEditor(QObject):
         self.highlight.valueChanged.connect(self._render_highlight)
         self.highlight.finished.connect(self._finish_highlight)
         self._highlight_rgb = (255, 255, 255)
+        self._glow_color = QColor(255, 255, 255)
+        self._status_after_glow: tuple | None = None  # a status that arrived during the remember pulse
         self.suggest_delay_ms = SUGGEST_DELAY_MS
         self._suggest_timer = QTimer(self)
         self._suggest_timer.setSingleShot(True)
@@ -240,12 +245,14 @@ class SmartEditor(QObject):
         self._suggest_timer.stop()
         if self.highlight.state() == QVariantAnimation.State.Running:
             self.highlight.stop()
+            self._end_glow()
             if self.window.mode == "result":
                 self._set_plain(self.original_text)
                 self.transcript.setReadOnly(False)
         self.remember_request = False
         self.remember_opening = ""
         self._memory_off_hint = False
+        self._status_after_glow = None
         self._pending_clean = None
         if self.animation.state() == QVariantAnimation.State.Running:
             self.animation.stop()
@@ -348,17 +355,44 @@ class SmartEditor(QObject):
     # Remember pulse ----------------------------------------------------------------------------
 
     def _start_highlight(self) -> None:
-        accent = QColor(saved_color_theme(self.window.settings).accent("dark")).lighter(135)
+        """The remembered text tints toward the theme color and a halo of that color swells behind it."""
+        theme_color = QColor(saved_color_theme(self.window.settings).accent("dark"))
+        accent = theme_color.lighter(135)
         self._highlight_rgb = (accent.red(), accent.green(), accent.blue())
+        self._glow_color = theme_color.lighter(GLOW_LIGHTER)
+        glow = QGraphicsDropShadowEffect(self.transcript)
+        glow.setOffset(0, 0)
+        glow.setBlurRadius(0)
+        glow.setColor(QColor(0, 0, 0, 0))
+        self.transcript.setGraphicsEffect(glow)
         self._set_status("status.will_remember")
         self.transcript.setReadOnly(True)
         self.highlight.start()
 
     def _render_highlight(self, value) -> None:
-        if self.highlight.state() == QVariantAnimation.State.Running:
-            self._set_html(highlight_html(self.original_text, float(value), TEXT_RGB, self._highlight_rgb))
+        if self.highlight.state() != QVariantAnimation.State.Running:
+            return
+        progress = float(value)
+        self._set_html(highlight_html(self.original_text, progress, TEXT_RGB, self._highlight_rgb))
+        glow = self.transcript.graphicsEffect()
+        if isinstance(glow, QGraphicsDropShadowEffect):
+            strength = math.sin(math.pi * progress)  # swells, then fades
+            glow.setBlurRadius(GLOW_BLUR * strength)
+            color = QColor(self._glow_color)
+            color.setAlpha(round(255 * strength))
+            glow.setColor(color)
+
+    def _end_glow(self) -> None:
+        # Drop the effect afterwards: a resting halo would blur the text and cost a repaint every frame.
+        if isinstance(self.transcript.graphicsEffect(), QGraphicsDropShadowEffect):
+            self.transcript.setGraphicsEffect(None)
 
     def _finish_highlight(self) -> None:
+        self._end_glow()
+        waiting, self._status_after_glow = self._status_after_glow, None
+        if waiting is not None:
+            key, tooltip, values = waiting
+            self._set_status(key, tooltip, **values)
         self._set_plain(self.original_text)
         self.transcript.setReadOnly(False)
         self._sync_bar()
@@ -469,6 +503,10 @@ class SmartEditor(QObject):
     def _set_status(self, key: str, tooltip: str = "", **values) -> None:
         if self._memory_off_hint and key in ("status.polished", "status.no_edits", "status.ready"):
             key, values = "status.memory_off", {}
+        if key != "status.will_remember" and self.highlight.state() == QVariantAnimation.State.Running:
+            # Keep "will remember" on screen while the text glows; show what came meanwhile afterwards.
+            self._status_after_glow = (key, tooltip, values)
+            return
         self.window.show_status(key, tooltip, **values)
 
     def _set_plain(self, text: str) -> None:
