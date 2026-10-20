@@ -54,3 +54,25 @@ def test_names_that_are_already_right_or_cross_punctuation_are_left_alone():
 def test_names_that_cannot_be_corrected_are_ignored():
     assert correct_names("李丝涵", ["王", "VoxFlow", "一二三四五六七八九"]) == "李丝涵"
     assert correct_names("李丝涵", []) == "李丝涵"
+
+
+@pytest.mark.parametrize("spoken, opening, rest", [
+    ("你好，记住我是张三。", "你好，", "我是张三。"),
+    ("好的，那个，帮我记一下：明天交房租", "好的，那个，", "明天交房租"),
+    ("Hi team, remember that the demo is on Friday.", "Hi team, ", "The demo is on Friday."),
+    ("记住周三开会", "", "周三开会"),
+])
+def test_a_request_may_follow_a_short_opening(spoken, opening, rest):
+    from voxflow.memory_command import find_command
+
+    assert find_command(spoken) == (opening, rest)
+    assert strip_command(spoken) == opening + rest
+
+
+@pytest.mark.parametrize("text", [
+    "我们要记住，安全第一。",  # in the middle of a clause
+    "今天开会的时候老板说了很多事情，记住下周交报告",  # the opening is too long to be a greeting
+    "你好，我记住了。",
+])
+def test_requests_inside_a_sentence_do_not_count(text):
+    assert strip_command(text) is None

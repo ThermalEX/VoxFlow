@@ -72,6 +72,8 @@ class SmartEditor(QObject):
         self._programmatic = False
         self._suggestions: list[dict] = []
         self.remember_request = False  # this dictation asked VoxFlow to remember it
+        self.remember_opening = ""  # a greeting said before the request, left out of the remembered entry
+        self._memory_off_hint = False  # asked to remember while memory is off: say where to turn it on
         self._pending_clean: str | None = None  # a rewrite that arrived while the remember pulse was playing
 
         self.animation = QVariantAnimation(self)
@@ -208,15 +210,19 @@ class SmartEditor(QObject):
         self.reset()
         self.session = session
         memory = getattr(self.window, "memory", None)
-        request = memory.strip_command(text) if memory is not None else None
-        self.remember_request = request is not None
-        if request is not None:
-            text = request
+        found = memory.find_command(text) if memory is not None else None
+        self.remember_request = found is not None and memory.enabled
+        self._memory_off_hint = found is not None and not memory.enabled
+        if self.remember_request:
+            self.remember_opening = found[0]
+            text = found[0] + found[1]
             self._set_plain(text)
         self.original_text = self.edited_text = text
         self._sync_bar()
         if self.remember_request:
             self._start_highlight()
+        elif self._memory_off_hint:
+            self._set_status("status.ready")
         if not self.active:
             self._apply_local_fixes()
             return
@@ -238,6 +244,8 @@ class SmartEditor(QObject):
                 self._set_plain(self.original_text)
                 self.transcript.setReadOnly(False)
         self.remember_request = False
+        self.remember_opening = ""
+        self._memory_off_hint = False
         self._pending_clean = None
         if self.animation.state() == QVariantAnimation.State.Running:
             self.animation.stop()
@@ -459,6 +467,8 @@ class SmartEditor(QObject):
         return 0 if self.bar.isHidden() else self.bar.sizeHint().height() + 10
 
     def _set_status(self, key: str, tooltip: str = "", **values) -> None:
+        if self._memory_off_hint and key in ("status.polished", "status.no_edits", "status.ready"):
+            key, values = "status.memory_off", {}
         self.window.show_status(key, tooltip, **values)
 
     def _set_plain(self, text: str) -> None:

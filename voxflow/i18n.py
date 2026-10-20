@@ -44,6 +44,8 @@ STRINGS: dict[str, tuple[str, str]] = {
     "status.suggestion_applied": ("Suggestion applied · Undo edits returns to the original",
                                   "已采用建议 · “撤回修改”可回到原文"),
     "status.will_remember": ("Will remember this · saved when you confirm", "将记住这段内容 · 确认后保存"),
+    "status.memory_off": ("Memory is off, so nothing was remembered · turn it on in Settings › Memory",
+                          "记忆未开启，这次没有记住 · 可在 设置 › 记忆 中打开"),
     # Overlay buttons and tooltips
     "button.continue": ("Continue", "继续说"),
     "suggestion.memory_fill": ("Fill from memory", "按记忆补全"),

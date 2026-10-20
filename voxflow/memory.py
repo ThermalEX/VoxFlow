@@ -14,7 +14,7 @@ from PySide6.QtCore import QObject, QSettings, QTimer, Signal
 
 from .i18n import describe_error
 from .memory_dates import describe_date, resolve
-from .memory_command import strip_command
+from .memory_command import find_command, strip_command
 from .memory_names import correct_names
 from .memory_store import FOREVER, WEEK, Entry, MemoryStore, Record, day_of
 from .paths import DATA_ROOT
@@ -119,21 +119,30 @@ class Memory(QObject):
     # Used by the overlay -----------------------------------------------------------------------
 
     def strip_command(self, text: str) -> str | None:
-        """The dictation without a leading "remember …", or None when memory is off or it is no request."""
+        """The dictation without its "remember …" words, or None when memory is off or it is no request."""
         return strip_command(text) if self.enabled else None
+
+    def find_command(self, text: str) -> tuple[str, str] | None:
+        """(opening, what to remember) when the dictation asks to remember something, memory on or off."""
+        return find_command(text)
 
     def correct(self, text: str) -> str:
         if not self.enabled or self.store is None:
             return text
         return correct_names(text, self.store.names())
 
-    def remember(self, text: str, explicit: bool = False) -> None:
-        """Keep a confirmed text; a "remember …" request also becomes an entry kept forever."""
+    def remember(self, text: str, explicit: bool = False, opening: str = "") -> None:
+        """Keep a confirmed text; a "remember …" request also becomes an entry kept forever, without the
+        greeting it may have opened with ("你好，记住我是张三" keeps "我是张三")."""
         if not self.enabled or not text.strip():
             return
         self.store.add_record(text, explicit=explicit)
         if explicit:
-            self.store.add_entry(strip_command(text) or text, source="explicit")
+            content = strip_command(text) or text
+            opening = opening.strip()
+            if opening and content.startswith(opening) and content[len(opening):].strip():
+                content = content[len(opening):].strip()
+            self.store.add_entry(content, source="explicit")
         self.changed.emit()
 
     def related(self, text: str) -> list[str]:

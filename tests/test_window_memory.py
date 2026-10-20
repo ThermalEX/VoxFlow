@@ -314,3 +314,28 @@ def test_summaries_need_texts_and_a_model(tmp_path):
     assert not window.memory.summarize(day_of(store.records()[0].created_at))
     assert failures == ["empty", "model"]
     window.close()
+
+
+def test_a_greeting_before_remember_is_kept_in_the_text_but_not_in_the_entry(tmp_path):
+    store = MemoryStore(tmp_path / "m.db")
+    app, window, output = make_window(tmp_path, store=store)
+    window.apply_transcript("final", "你好，记住我是张三。")
+    assert window.transcript.toPlainText() == "你好，我是张三。"
+    assert window.smart.highlight.state() == window.smart.highlight.State.Running
+    finish(app, window.smart.highlight)
+    window._confirm_text()
+    assert output.calls == ["你好，我是张三。"]
+    assert [(entry.content, entry.keep) for entry in store.entries()] == [("我是张三。", FOREVER)]
+    window.close()
+
+
+def test_asking_to_remember_with_memory_off_says_where_to_turn_it_on(tmp_path):
+    app, window, output = make_window(tmp_path, memory_on=False)
+    window.apply_transcript("final", "记住周三开会")
+    assert "Memory is off" in window.status_label.text()
+    assert window.transcript.toPlainText() == "记住周三开会"
+    window._confirm_text()
+    assert output.calls == ["记住周三开会"]
+    window.apply_transcript("final", "明天交房租。")
+    assert "Memory is off" not in window.status_label.text()
+    window.close()
