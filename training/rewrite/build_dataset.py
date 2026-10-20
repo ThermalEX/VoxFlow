@@ -6,10 +6,12 @@ import json
 import random
 import sys
 from collections import Counter
+from difflib import SequenceMatcher
 from dataclasses import dataclass, field
 from pathlib import Path
 
 from .augment import augment_text
+from .memory_tasks import memory_example, texts_of, validate_memory
 from .prompts import CLEAN_SYSTEM_PROMPT, SUGGEST_SYSTEM_PROMPT
 from .schema import (
     CATEGORIES,
@@ -25,6 +27,8 @@ from .schema import (
 ROOT = Path(__file__).resolve().parent
 SEEDS_DIR = ROOT / "seeds"
 BUILD_DIR = ROOT / "build"
+MEMORY_EVAL_DIR = ROOT / "memory_eval"
+EVAL_LEAK_SIMILARITY = 0.75
 SPLIT_LIMITS = (("train", 85), ("valid", 90), ("test", 100))
 AUGMENT_RATIO = 1.4
 RANDOM_SEED = 20261013
@@ -129,6 +133,21 @@ def _coverage(cases: list[dict], tips: list[dict]) -> tuple[list[str], list[str]
     return lines, warnings
 
 
+def _eval_leaks(memory_seeds: list[dict]) -> list[str]:
+    """Memory seeds must not copy a case of the memory evaluation set."""
+    held_out = []
+    for name in ("extract.jsonl", "fill.jsonl", "summary.jsonl"):
+        for case in load_jsonl(MEMORY_EVAL_DIR / name):
+            held_out += [(case["id"], text) for text in case.get("texts") or [case["text"]]]
+    leaks = []
+    for record in memory_seeds:
+        for text in texts_of(record):
+            for case_id, other in held_out:
+                if SequenceMatcher(None, text, other, autojunk=False).ratio() >= EVAL_LEAK_SIMILARITY:
+                    leaks.append(f"memory {record['id']!r} is too close to evaluation case {case_id}: {text}")
+    return leaks
+
+
 def build(seeds_dir: Path = SEEDS_DIR, out_dir: Path = BUILD_DIR) -> BuildReport:
     missing = [name for name in ("clean_cases.jsonl", "suggestions.jsonl") if not (seeds_dir / name).is_file()]
     if missing:
@@ -159,13 +178,29 @@ def build(seeds_dir: Path = SEEDS_DIR, out_dir: Path = BUILD_DIR) -> BuildReport
         if split != "test":
             bases.append((record["id"], record["input"]))
 
+    memory_seeds = load_jsonl(seeds_dir / "memory.jsonl")
+    memory_errors = [f"memory {record.get('id')!r}: {error}" for record in memory_seeds
+                     for error in validate_memory(record)]
+    memory_errors += [f"duplicate id: {record_id}" for record_id in duplicate_ids(cases, tips, memory_seeds)]
+    memory_errors += _eval_leaks(memory_seeds)
+    if memory_errors:
+        raise DatasetError(memory_errors)
+    for record in sorted(memory_seeds, key=lambda item: item["id"]):
+        # The memory tasks have their own test set (memory_eval), so none of these go to test.
+        split = "valid" if split_for(record["id"]) == "valid" else "train"
+        system, user, assistant, lang = memory_example(record)
+        rows[split].append(_example(system, user, assistant, {
+            "id": record["id"], "group": record["id"], "task": f"memory_{record['task']}", "source": "hand",
+            "categories": [], "scene": None, "lang": lang,
+        }))
+
     rng = random.Random(RANDOM_SEED)
     augmented = []
     for group, text in bases:
         for number, (noisy, applied) in enumerate(augment_text(text, rng), 1):
             augmented.append((group, number, noisy, text, applied))
     rng.shuffle(augmented)
-    hand_total = len(cases) + len(tips)
+    hand_total = len(cases) + len(tips)  # memory seeds are not augmented, so they do not change this
     augmented = sorted(augmented[:int(hand_total * AUGMENT_RATIO)], key=lambda item: (item[0], item[1]))
     for group, number, noisy, text, applied in augmented:
         rows[split_for(group)].append(_example(CLEAN_SYSTEM_PROMPT, noisy, text, {
@@ -184,7 +219,7 @@ def build(seeds_dir: Path = SEEDS_DIR, out_dir: Path = BUILD_DIR) -> BuildReport
                                  + [(record["id"], record["input"]) for record in tips])
     return BuildReport(
         counts={name: len(split_rows) for name, split_rows in rows.items()},
-        hand_total=hand_total,
+        hand_total=hand_total + len(memory_seeds),
         augmented_total=len(augmented),
         warnings=warnings,
         coverage=coverage,

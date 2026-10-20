@@ -1,0 +1,310 @@
+{"id": "mem-ext-0001", "task": "extract", "today": "2026-10-12", "text": "明天下午两点和设计组对一下首页改版。", "items": [{"kind": "event", "content": "和设计组对首页改版", "time": "明天下午两点"}]}
+{"id": "mem-ext-0002", "task": "extract", "today": "2026-10-15", "text": "后天上午九点半体检，前一天晚上别吃东西。", "items": [{"kind": "event", "content": "体检", "time": "后天上午九点半"}, {"kind": "fact", "content": "体检前一天晚上不吃东西"}]}
+{"id": "mem-ext-0003", "task": "extract", "today": "2026-10-31", "text": "周四下午四点给客户做产品演示。", "items": [{"kind": "event", "content": "给客户做产品演示", "time": "周四下午四点"}]}
+{"id": "mem-ext-0004", "task": "extract", "today": "2026-11-04", "text": "下周二上午十点开季度复盘会。", "items": [{"kind": "event", "content": "季度复盘会", "time": "下周二上午十点"}]}
+{"id": "mem-ext-0005", "task": "extract", "today": "2026-11-18", "text": "这周五下班前把合同初稿发给法务。", "items": [{"kind": "event", "content": "把合同初稿发给法务", "time": "这周五下班前"}]}
+{"id": "mem-ext-0006", "task": "extract", "today": "2026-12-07", "text": "11月20日之前要交论文开题报告。", "items": [{"kind": "event", "content": "交论文开题报告", "time": "11月20日之前"}]}
+{"id": "mem-ext-0007", "task": "extract", "today": "2026-12-23", "text": "今晚八点半家长会，在三楼多功能厅。", "items": [{"kind": "event", "content": "家长会", "time": "今晚八点半"}, {"kind": "fact", "content": "家长会在三楼多功能厅"}]}
+{"id": "mem-ext-0008", "task": "extract", "today": "2027-01-08", "text": "下个月五号交物业费。", "items": [{"kind": "event", "content": "交物业费", "time": "下个月五号"}]}
+{"id": "mem-ext-0009", "task": "extract", "today": "2027-02-14", "text": "每周三下午四点组内分享会。", "items": [{"kind": "event", "content": "组内分享会", "time": "每周三下午四点"}]}
+{"id": "mem-ext-0010", "task": "extract", "today": "2027-03-02", "text": "12月15号去北京参加行业峰会。", "items": [{"kind": "event", "content": "去北京参加行业峰会", "time": "12月15号"}]}
+{"id": "mem-ext-0011", "task": "extract", "today": "2027-03-25", "text": "明早七点半的航班去深圳，记得提前两小时到机场。", "items": [{"kind": "event", "content": "航班去深圳", "time": "明早七点半"}, {"kind": "fact", "content": "坐飞机提前两小时到机场"}]}
+{"id": "mem-ext-0012", "task": "extract", "today": "2027-04-16", "text": "周六上午带孩子去打疫苗。", "items": [{"kind": "event", "content": "带孩子打疫苗", "time": "周六上午"}]}
+{"id": "mem-ext-0013", "task": "extract", "today": "2027-05-06", "text": "下下周一开始新学期。", "items": [{"kind": "event", "content": "新学期开始", "time": "下下周一"}]}
+{"id": "mem-ext-0014", "task": "extract", "today": "2027-06-11", "text": "今天下午五点前把报销单交给财务。", "items": [{"kind": "event", "content": "把报销单交给财务", "time": "今天下午五点前"}]}
+{"id": "mem-ext-0015", "task": "extract", "today": "2026-10-12", "text": "周日中午和爸妈吃饭。", "items": [{"kind": "event", "content": "和爸妈吃饭", "time": "周日中午"}]}
+{"id": "mem-ext-0016", "task": "extract", "today": "2026-10-15", "text": "星期四晚上七点羽毛球，老地方。", "items": [{"kind": "event", "content": "打羽毛球", "time": "星期四晚上七点"}]}
+{"id": "mem-ext-0017", "task": "extract", "today": "2026-10-31", "text": "月底前把年终总结写完。", "items": [{"kind": "event", "content": "写完年终总结", "time": "月底前"}]}
+{"id": "mem-ext-0018", "task": "extract", "today": "2026-11-04", "text": "1月10号公司年会，要准备一个节目。", "items": [{"kind": "event", "content": "公司年会", "time": "1月10号"}, {"kind": "event", "content": "准备年会节目"}]}
+{"id": "mem-ext-0019", "task": "extract", "today": "2026-11-18", "text": "明天上午的面试改到下午三点了。", "items": [{"kind": "event", "content": "面试", "time": "下午三点"}]}
+{"id": "mem-ext-0020", "task": "extract", "today": "2026-12-07", "text": "下周一早上八点出发去团建。", "items": [{"kind": "event", "content": "出发去团建", "time": "下周一早上八点"}]}
+{"id": "mem-ext-0021", "task": "extract", "today": "2026-12-23", "text": "后天晚上十点系统维护，服务会停一小时。", "items": [{"kind": "event", "content": "系统维护", "time": "后天晚上十点"}, {"kind": "fact", "content": "系统维护期间服务停一小时"}]}
+{"id": "mem-ext-0022", "task": "extract", "today": "2027-01-08", "text": "三月八号是结婚纪念日，提前订餐厅。", "items": [{"kind": "event", "content": "结婚纪念日", "time": "三月八号"}, {"kind": "event", "content": "订餐厅"}]}
+{"id": "mem-ext-0023", "task": "extract", "today": "2027-02-14", "text": "这周四之前给供应商回复报价。", "items": [{"kind": "event", "content": "给供应商回复报价", "time": "这周四之前"}]}
+{"id": "mem-ext-0024", "task": "extract", "today": "2027-03-02", "text": "每个月最后一个周五发月报。", "items": [{"kind": "event", "content": "发月报", "time": "每个月最后一个周五"}]}
+{"id": "mem-ext-0025", "task": "extract", "today": "2027-03-25", "text": "下周三下午去银行办理开户。", "items": [{"kind": "event", "content": "去银行开户", "time": "下周三下午"}]}
+{"id": "mem-ext-0026", "task": "extract", "today": "2027-04-16", "text": "今天中午十二点半在食堂门口等你。", "items": [{"kind": "event", "content": "食堂门口见面", "time": "今天中午十二点半"}]}
+{"id": "mem-ext-0027", "task": "extract", "today": "2027-05-06", "text": "周五早上九点的站会取消了。", "items": [{"kind": "event", "content": "站会取消", "time": "周五早上九点"}]}
+{"id": "mem-ext-0028", "task": "extract", "today": "2027-06-11", "text": "明天晚上六点之前把课件发到群里。", "items": [{"kind": "event", "content": "把课件发到群里", "time": "明天晚上六点之前"}]}
+{"id": "mem-ext-0029", "task": "extract", "today": "2026-10-12", "text": "2月3号开学，学费要在开学前交。", "items": [{"kind": "event", "content": "开学", "time": "2月3号"}, {"kind": "event", "content": "交学费"}]}
+{"id": "mem-ext-0030", "task": "extract", "today": "2026-10-15", "text": "下个周末搬家，找好搬家公司了。", "items": [{"kind": "event", "content": "搬家", "time": "下个周末"}]}
+{"id": "mem-ext-0031", "task": "extract", "today": "2026-10-31", "text": "今晚十一点有欧冠决赛直播。", "items": [{"kind": "event", "content": "欧冠决赛直播", "time": "今晚十一点"}]}
+{"id": "mem-ext-0032", "task": "extract", "today": "2026-11-04", "text": "周二和周四下午是答疑时间。", "items": [{"kind": "event", "content": "答疑时间", "time": "周二和周四下午"}]}
+{"id": "mem-ext-0033", "task": "extract", "today": "2026-11-18", "text": "下周五晚上团队聚餐，地点待定。", "items": [{"kind": "event", "content": "团队聚餐", "time": "下周五晚上"}]}
+{"id": "mem-ext-0034", "task": "extract", "today": "2026-12-07", "text": "后天下午三点半去4S店保养车。", "items": [{"kind": "event", "content": "去4S店保养车", "time": "后天下午三点半"}]}
+{"id": "mem-ext-0035", "task": "extract", "today": "2026-12-23", "text": "Dentist appointment tomorrow at 10:30.", "items": [{"kind": "event", "content": "Dentist appointment", "time": "tomorrow at 10:30"}]}
+{"id": "mem-ext-0036", "task": "extract", "today": "2027-01-08", "text": "The design review is on Wednesday at 3pm.", "items": [{"kind": "event", "content": "Design review", "time": "Wednesday at 3pm"}]}
+{"id": "mem-ext-0037", "task": "extract", "today": "2027-02-14", "text": "We ship version 2.4 next Monday.", "items": [{"kind": "event", "content": "Ship version 2.4", "time": "next Monday"}]}
+{"id": "mem-ext-0038", "task": "extract", "today": "2027-03-02", "text": "Submit the expense report by Friday.", "items": [{"kind": "event", "content": "Submit the expense report", "time": "by Friday"}]}
+{"id": "mem-ext-0039", "task": "extract", "today": "2027-03-25", "text": "Parent-teacher meeting on December 9th at 6pm.", "items": [{"kind": "event", "content": "Parent-teacher meeting", "time": "December 9th at 6pm"}]}
+{"id": "mem-ext-0040", "task": "extract", "today": "2027-04-16", "text": "Team lunch every Thursday at noon.", "items": [{"kind": "event", "content": "Team lunch", "time": "every Thursday at noon"}]}
+{"id": "mem-ext-0041", "task": "extract", "today": "2027-05-06", "text": "My flight to Tokyo leaves Saturday at 8am.", "items": [{"kind": "event", "content": "Flight to Tokyo", "time": "Saturday at 8am"}]}
+{"id": "mem-ext-0042", "task": "extract", "today": "2027-06-11", "text": "The quarterly board meeting is next Tuesday.", "items": [{"kind": "event", "content": "Quarterly board meeting", "time": "next Tuesday"}]}
+{"id": "mem-ext-0043", "task": "extract", "today": "2026-10-12", "text": "Call the insurance company today before 5.", "items": [{"kind": "event", "content": "Call the insurance company", "time": "today before 5"}]}
+{"id": "mem-ext-0044", "task": "extract", "today": "2026-10-15", "text": "Rent is due on the first of every month.", "items": [{"kind": "fact", "content": "Rent is due on the first of every month"}]}
+{"id": "mem-ext-0045", "task": "extract", "today": "2026-10-31", "text": "新来的产品经理叫刘思远，以后需求找他。", "items": [{"kind": "person", "content": "刘思远"}, {"kind": "fact", "content": "需求找刘思远"}]}
+{"id": "mem-ext-0046", "task": "extract", "today": "2026-11-04", "text": "把报价单抄送给何嘉宁。", "items": [{"kind": "person", "content": "何嘉宁"}]}
+{"id": "mem-ext-0047", "task": "extract", "today": "2026-11-18", "text": "我的导师是宋雨桐教授。", "items": [{"kind": "person", "content": "宋雨桐"}, {"kind": "fact", "content": "导师是宋雨桐教授"}]}
+{"id": "mem-ext-0048", "task": "extract", "today": "2026-12-07", "text": "跟老周说一声，明天他值班。", "items": [{"kind": "person", "content": "老周"}, {"kind": "event", "content": "老周值班", "time": "明天"}]}
+{"id": "mem-ext-0049", "task": "extract", "today": "2026-12-23", "text": "这个问题问问运维的韩冬。", "items": [{"kind": "person", "content": "韩冬"}]}
+{"id": "mem-ext-0050", "task": "extract", "today": "2027-01-08", "text": "请转告马总，方案已经改好了。", "items": [{"kind": "person", "content": "马总"}]}
+{"id": "mem-ext-0051", "task": "extract", "today": "2027-02-14", "text": "我们班主任叫姚晓琳。", "items": [{"kind": "person", "content": "姚晓琳"}, {"kind": "fact", "content": "班主任是姚晓琳"}]}
+{"id": "mem-ext-0052", "task": "extract", "today": "2027-03-02", "text": "客户那边的对接人换成了邓卓然。", "items": [{"kind": "person", "content": "邓卓然"}]}
+{"id": "mem-ext-0053", "task": "extract", "today": "2027-03-25", "text": "周末去看外婆，顺便带上表弟严浩。", "items": [{"kind": "event", "content": "去看外婆", "time": "周末"}, {"kind": "person", "content": "严浩"}]}
+{"id": "mem-ext-0054", "task": "extract", "today": "2027-04-16", "text": "小唐负责这次活动的签到。", "items": [{"kind": "person", "content": "小唐"}, {"kind": "fact", "content": "小唐负责活动签到"}]}
+{"id": "mem-ext-0055", "task": "extract", "today": "2027-05-06", "text": "技术总监是司马俊，有问题直接找他。", "items": [{"kind": "person", "content": "司马俊"}]}
+{"id": "mem-ext-0056", "task": "extract", "today": "2027-06-11", "text": "HR的Amy说体检报告下周出来。", "items": [{"kind": "person", "content": "Amy"}, {"kind": "event", "content": "体检报告出来", "time": "下周"}]}
+{"id": "mem-ext-0057", "task": "extract", "today": "2026-10-12", "text": "Please loop in Daniel Park on the vendor emails.", "items": [{"kind": "person", "content": "Daniel Park"}]}
+{"id": "mem-ext-0058", "task": "extract", "today": "2026-10-15", "text": "Our new intern is Priya Nair.", "items": [{"kind": "person", "content": "Priya Nair"}]}
+{"id": "mem-ext-0059", "task": "extract", "today": "2026-10-31", "text": "Ask Marcus about the server credentials.", "items": [{"kind": "person", "content": "Marcus"}]}
+{"id": "mem-ext-0060", "task": "extract", "today": "2026-11-04", "text": "房东姓钟，电话在合同上。", "items": [{"kind": "person", "content": "房东钟先生"}, {"kind": "fact", "content": "房东电话在合同上"}]}
+{"id": "mem-ext-0061", "task": "extract", "today": "2026-11-18", "text": "这次的项目代号叫青鸟，对外别说。", "items": [{"kind": "term", "content": "青鸟"}, {"kind": "fact", "content": "青鸟项目代号不对外说"}]}
+{"id": "mem-ext-0062", "task": "extract", "today": "2026-12-07", "text": "我们的竞品主要是飞书和钉钉。", "items": [{"kind": "term", "content": "飞书"}, {"kind": "term", "content": "钉钉"}]}
+{"id": "mem-ext-0063", "task": "extract", "today": "2026-12-23", "text": "报表都从Metabase里导出来。", "items": [{"kind": "term", "content": "Metabase"}]}
+{"id": "mem-ext-0064", "task": "extract", "today": "2027-01-08", "text": "新系统名字叫灵犀，下个月上线。", "items": [{"kind": "term", "content": "灵犀"}, {"kind": "event", "content": "灵犀系统上线", "time": "下个月"}]}
+{"id": "mem-ext-0065", "task": "extract", "today": "2027-02-14", "text": "合作方是远航物流有限公司。", "items": [{"kind": "term", "content": "远航物流有限公司"}]}
+{"id": "mem-ext-0066", "task": "extract", "today": "2027-03-02", "text": "代码仓库统一放在GitLab上。", "items": [{"kind": "term", "content": "GitLab"}]}
+{"id": "mem-ext-0067", "task": "extract", "today": "2027-03-25", "text": "这个功能用的是Elasticsearch做搜索。", "items": [{"kind": "term", "content": "Elasticsearch"}]}
+{"id": "mem-ext-0068", "task": "extract", "today": "2027-04-16", "text": "课程平台换成了学堂在线。", "items": [{"kind": "term", "content": "学堂在线"}]}
+{"id": "mem-ext-0069", "task": "extract", "today": "2027-05-06", "text": "我们的小程序叫随手记账。", "items": [{"kind": "term", "content": "随手记账"}]}
+{"id": "mem-ext-0070", "task": "extract", "today": "2027-06-11", "text": "测试环境的地址是test点内网，生产叫prod。", "items": [{"kind": "term", "content": "test环境"}, {"kind": "term", "content": "prod环境"}]}
+{"id": "mem-ext-0071", "task": "extract", "today": "2026-10-12", "text": "The billing service is called Ledger.", "items": [{"kind": "term", "content": "Ledger"}]}
+{"id": "mem-ext-0072", "task": "extract", "today": "2026-10-15", "text": "We moved our docs to Notion last week.", "items": [{"kind": "term", "content": "Notion"}]}
+{"id": "mem-ext-0073", "task": "extract", "today": "2026-10-31", "text": "Client is Brightwave Analytics.", "items": [{"kind": "term", "content": "Brightwave Analytics"}]}
+{"id": "mem-ext-0074", "task": "extract", "today": "2026-10-12", "text": "我不吃香菜，点外卖记得备注。", "items": [{"kind": "fact", "content": "不吃香菜"}]}
+{"id": "mem-ext-0075", "task": "extract", "today": "2026-10-15", "text": "公司的报销上限是每月两千。", "items": [{"kind": "fact", "content": "报销上限每月两千"}]}
+{"id": "mem-ext-0076", "task": "extract", "today": "2026-10-31", "text": "我家住在梧桐路12号3单元。", "items": [{"kind": "fact", "content": "家住梧桐路12号3单元"}]}
+{"id": "mem-ext-0077", "task": "extract", "today": "2026-11-04", "text": "会议室B预订要提前一天在系统里登记。", "items": [{"kind": "fact", "content": "会议室B要提前一天在系统里登记"}]}
+{"id": "mem-ext-0078", "task": "extract", "today": "2026-11-18", "text": "我女儿对花生过敏。", "items": [{"kind": "fact", "content": "女儿对花生过敏"}]}
+{"id": "mem-ext-0079", "task": "extract", "today": "2026-12-07", "text": "打印机在二楼茶水间旁边。", "items": [{"kind": "fact", "content": "打印机在二楼茶水间旁边"}]}
+{"id": "mem-ext-0080", "task": "extract", "today": "2026-12-23", "text": "周报统一用公司模板，别自己改格式。", "items": [{"kind": "fact", "content": "周报用公司模板"}]}
+{"id": "mem-ext-0081", "task": "extract", "today": "2027-01-08", "text": "我习惯用微信沟通，邮件看得少。", "items": [{"kind": "fact", "content": "习惯用微信沟通"}]}
+{"id": "mem-ext-0082", "task": "extract", "today": "2027-02-14", "text": "快递一律放前台，不要放门口。", "items": [{"kind": "fact", "content": "快递放前台"}]}
+{"id": "mem-ext-0083", "task": "extract", "today": "2027-03-02", "text": "车牌号是浙A·8K321。", "items": [{"kind": "fact", "content": "车牌号是浙A·8K321"}]}
+{"id": "mem-ext-0084", "task": "extract", "today": "2027-03-25", "text": "我们组的预算今年是五十万。", "items": [{"kind": "fact", "content": "组里今年预算五十万"}]}
+{"id": "mem-ext-0085", "task": "extract", "today": "2027-04-16", "text": "儿子的学校下午四点放学。", "items": [{"kind": "fact", "content": "儿子学校下午四点放学"}]}
+{"id": "mem-ext-0086", "task": "extract", "today": "2027-05-06", "text": "线上发布只能在周二和周四。", "items": [{"kind": "fact", "content": "线上发布只在周二和周四"}]}
+{"id": "mem-ext-0087", "task": "extract", "today": "2027-06-11", "text": "我穿四十二码的鞋。", "items": [{"kind": "fact", "content": "穿四十二码的鞋"}]}
+{"id": "mem-ext-0088", "task": "extract", "today": "2026-10-12", "text": "I take my coffee black, no sugar.", "items": [{"kind": "fact", "content": "Takes coffee black, no sugar"}]}
+{"id": "mem-ext-0089", "task": "extract", "today": "2026-10-15", "text": "The office closes at 7pm on Fridays.", "items": [{"kind": "fact", "content": "Office closes at 7pm on Fridays"}]}
+{"id": "mem-ext-0090", "task": "extract", "today": "2026-10-31", "text": "Never deploy on Fridays.", "items": [{"kind": "fact", "content": "Never deploy on Fridays"}]}
+{"id": "mem-ext-0091", "task": "extract", "today": "2026-11-04", "text": "My blood type is O negative.", "items": [{"kind": "fact", "content": "Blood type is O negative"}]}
+{"id": "mem-ext-0092", "task": "extract", "today": "2026-11-18", "text": "周三晚上七点和韩梅在星光影院看电影，她买票。", "items": [{"kind": "event", "content": "和韩梅看电影", "time": "周三晚上七点"}, {"kind": "person", "content": "韩梅"}, {"kind": "fact", "content": "韩梅买电影票"}]}
+{"id": "mem-ext-0093", "task": "extract", "today": "2026-12-07", "text": "明天下午三点在望京SOHO见投资人，带上商业计划书。", "items": [{"kind": "event", "content": "见投资人", "time": "明天下午三点"}, {"kind": "fact", "content": "见投资人带上商业计划书"}]}
+{"id": "mem-ext-0094", "task": "extract", "today": "2026-12-23", "text": "下周一由廖志强给新人培训，内容是代码规范。", "items": [{"kind": "event", "content": "新人培训", "time": "下周一"}, {"kind": "person", "content": "廖志强"}]}
+{"id": "mem-ext-0095", "task": "extract", "today": "2027-01-08", "text": "火种项目的负责人是贝宁，周四要交第一版原型。", "items": [{"kind": "term", "content": "火种项目"}, {"kind": "person", "content": "贝宁"}, {"kind": "event", "content": "火种项目交第一版原型", "time": "周四"}]}
+{"id": "mem-ext-0096", "task": "extract", "today": "2027-02-14", "text": "后天去上海见客户安途科技，住两晚，酒店是全季。", "items": [{"kind": "event", "content": "去上海见客户", "time": "后天"}, {"kind": "term", "content": "安途科技"}, {"kind": "fact", "content": "上海住全季酒店两晚"}]}
+{"id": "mem-ext-0097", "task": "extract", "today": "2027-03-02", "text": "周五之前请冯越把测试报告发给我。", "items": [{"kind": "event", "content": "冯越发测试报告", "time": "周五之前"}, {"kind": "person", "content": "冯越"}]}
+{"id": "mem-ext-0098", "task": "extract", "today": "2027-03-25", "text": "我们和星启教育约了周二上午十点线上沟通。", "items": [{"kind": "term", "content": "星启教育"}, {"kind": "event", "content": "和星启教育线上沟通", "time": "周二上午十点"}]}
+{"id": "mem-ext-0099", "task": "extract", "today": "2027-04-16", "text": "下个月十号是外公八十大寿，全家去杭州。", "items": [{"kind": "event", "content": "外公八十大寿", "time": "下个月十号"}, {"kind": "fact", "content": "外公八十大寿全家去杭州"}]}
+{"id": "mem-ext-0100", "task": "extract", "today": "2027-05-06", "text": "On Thursday at 4pm, Elena Ruiz will present the Atlas roadmap.", "items": [{"kind": "event", "content": "Elena Ruiz presents the roadmap", "time": "Thursday at 4pm"}, {"kind": "person", "content": "Elena Ruiz"}]}
+{"id": "mem-ext-0101", "task": "extract", "today": "2027-06-11", "text": "Ping Tom Becker before the vendor call tomorrow morning.", "items": [{"kind": "person", "content": "Tom Becker"}, {"kind": "event", "content": "Vendor call", "time": "tomorrow morning"}]}
+{"id": "mem-ext-0102", "task": "extract", "today": "2026-10-12", "text": "好的，我知道了。", "items": []}
+{"id": "mem-ext-0103", "task": "extract", "today": "2026-10-15", "text": "谢谢你！", "items": []}
+{"id": "mem-ext-0104", "task": "extract", "today": "2026-10-31", "text": "哈哈哈太好笑了。", "items": []}
+{"id": "mem-ext-0105", "task": "extract", "today": "2026-11-04", "text": "收到，马上处理。", "items": []}
+{"id": "mem-ext-0106", "task": "extract", "today": "2026-11-18", "text": "行，按你说的来。", "items": []}
+{"id": "mem-ext-0107", "task": "extract", "today": "2026-12-07", "text": "好累啊今天。", "items": []}
+{"id": "mem-ext-0108", "task": "extract", "today": "2026-12-23", "text": "我先去洗个澡。", "items": []}
+{"id": "mem-ext-0109", "task": "extract", "today": "2027-01-08", "text": "你吃饭了吗？", "items": []}
+{"id": "mem-ext-0110", "task": "extract", "today": "2027-02-14", "text": "外面在下雨。", "items": []}
+{"id": "mem-ext-0111", "task": "extract", "today": "2027-03-02", "text": "这个视频挺有意思的。", "items": []}
+{"id": "mem-ext-0112", "task": "extract", "today": "2027-03-25", "text": "我到家了。", "items": []}
+{"id": "mem-ext-0113", "task": "extract", "today": "2027-04-16", "text": "晚安。", "items": []}
+{"id": "mem-ext-0114", "task": "extract", "today": "2027-05-06", "text": "辛苦了！", "items": []}
+{"id": "mem-ext-0115", "task": "extract", "today": "2027-06-11", "text": "等我一下，马上回来。", "items": []}
+{"id": "mem-ext-0116", "task": "extract", "today": "2026-10-12", "text": "今天的咖啡有点苦。", "items": []}
+{"id": "mem-ext-0117", "task": "extract", "today": "2026-10-15", "text": "哪里有卖充电线的？", "items": []}
+{"id": "mem-ext-0118", "task": "extract", "today": "2026-10-31", "text": "我先挂了。", "items": []}
+{"id": "mem-ext-0119", "task": "extract", "today": "2026-11-04", "text": "好的好的，就这样吧。", "items": []}
+{"id": "mem-ext-0120", "task": "extract", "today": "2026-11-18", "text": "这首歌真好听。", "items": []}
+{"id": "mem-ext-0121", "task": "extract", "today": "2026-12-07", "text": "早上好！", "items": []}
+{"id": "mem-ext-0122", "task": "extract", "today": "2026-12-23", "text": "我在地铁上，信号不好。", "items": []}
+{"id": "mem-ext-0123", "task": "extract", "today": "2027-01-08", "text": "这个价格还行。", "items": []}
+{"id": "mem-ext-0124", "task": "extract", "today": "2027-02-14", "text": "你说得对。", "items": []}
+{"id": "mem-ext-0125", "task": "extract", "today": "2027-03-02", "text": "有点饿了。", "items": []}
+{"id": "mem-ext-0126", "task": "extract", "today": "2027-03-25", "text": "刚刚开完会。", "items": []}
+{"id": "mem-ext-0127", "task": "extract", "today": "2027-04-16", "text": "麻烦你了。", "items": []}
+{"id": "mem-ext-0128", "task": "extract", "today": "2027-05-06", "text": "我再想想。", "items": []}
+{"id": "mem-ext-0129", "task": "extract", "today": "2027-06-11", "text": "看起来不错。", "items": []}
+{"id": "mem-ext-0130", "task": "extract", "today": "2026-10-12", "text": "这家店人好多。", "items": []}
+{"id": "mem-ext-0131", "task": "extract", "today": "2026-10-15", "text": "我马上下楼。", "items": []}
+{"id": "mem-ext-0132", "task": "extract", "today": "2026-10-31", "text": "不好意思，刚看到消息。", "items": []}
+{"id": "mem-ext-0133", "task": "extract", "today": "2026-11-04", "text": "好的，回头聊。", "items": []}
+{"id": "mem-ext-0134", "task": "extract", "today": "2026-11-18", "text": "Okay, sounds good.", "items": []}
+{"id": "mem-ext-0135", "task": "extract", "today": "2026-12-07", "text": "Thanks so much!", "items": []}
+{"id": "mem-ext-0136", "task": "extract", "today": "2026-12-23", "text": "I'm on my way.", "items": []}
+{"id": "mem-ext-0137", "task": "extract", "today": "2027-01-08", "text": "Haha that's hilarious.", "items": []}
+{"id": "mem-ext-0138", "task": "extract", "today": "2027-02-14", "text": "Got it, thanks.", "items": []}
+{"id": "mem-ext-0139", "task": "extract", "today": "2027-03-02", "text": "Let me think about it.", "items": []}
+{"id": "mem-ext-0140", "task": "extract", "today": "2027-03-25", "text": "Sorry, just saw this.", "items": []}
+{"id": "mem-ext-0141", "task": "extract", "today": "2027-04-16", "text": "Good morning!", "items": []}
+{"id": "mem-ext-0142", "task": "extract", "today": "2027-05-06", "text": "I'm so tired today.", "items": []}
+{"id": "mem-ext-0143", "task": "extract", "today": "2026-10-12", "text": "各位，周四下午两点在三号会议室过一下需求文档，汤静主讲，大家提前看一遍。", "items": [{"kind": "event", "content": "过需求文档", "time": "周四下午两点"}, {"kind": "fact", "content": "需求文档会在三号会议室"}, {"kind": "person", "content": "汤静"}]}
+{"id": "mem-ext-0144", "task": "extract", "today": "2026-10-15", "text": "跟大家同步一下，云帆项目延期到下月中旬上线，原因是支付接口还没联调完。", "items": [{"kind": "term", "content": "云帆项目"}, {"kind": "event", "content": "云帆项目上线", "time": "下月中旬"}]}
+{"id": "mem-ext-0145", "task": "extract", "today": "2026-10-31", "text": "麻烦帮我订一下明天下午去广州的高铁，最好四点前到。", "items": [{"kind": "event", "content": "去广州的高铁", "time": "明天下午"}]}
+{"id": "mem-ext-0146", "task": "extract", "today": "2026-11-04", "text": "下周开始我们改成每天早上九点十五站会，十五分钟以内。", "items": [{"kind": "event", "content": "站会", "time": "每天早上九点十五"}, {"kind": "fact", "content": "站会控制在十五分钟以内"}]}
+{"id": "mem-ext-0147", "task": "extract", "today": "2026-11-18", "text": "客户反馈说登录页太慢，景天负责排查，周三给结论。", "items": [{"kind": "person", "content": "景天"}, {"kind": "event", "content": "景天给登录页变慢的结论", "time": "周三"}]}
+{"id": "mem-ext-0148", "task": "extract", "today": "2026-12-07", "text": "我下周三到周五请假，有急事打我电话。", "items": [{"kind": "event", "content": "请假", "time": "下周三到周五"}]}
+{"id": "mem-ext-0149", "task": "extract", "today": "2026-12-23", "text": "报价我们按八折给，最低不能低于七五折。", "items": [{"kind": "fact", "content": "报价按八折，最低七五折"}]}
+{"id": "mem-ext-0150", "task": "extract", "today": "2027-01-08", "text": "新办公室在浦东软件园，十二月一号搬。", "items": [{"kind": "fact", "content": "新办公室在浦东软件园"}, {"kind": "event", "content": "搬新办公室", "time": "十二月一号"}]}
+{"id": "mem-ext-0151", "task": "extract", "today": "2027-02-14", "text": "顾晨下周入职，帮他开通邮箱和VPN。", "items": [{"kind": "person", "content": "顾晨"}, {"kind": "event", "content": "顾晨入职", "time": "下周"}, {"kind": "event", "content": "给顾晨开通邮箱和VPN"}]}
+{"id": "mem-ext-0152", "task": "extract", "today": "2027-03-02", "text": "我们和合众保险的合同明年三月到期。", "items": [{"kind": "term", "content": "合众保险"}, {"kind": "event", "content": "和合众保险的合同到期", "time": "明年三月"}]}
+{"id": "mem-ext-0153", "task": "extract", "today": "2027-03-25", "text": "这个月的OKR是把留存率提到百分之四十。", "items": [{"kind": "fact", "content": "本月OKR是留存率提到百分之四十"}]}
+{"id": "mem-ext-0154", "task": "extract", "today": "2027-04-16", "text": "提醒一下，下周一起门禁卡要刷两次。", "items": [{"kind": "fact", "content": "门禁卡要刷两次"}]}
+{"id": "mem-ext-0155", "task": "extract", "today": "2027-05-06", "text": "要给妈妈买生日礼物。", "items": [{"kind": "event", "content": "给妈妈买生日礼物"}]}
+{"id": "mem-ext-0156", "task": "extract", "today": "2027-06-11", "text": "车险快到期了，得续一下。", "items": [{"kind": "event", "content": "续车险"}]}
+{"id": "mem-ext-0157", "task": "extract", "today": "2026-10-12", "text": "记得把护照续签。", "items": [{"kind": "event", "content": "续签护照"}]}
+{"id": "mem-ext-0158", "task": "extract", "today": "2026-10-15", "text": "找时间去换个手机屏幕。", "items": [{"kind": "event", "content": "换手机屏幕"}]}
+{"id": "mem-ext-0159", "task": "extract", "today": "2026-10-31", "text": "I need to renew my gym membership.", "items": [{"kind": "event", "content": "Renew gym membership"}]}
+{"id": "mem-ext-0160", "task": "extract", "today": "2026-11-04", "text": "周日下午三点带狗去打疫苗。", "items": [{"kind": "event", "content": "带狗打疫苗", "time": "周日下午三点"}]}
+{"id": "mem-ext-0161", "task": "extract", "today": "2026-11-18", "text": "今晚九点和高中同学视频。", "items": [{"kind": "event", "content": "和高中同学视频", "time": "今晚九点"}]}
+{"id": "mem-ext-0162", "task": "extract", "today": "2026-12-07", "text": "下周二晚上七点钢琴课改到周三了。", "items": [{"kind": "event", "content": "钢琴课", "time": "周三"}]}
+{"id": "mem-ext-0163", "task": "extract", "today": "2026-12-23", "text": "后天中午去机场接舅舅。", "items": [{"kind": "event", "content": "去机场接舅舅", "time": "后天中午"}]}
+{"id": "mem-ext-0164", "task": "extract", "today": "2027-01-08", "text": "圣诞节前把礼物寄给表姐。", "items": [{"kind": "event", "content": "给表姐寄礼物", "time": "圣诞节前"}]}
+{"id": "mem-ext-0165", "task": "extract", "today": "2027-02-14", "text": "每周六早上八点去游泳。", "items": [{"kind": "event", "content": "游泳", "time": "每周六早上八点"}]}
+{"id": "mem-ext-0166", "task": "extract", "today": "2027-03-02", "text": "刚看完《流浪地球》，太震撼了。", "items": []}
+{"id": "mem-ext-0167", "task": "extract", "today": "2027-03-25", "text": "周杰伦的新歌挺好听的。", "items": []}
+{"id": "mem-ext-0168", "task": "extract", "today": "2027-04-16", "text": "今天地铁好挤。", "items": []}
+{"id": "mem-ext-0169", "task": "extract", "today": "2027-05-06", "text": "楼下新开了一家奶茶店。", "items": []}
+{"id": "mem-ext-0170", "task": "extract", "today": "2027-06-11", "text": "这个表情包笑死我了。", "items": []}
+{"id": "mem-ext-0171", "task": "extract", "today": "2026-10-12", "text": "我在排队，前面还有十个人。", "items": []}
+{"id": "mem-ext-0172", "task": "extract", "today": "2026-10-15", "text": "Taylor Swift's new album is great.", "items": []}
+{"id": "mem-ext-0173", "task": "extract", "today": "2026-10-31", "text": "Traffic is terrible today.", "items": []}
+{"id": "mem-ext-0174", "task": "extract", "today": "2026-11-04", "text": "这个周末天气不错。", "items": []}
+{"id": "mem-ext-0175", "task": "extract", "today": "2026-11-18", "text": "你看那个新闻了吗？", "items": []}
+{"id": "mem-ext-0176", "task": "extract", "today": "2026-12-07", "text": "我把伞落在公司了。", "items": []}
+{"id": "mem-ext-0177", "task": "extract", "today": "2026-12-23", "text": "今天跑了五公里。", "items": []}
+{"id": "mem-ext-0178", "task": "extract", "today": "2027-01-08", "text": "这道题我不会做。", "items": []}
+{"id": "mem-ext-0179", "task": "extract", "today": "2027-02-14", "text": "好想放假啊。", "items": []}
+{"id": "mem-ext-0180", "task": "extract", "today": "2027-03-02", "text": "把这份材料发给财务的祁雪。", "items": [{"kind": "person", "content": "祁雪"}]}
+{"id": "mem-ext-0181", "task": "extract", "today": "2027-03-25", "text": "宁总下午到，安排一下接待。", "items": [{"kind": "person", "content": "宁总"}, {"kind": "event", "content": "接待宁总", "time": "下午"}]}
+{"id": "mem-ext-0182", "task": "extract", "today": "2027-04-16", "text": "跟芸芸说她要的书我买到了。", "items": [{"kind": "person", "content": "芸芸"}, {"kind": "fact", "content": "芸芸要的书已经买到"}]}
+{"id": "mem-ext-0183", "task": "extract", "today": "2027-05-06", "text": "项目用的组件库是Ant Design。", "items": [{"kind": "term", "content": "Ant Design"}]}
+{"id": "mem-ext-0184", "task": "extract", "today": "2027-06-11", "text": "小程序后台在微信公众平台里。", "items": [{"kind": "term", "content": "微信公众平台"}]}
+{"id": "mem-ext-0185", "task": "extract", "today": "2026-10-12", "text": "Our CRM is HubSpot.", "items": [{"kind": "term", "content": "HubSpot"}]}
+{"id": "mem-ext-0186", "task": "extract", "today": "2026-10-15", "text": "Send the draft to Olivia Grant for review.", "items": [{"kind": "person", "content": "Olivia Grant"}]}
+{"id": "mem-fill-0001", "task": "fill", "memories": ["季度复盘会（下周二上午十点，11月10日周二）"], "text": "大家别忘了季度复盘会。", "output": "大家别忘了下周二上午十点的季度复盘会。"}
+{"id": "mem-fill-0002", "task": "fill", "memories": ["产品演示（周四下午四点，11月5日周四）"], "text": "跟客户确认一下产品演示的时间。", "output": "跟客户确认一下周四下午四点产品演示的时间。"}
+{"id": "mem-fill-0003", "task": "fill", "memories": ["体检（后天上午九点半，11月6日周五）", "体检前一天晚上不吃东西"], "text": "明天晚上记得别吃东西。", "output": "明天晚上记得别吃东西，后天上午九点半体检。"}
+{"id": "mem-fill-0004", "task": "fill", "memories": ["家长会（今晚八点半）", "家长会在三楼多功能厅"], "text": "我去开家长会了。", "output": "我去三楼多功能厅开家长会了，今晚八点半开始。"}
+{"id": "mem-fill-0005", "task": "fill", "memories": ["交物业费（下个月五号，12月5日周六）"], "text": "物业费别忘了交。", "output": "物业费别忘了在下个月五号前交。"}
+{"id": "mem-fill-0006", "task": "fill", "memories": ["组内分享会（每周三下午四点）"], "text": "这周的组内分享谁来讲？", "output": "这周三下午四点的组内分享谁来讲？"}
+{"id": "mem-fill-0007", "task": "fill", "memories": ["去北京参加行业峰会（12月15号）"], "text": "帮我订去北京的机票。", "output": "帮我订12月15号去北京的机票。"}
+{"id": "mem-fill-0008", "task": "fill", "memories": ["航班去深圳（明早七点半）", "坐飞机提前两小时到机场"], "text": "明天几点出门去机场？", "output": "明早七点半的航班去深圳，提前两小时到机场，几点出门？"}
+{"id": "mem-fill-0009", "task": "fill", "memories": ["带孩子打疫苗（周六上午）"], "text": "孩子打疫苗要带疫苗本。", "output": "周六上午孩子打疫苗要带疫苗本。"}
+{"id": "mem-fill-0010", "task": "fill", "memories": ["把报销单交给财务（今天下午五点前）"], "text": "报销单记得交。", "output": "报销单记得在今天下午五点前交给财务。"}
+{"id": "mem-fill-0011", "task": "fill", "memories": ["打羽毛球（星期四晚上七点）"], "text": "羽毛球还是老地方吗？", "output": "星期四晚上七点的羽毛球还是老地方吗？"}
+{"id": "mem-fill-0012", "task": "fill", "memories": ["写完年终总结（月底前）"], "text": "年终总结写了吗？", "output": "月底前要交的年终总结写了吗？"}
+{"id": "mem-fill-0013", "task": "fill", "memories": ["公司年会（1月10号）", "准备年会节目"], "text": "年会节目准备得怎么样了？", "output": "1月10号年会的节目准备得怎么样了？"}
+{"id": "mem-fill-0014", "task": "fill", "memories": ["出发去团建（下周一早上八点）"], "text": "团建大家别迟到。", "output": "下周一早上八点出发去团建，大家别迟到。"}
+{"id": "mem-fill-0015", "task": "fill", "memories": ["结婚纪念日（三月八号）", "订餐厅"], "text": "帮我找家好点的餐厅。", "output": "三月八号结婚纪念日，帮我找家好点的餐厅。"}
+{"id": "mem-fill-0016", "task": "fill", "memories": ["给供应商回复报价（这周四之前）"], "text": "供应商的报价要回一下。", "output": "供应商的报价要在这周四之前回一下。"}
+{"id": "mem-fill-0017", "task": "fill", "memories": ["去银行开户（下周三下午）"], "text": "开户要带什么材料？", "output": "下周三下午去银行开户要带什么材料？"}
+{"id": "mem-fill-0018", "task": "fill", "memories": ["把课件发到群里（明天晚上六点之前）"], "text": "课件做完记得发群里。", "output": "课件做完记得在明天晚上六点之前发群里。"}
+{"id": "mem-fill-0019", "task": "fill", "memories": ["开学（2月3号）", "交学费"], "text": "学费什么时候交？", "output": "学费要在2月3号开学前交，什么时候交？"}
+{"id": "mem-fill-0020", "task": "fill", "memories": ["团队聚餐（下周五晚上）"], "text": "聚餐的地点定了吗？", "output": "下周五晚上聚餐的地点定了吗？"}
+{"id": "mem-fill-0021", "task": "fill", "memories": ["去4S店保养车（后天下午三点半）"], "text": "保养车要预约吗？", "output": "后天下午三点半去4S店保养车要预约吗？"}
+{"id": "mem-fill-0022", "task": "fill", "memories": ["和设计组对首页改版（明天下午两点）"], "text": "首页改版的稿子准备好。", "output": "明天下午两点和设计组对首页改版，稿子准备好。"}
+{"id": "mem-fill-0023", "task": "fill", "memories": ["新人培训（下周一）", "廖志强"], "text": "新人培训的讲师是谁来着？", "output": "下周一新人培训的讲师是廖志强。"}
+{"id": "mem-fill-0024", "task": "fill", "memories": ["见投资人（明天下午三点）", "见投资人带上商业计划书"], "text": "明天见投资人要带什么？", "output": "明天下午三点见投资人要带商业计划书。"}
+{"id": "mem-fill-0025", "task": "fill", "memories": ["韩梅"], "text": "跟梅确认一下电影票。", "output": "跟韩梅确认一下电影票。"}
+{"id": "mem-fill-0026", "task": "fill", "memories": ["刘思远"], "text": "需求的事找思远聊。", "output": "需求的事找刘思远聊。"}
+{"id": "mem-fill-0027", "task": "fill", "memories": ["邓卓然"], "text": "把方案发给客户那边的卓然。", "output": "把方案发给客户那边的邓卓然。"}
+{"id": "mem-fill-0028", "task": "fill", "memories": ["家住梧桐路12号3单元"], "text": "外卖送到家里。", "output": "外卖送到梧桐路12号3单元。"}
+{"id": "mem-fill-0029", "task": "fill", "memories": ["打印机在二楼茶水间旁边"], "text": "文件打印好了，去拿一下。", "output": "文件打印好了，去二楼茶水间旁边的打印机拿一下。"}
+{"id": "mem-fill-0030", "task": "fill", "memories": ["新办公室在浦东软件园"], "text": "下周的访客直接去新办公室。", "output": "下周的访客直接去浦东软件园的新办公室。"}
+{"id": "mem-fill-0031", "task": "fill", "memories": ["车牌号是浙A·8K321"], "text": "帮我登记一下车牌。", "output": "帮我登记一下车牌浙A·8K321。"}
+{"id": "mem-fill-0032", "task": "fill", "memories": ["航班去深圳（明早七点半）"], "text": "明天的航班是几点来着？我记得是早上。", "output": "明天的航班是早上七点半。"}
+{"id": "mem-fill-0033", "task": "fill", "memories": ["Design review (Wednesday at 3pm)"], "text": "Remind the team about the design review.", "output": "Remind the team about the design review on Wednesday at 3pm."}
+{"id": "mem-fill-0034", "task": "fill", "memories": ["Dentist appointment (tomorrow at 10:30)"], "text": "Move my dentist appointment if possible.", "output": "Move my dentist appointment tomorrow at 10:30 if possible."}
+{"id": "mem-fill-0035", "task": "fill", "memories": ["Ship version 2.4 (next Monday)"], "text": "Tell support that 2.4 is coming.", "output": "Tell support that 2.4 is coming next Monday."}
+{"id": "mem-fill-0036", "task": "fill", "memories": ["Flight to Tokyo (Saturday at 8am)"], "text": "Book a taxi to the airport for my Tokyo flight.", "output": "Book a taxi to the airport for my Tokyo flight on Saturday at 8am."}
+{"id": "mem-fill-0037", "task": "fill", "memories": ["Daniel Park"], "text": "Loop in Daniel on the vendor thread.", "output": "Loop in Daniel Park on the vendor thread."}
+{"id": "mem-fill-0038", "task": "fill", "memories": ["Team lunch (every Thursday at noon)"], "text": "Are we still doing team lunch?", "output": "Are we still doing team lunch this Thursday at noon?"}
+{"id": "mem-fill-0039", "task": "fill", "memories": ["Submit the expense report (by Friday)"], "text": "Don't forget the expense report.", "output": "Don't forget the expense report by Friday."}
+{"id": "mem-fill-0040", "task": "fill", "memories": ["Office closes at 7pm on Fridays"], "text": "Can we meet at the office Friday evening?", "output": "Can we meet at the office Friday evening before it closes at 7pm?"}
+{"id": "mem-fill-0041", "task": "fill", "memories": ["和星启教育线上沟通（周二上午十点）", "星启教育"], "text": "线上沟通的会议链接发我。", "output": "周二上午十点和星启教育线上沟通的会议链接发我。"}
+{"id": "mem-fill-0042", "task": "fill", "memories": ["外公八十大寿（下个月十号）", "外公八十大寿全家去杭州"], "text": "去杭州的车票买了吗？", "output": "下个月十号外公八十大寿去杭州的车票买了吗？"}
+{"id": "mem-fill-0043", "task": "fill", "memories": ["冯越发测试报告（周五之前）", "冯越"], "text": "测试报告催一下。", "output": "测试报告催一下冯越，周五之前要。"}
+{"id": "mem-fill-0044", "task": "fill", "memories": ["钢琴课（周三）"], "text": "这周钢琴课记得带琴谱。", "output": "这周三钢琴课记得带琴谱。"}
+{"id": "mem-fill-0045", "task": "fill", "memories": ["去机场接舅舅（后天中午）"], "text": "接舅舅的车安排好了吗？", "output": "后天中午去机场接舅舅的车安排好了吗？"}
+{"id": "mem-fill-0046", "task": "fill", "memories": ["游泳（每周六早上八点）"], "text": "这周还去游泳吗？", "output": "这周六早上八点还去游泳吗？"}
+{"id": "mem-fill-0047", "task": "fill", "memories": ["顾晨入职（下周）", "给顾晨开通邮箱和VPN"], "text": "新同事的账号开了吗？", "output": "下周入职的顾晨的邮箱和VPN开了吗？"}
+{"id": "mem-fill-0048", "task": "fill", "memories": ["和合众保险的合同到期（明年三月）"], "text": "续约的事要提前准备。", "output": "和合众保险的合同明年三月到期，续约的事要提前准备。"}
+{"id": "mem-fill-0049", "task": "fill", "memories": ["站会（每天早上九点十五）"], "text": "明天站会我请个假。", "output": "明天早上九点十五的站会我请个假。"}
+{"id": "mem-fill-0050", "task": "fill", "memories": ["给妈妈买生日礼物"], "text": "下班顺路去商场。", "output": "下班顺路去商场给妈妈买生日礼物。"}
+{"id": "mem-fill-0051", "task": "fill", "memories": ["续车险"], "text": "这个月要办的事列一下。", "output": "这个月要办的事列一下，包括续车险。"}
+{"id": "mem-fill-0052", "task": "fill", "memories": ["Renew gym membership"], "text": "What do I need to do this week?", "output": "What do I need to do this week? Renew the gym membership."}
+{"id": "mem-fill-0053", "task": "fill", "memories": ["过需求文档（周四下午两点）", "需求文档会在三号会议室", "汤静"], "text": "需求文档会在哪开？", "output": "周四下午两点的需求文档会在三号会议室开，汤静主讲。"}
+{"id": "mem-fill-0054", "task": "fill", "memories": ["接待宁总（下午）", "宁总"], "text": "会议室帮我留一下，有客人来。", "output": "会议室帮我留一下，宁总下午来。"}
+{"id": "mem-fill-0055", "task": "fill", "memories": ["季度复盘会（下周二上午十点）"], "text": "帮我买一杯拿铁。", "output": "帮我买一杯拿铁。"}
+{"id": "mem-fill-0056", "task": "fill", "memories": ["刘思远"], "text": "今天天气真不错。", "output": "今天天气真不错。"}
+{"id": "mem-fill-0057", "task": "fill", "memories": ["产品演示（周四下午四点）"], "text": "产品演示周四下午四点开始，请准时。", "output": "产品演示周四下午四点开始，请准时。"}
+{"id": "mem-fill-0058", "task": "fill", "memories": ["团队聚餐（下周五晚上）"], "text": "聚餐改到下周六了。", "output": "聚餐改到下周六了。"}
+{"id": "mem-fill-0059", "task": "fill", "memories": ["家长会（今晚八点半）"], "text": "家长会推迟到九点了。", "output": "家长会推迟到九点了。"}
+{"id": "mem-fill-0060", "task": "fill", "memories": ["体检（后天上午九点半）"], "text": "了解，我这边没问题。", "output": "了解，我这边没问题。"}
+{"id": "mem-fill-0061", "task": "fill", "memories": ["不吃香菜"], "text": "明天的会议纪要我来写。", "output": "明天的会议纪要我来写。"}
+{"id": "mem-fill-0062", "task": "fill", "memories": ["去北京参加行业峰会（12月15号）"], "text": "峰会我不去了，让小唐替我去。", "output": "峰会我不去了，让小唐替我去。"}
+{"id": "mem-fill-0063", "task": "fill", "memories": ["打羽毛球（星期四晚上七点）"], "text": "谢谢你的礼物！", "output": "谢谢你的礼物！"}
+{"id": "mem-fill-0064", "task": "fill", "memories": ["韩梅"], "text": "韩梅已经买好票了。", "output": "韩梅已经买好票了。"}
+{"id": "mem-fill-0065", "task": "fill", "memories": ["Design review (Wednesday at 3pm)"], "text": "Thanks, see you then.", "output": "Thanks, see you then."}
+{"id": "mem-fill-0066", "task": "fill", "memories": ["Dentist appointment (tomorrow at 10:30)"], "text": "Can you pick up milk on the way home?", "output": "Can you pick up milk on the way home?"}
+{"id": "mem-fill-0067", "task": "fill", "memories": ["Ship version 2.4 (next Monday)"], "text": "We moved the 2.4 release to Wednesday.", "output": "We moved the 2.4 release to Wednesday."}
+{"id": "mem-fill-0068", "task": "fill", "memories": ["Daniel Park"], "text": "Daniel Park already replied.", "output": "Daniel Park already replied."}
+{"id": "mem-fill-0069", "task": "fill", "memories": ["给供应商回复报价（这周四之前）"], "text": "这家餐厅的菜真不错。", "output": "这家餐厅的菜真不错。"}
+{"id": "mem-fill-0070", "task": "fill", "memories": ["车牌号是浙A·8K321"], "text": "停车场满了，我停在路边。", "output": "停车场满了，我停在路边。"}
+{"id": "mem-fill-0071", "task": "fill", "memories": ["公司年会（1月10号）"], "text": "年会定在1月10号，大家准备节目。", "output": "年会定在1月10号，大家准备节目。"}
+{"id": "mem-fill-0072", "task": "fill", "memories": ["航班去深圳（明早七点半）"], "text": "航班改签到下午了。", "output": "航班改签到下午了。"}
+{"id": "mem-fill-0073", "task": "fill", "memories": ["家住梧桐路12号3单元"], "text": "我妈今天来看我。", "output": "我妈今天来看我。"}
+{"id": "mem-fill-0074", "task": "fill", "memories": ["站会（每天早上九点十五）"], "text": "今天的站会就到这里。", "output": "今天的站会就到这里。"}
+{"id": "mem-fill-0075", "task": "fill", "memories": ["游泳（每周六早上八点）"], "text": "这周游泳改到周日了。", "output": "这周游泳改到周日了。"}
+{"id": "mem-fill-0076", "task": "fill", "memories": ["邓卓然"], "text": "这个bug我来修。", "output": "这个bug我来修。"}
+{"id": "mem-fill-0077", "task": "fill", "memories": ["报销上限每月两千"], "text": "这个月的报销已经提交了。", "output": "这个月的报销已经提交了。"}
+{"id": "mem-fill-0078", "task": "fill", "memories": ["Team lunch (every Thursday at noon)"], "text": "I'm working from home today.", "output": "I'm working from home today."}
+{"id": "mem-fill-0079", "task": "fill", "memories": ["Rent is due on the first of every month"], "text": "Rent is paid, thanks.", "output": "Rent is paid, thanks."}
+{"id": "mem-fill-0080", "task": "fill", "memories": ["续车险"], "text": "车险已经续好了。", "output": "车险已经续好了。"}
+{"id": "mem-fill-0081", "task": "fill", "memories": ["外公八十大寿（下个月十号）"], "text": "生日快乐！", "output": "生日快乐！"}
+{"id": "mem-fill-0082", "task": "fill", "memories": ["去银行开户（下周三下午）"], "text": "开户的事已经办完了。", "output": "开户的事已经办完了。"}
+{"id": "mem-fill-0083", "task": "fill", "memories": ["和设计组对首页改版（明天下午两点）"], "text": "首页改版的稿子发你了，看看。", "output": "首页改版的稿子发你了，看看。"}
+{"id": "mem-fill-0084", "task": "fill", "memories": ["新人培训（下周一）"], "text": "这周的周报写完了吗？", "output": "这周的周报写完了吗？"}
+{"id": "mem-fill-0085", "task": "fill", "memories": ["打印机在二楼茶水间旁边"], "text": "打印机卡纸了，找人修一下。", "output": "打印机卡纸了，找人修一下。"}
+{"id": "mem-fill-0086", "task": "fill", "memories": ["Flight to Tokyo (Saturday at 8am)"], "text": "My Tokyo flight got cancelled.", "output": "My Tokyo flight got cancelled."}
+{"id": "mem-fill-0087", "task": "fill", "memories": ["冯越"], "text": "冯越今天请假了。", "output": "冯越今天请假了。"}
+{"id": "mem-fill-0088", "task": "fill", "memories": ["组内分享会（每周三下午四点）"], "text": "分享会的PPT我上传到网盘了。", "output": "分享会的PPT我上传到网盘了。"}
+{"id": "mem-fill-0089", "task": "fill", "memories": ["交物业费（下个月五号）"], "text": "物业费已经交过了。", "output": "物业费已经交过了。"}
+{"id": "mem-sum-0001", "task": "summary", "day": "2026-10-12", "texts": ["明天下午两点和设计组对一下首页改版。", "行，明白了。", "把报价单抄送给何嘉宁。", "今天好累啊。"], "memories": ["和设计组对首页改版（明天下午两点）", "何嘉宁"], "output": "日程与会议：\n- 明天下午两点和设计组对首页改版\n待办事项：\n- 把报价单抄送给何嘉宁"}
+{"id": "mem-sum-0002", "task": "summary", "day": "2026-10-15", "texts": ["周四下午四点给客户做产品演示。", "演示用的样机记得充电。", "刘思远负责讲解需求部分。"], "memories": ["给客户做产品演示（周四下午四点）", "刘思远"], "output": "日程与会议：\n- 周四下午四点给客户做产品演示\n待办事项：\n- 给演示样机充电\n提到的人和事：\n- 刘思远负责讲解需求部分"}
+{"id": "mem-sum-0003", "task": "summary", "day": "2026-10-31", "texts": ["今晚八点半家长会，在三楼多功能厅。", "我先下班了。", "女儿对花生过敏，跟老师再说一下。"], "memories": ["家长会（今晚八点半）", "女儿对花生过敏"], "output": "日程与会议：\n- 今晚八点半家长会，三楼多功能厅\n待办事项：\n- 跟老师说明女儿对花生过敏"}
+{"id": "mem-sum-0004", "task": "summary", "day": "2026-11-04", "texts": ["下周二上午十点开季度复盘会。", "复盘的数据请各组周一前准备好。", "辛苦大家了。", "会议室已经订好了。"], "memories": ["季度复盘会（下周二上午十点）"], "output": "日程与会议：\n- 下周二上午十点季度复盘会，会议室已订好\n待办事项：\n- 各组周一前准备复盘数据"}
+{"id": "mem-sum-0005", "task": "summary", "day": "2026-11-18", "texts": ["11月20日之前要交论文开题报告。", "我的导师是宋雨桐教授。", "图书馆的书明天要还。", "晚饭吃什么？"], "memories": ["交论文开题报告（11月20日之前）", "宋雨桐"], "output": "待办事项：\n- 11月20日之前交论文开题报告\n- 明天还图书馆的书\n提到的人和事：\n- 导师宋雨桐教授"}
+{"id": "mem-sum-0006", "task": "summary", "day": "2026-12-07", "texts": ["明早七点半的航班去深圳。", "深圳那边的住处帮我找一下，两个晚上。", "跟老周说一声，明天他值班。"], "memories": ["航班去深圳（明早七点半）", "老周"], "output": "日程与会议：\n- 明早七点半航班去深圳\n待办事项：\n- 找深圳的住处，两个晚上\n- 通知老周明天值班"}
+{"id": "mem-sum-0007", "task": "summary", "day": "2026-12-23", "texts": ["这个月的OKR是把留存率提到百分之四十。", "灵犀系统下个月上线。", "上线前要做一次压测。", "收到。"], "memories": ["本月OKR是留存率提到百分之四十", "灵犀系统上线（下个月）"], "output": "日程与会议：\n- 灵犀系统下个月上线\n待办事项：\n- 上线前做一次压测\n提到的人和事：\n- 本月OKR：留存率提到百分之四十"}
+{"id": "mem-sum-0008", "task": "summary", "day": "2027-01-08", "texts": ["周六上午带孩子去打疫苗。", "疫苗本放在书房抽屉。", "周日中午和爸妈吃饭。", "哈哈哈太好笑了。"], "memories": ["带孩子打疫苗（周六上午）", "和爸妈吃饭（周日中午）"], "output": "日程与会议：\n- 周六上午带孩子打疫苗（疫苗本在书房抽屉）\n- 周日中午和爸妈吃饭"}
+{"id": "mem-sum-0009", "task": "summary", "day": "2027-02-14", "texts": ["客户反馈说登录页太慢，景天负责排查，周三给结论。", "支付接口还没联调完。", "云帆项目延期到下月中旬上线。"], "memories": ["景天", "云帆项目上线（下月中旬）"], "output": "日程与会议：\n- 云帆项目延期到下月中旬上线\n待办事项：\n- 景天排查登录页变慢，周三给结论\n- 完成支付接口联调"}
+{"id": "mem-sum-0010", "task": "summary", "day": "2027-03-02", "texts": ["顾晨下周入职，帮他开通邮箱和VPN。", "工位安排在我旁边。", "入职材料让HR发给他。"], "memories": ["顾晨入职（下周）"], "output": "日程与会议：\n- 顾晨下周入职\n待办事项：\n- 给顾晨开通邮箱和VPN，安排工位\n- 请HR发送入职材料"}
+{"id": "mem-sum-0011", "task": "summary", "day": "2027-03-25", "texts": ["后天去上海见客户安途科技，住两晚。", "合同带两份打印版。", "出差期间有急事打我电话。"], "memories": ["去上海见客户（后天）", "安途科技"], "output": "日程与会议：\n- 后天去上海见客户安途科技，住两晚\n待办事项：\n- 带两份打印版合同"}
+{"id": "mem-sum-0012", "task": "summary", "day": "2027-04-16", "texts": ["下个月五号交物业费。", "车险快到期了，得续一下。", "要给妈妈买生日礼物。", "外面在下雨。"], "memories": ["交物业费（下个月五号）", "续车险", "给妈妈买生日礼物"], "output": "待办事项：\n- 下个月五号交物业费\n- 续车险\n- 给妈妈买生日礼物"}
+{"id": "mem-sum-0013", "task": "summary", "day": "2027-05-06", "texts": ["Dentist appointment tomorrow at 10:30.", "Pick up the dry cleaning on the way back.", "Thanks so much!"], "memories": ["Dentist appointment (tomorrow at 10:30)"], "output": "Schedule:\n- Dentist appointment tomorrow at 10:30\nTo do:\n- Pick up the dry cleaning"}
+{"id": "mem-sum-0014", "task": "summary", "day": "2027-06-11", "texts": ["The design review is on Wednesday at 3pm.", "Please loop in Daniel Park on the vendor emails.", "We ship version 2.4 next Monday.", "Got it, thanks."], "memories": ["Design review (Wednesday at 3pm)", "Daniel Park", "Ship version 2.4 (next Monday)"], "output": "Schedule:\n- Design review on Wednesday at 3pm\n- Ship version 2.4 next Monday\nTo do:\n- Loop in Daniel Park on the vendor emails"}
+{"id": "mem-sum-0015", "task": "summary", "day": "2026-10-12", "texts": ["My flight to Tokyo leaves Saturday at 8am.", "Book a hotel near Shinjuku for three nights.", "Ask Marcus about the server credentials before I leave."], "memories": ["Flight to Tokyo (Saturday at 8am)", "Marcus"], "output": "Schedule:\n- Flight to Tokyo, Saturday at 8am\nTo do:\n- Book a hotel near Shinjuku for three nights\n- Ask Marcus about the server credentials"}
+{"id": "mem-sum-0016", "task": "summary", "day": "2026-10-15", "texts": ["好的，我知道了。", "谢谢你！", "我到家了。"], "memories": [], "output": "今天没有需要特别记录的安排或待办。"}
+{"id": "mem-sum-0017", "task": "summary", "day": "2026-10-31", "texts": ["Okay, sounds good.", "I'm on my way.", "Good night!"], "memories": [], "output": "Nothing in particular to note today."}
+{"id": "mem-sum-0018", "task": "summary", "day": "2026-11-04", "texts": ["周三晚上七点和韩梅在星光影院看电影，她买票。", "看完电影去吃火锅。", "明天早上记得给花浇水。"], "memories": ["和韩梅看电影（周三晚上七点）", "韩梅"], "output": "日程与会议：\n- 周三晚上七点和韩梅在星光影院看电影，之后吃火锅\n待办事项：\n- 明天早上给花浇水"}
+{"id": "mem-sum-0019", "task": "summary", "day": "2026-11-18", "texts": ["下周一早上八点出发去团建。", "团建要穿运动鞋。", "大巴在公司楼下集合。", "好的好的。"], "memories": ["出发去团建（下周一早上八点）"], "output": "日程与会议：\n- 下周一早上八点出发去团建，公司楼下集合\n提到的人和事：\n- 团建穿运动鞋"}
+{"id": "mem-sum-0020", "task": "summary", "day": "2026-12-07", "texts": ["每周三下午四点组内分享会。", "这周轮到我讲，主题是缓存设计。", "PPT周二晚上发群里。"], "memories": ["组内分享会（每周三下午四点）"], "output": "日程与会议：\n- 周三下午四点组内分享会，本周由我讲缓存设计\n待办事项：\n- 周二晚上把PPT发到群里"}
+{"id": "mem-sum-0021", "task": "summary", "day": "2026-12-23", "texts": ["报价我们按八折给，最低不能低于七五折。", "合作方是远航物流有限公司。", "合同明天发给他们法务。"], "memories": ["报价按八折，最低七五折", "远航物流有限公司"], "output": "待办事项：\n- 明天把合同发给远航物流有限公司的法务\n提到的人和事：\n- 报价按八折，最低七五折"}
+{"id": "mem-sum-0022", "task": "summary", "day": "2027-01-08", "texts": ["12月15号去北京参加行业峰会。", "峰会的演讲稿还没写。", "马总也去。", "今天的咖啡有点苦。"], "memories": ["去北京参加行业峰会（12月15号）", "马总"], "output": "日程与会议：\n- 12月15号去北京参加行业峰会，马总同去\n待办事项：\n- 写峰会演讲稿"}
+{"id": "mem-sum-0023", "task": "summary", "day": "2027-02-14", "texts": ["后天晚上十点系统维护，服务会停一小时。", "维护前要发公告通知用户。", "公告让小唐来写。"], "memories": ["系统维护（后天晚上十点）", "小唐"], "output": "日程与会议：\n- 后天晚上十点系统维护，服务停一小时\n待办事项：\n- 维护前发公告通知用户（小唐写）"}
+{"id": "mem-sum-0024", "task": "summary", "day": "2027-03-02", "texts": ["三月八号是结婚纪念日，提前订餐厅。", "顺便买束花。", "这家店人好多。"], "memories": ["结婚纪念日（三月八号）", "订餐厅"], "output": "日程与会议：\n- 三月八号结婚纪念日\n待办事项：\n- 提前订餐厅，买束花"}
+{"id": "mem-sum-0025", "task": "summary", "day": "2027-03-25", "texts": ["Team lunch every Thursday at noon.", "Our new intern is Priya Nair.", "Show Priya the onboarding docs this week."], "memories": ["Team lunch (every Thursday at noon)", "Priya Nair"], "output": "Schedule:\n- Team lunch every Thursday at noon\nTo do:\n- Show Priya Nair the onboarding docs this week"}
+{"id": "mem-sum-0026", "task": "summary", "day": "2027-04-16", "texts": ["新来的产品经理叫刘思远，以后需求找他。", "他下午过来认识一下大家。", "工牌要找行政办。"], "memories": ["刘思远"], "output": "日程与会议：\n- 下午新产品经理刘思远来认识大家\n待办事项：\n- 找行政给刘思远办工牌\n提到的人和事：\n- 以后需求找刘思远"}
+{"id": "mem-sum-0027", "task": "summary", "day": "2027-05-06", "texts": ["我下周三到周五请假，有急事打我电话。", "请假期间冯越帮我看一下线上告警。", "交接文档放在共享盘了。"], "memories": ["请假（下周三到周五）", "冯越"], "output": "日程与会议：\n- 下周三到周五请假\n提到的人和事：\n- 冯越代看线上告警，交接文档在共享盘"}
+{"id": "mem-sum-0028", "task": "summary", "day": "2027-06-11", "texts": ["明天下午三点在望京SOHO见投资人。", "商业计划书再改一版。", "财务数据让祁雪今晚发我。"], "memories": ["见投资人（明天下午三点）", "祁雪"], "output": "日程与会议：\n- 明天下午三点在望京SOHO见投资人\n待办事项：\n- 再改一版商业计划书\n- 祁雪今晚发财务数据"}
+{"id": "mem-sum-0029", "task": "summary", "day": "2026-10-12", "texts": ["周日下午三点带狗去打疫苗。", "狗粮快吃完了，记得买。", "我先去洗个澡。"], "memories": ["带狗打疫苗（周日下午三点）"], "output": "日程与会议：\n- 周日下午三点带狗打疫苗\n待办事项：\n- 买狗粮"}
+{"id": "mem-sum-0030", "task": "summary", "day": "2026-10-15", "texts": ["火种项目的负责人是贝宁，周四要交第一版原型。", "原型评审定在周五上午。", "需要UI那边配合两个人。"], "memories": ["火种项目", "贝宁", "火种项目交第一版原型（周四）"], "output": "日程与会议：\n- 周四交火种项目第一版原型\n- 周五上午原型评审\n提到的人和事：\n- 火种项目负责人贝宁，需要UI配合两人"}
+{"id": "mem-sum-0031", "task": "summary", "day": "2026-10-31", "texts": ["Call the insurance company today before 5.", "Renew my gym membership.", "Haha that's hilarious."], "memories": ["Call the insurance company (today before 5)", "Renew gym membership"], "output": "To do:\n- Call the insurance company before 5\n- Renew gym membership"}
+{"id": "mem-sum-0032", "task": "summary", "day": "2026-11-04", "texts": ["宁总下午到，安排一下接待。", "会议室要提前开空调。", "准备两份产品手册。", "收到，马上处理。"], "memories": ["接待宁总（下午）", "宁总"], "output": "日程与会议：\n- 宁总下午到访\n待办事项：\n- 会议室提前开空调\n- 准备两份产品手册"}
+{"id": "mem-sum-0033", "task": "summary", "day": "2026-11-18", "texts": ["下周五晚上团队聚餐，地点待定。", "大家有忌口的提前说。", "我不吃香菜。"], "memories": ["团队聚餐（下周五晚上）", "不吃香菜"], "output": "日程与会议：\n- 下周五晚上团队聚餐，地点待定\n待办事项：\n- 收集大家的忌口（我不吃香菜）"}
+{"id": "mem-sum-0034", "task": "summary", "day": "2026-12-07", "texts": ["月底前把年终总结写完。", "年终总结要附上项目数据。", "这个视频挺有意思的。"], "memories": ["写完年终总结（月底前）"], "output": "待办事项：\n- 月底前写完年终总结，附上项目数据"}
+{"id": "mem-sum-0035", "task": "summary", "day": "2026-12-23", "texts": ["Elena Ruiz will present the Atlas roadmap on Thursday at 4pm.", "Send her the latest metrics before then.", "Never deploy on Fridays."], "memories": ["Elena Ruiz presents the roadmap (Thursday at 4pm)", "Never deploy on Fridays"], "output": "Schedule:\n- Elena Ruiz presents the Atlas roadmap on Thursday at 4pm\nTo do:\n- Send Elena the latest metrics\nPeople and things:\n- Never deploy on Fridays"}
