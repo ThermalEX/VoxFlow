@@ -54,7 +54,7 @@ VoxFlow 的本地智能编辑模型：把语音识别得到的口语原文，整
 | 版本 | 日期 | 种子数据 | 主要改动 |
 | --- | --- | --- | --- |
 | [v1](https://huggingface.co/ThermalEX/voxflow-rewrite/tree/main/v1) | 2026-10-13 | 1230 条 | 初版，覆盖 14 类口语现象 |
-| [v2](https://huggingface.co/ThermalEX/voxflow-rewrite/tree/main/v2) | 2026-10-14 | 1269 条 | 中文姓名英译用“名 姓”顺序（王书涵 → Shuhan Wang），称呼写作 Xiao Li、Lao Wang |
+| [v2](https://huggingface.co/ThermalEX/voxflow-rewrite/tree/main/v2) | 2026-10-14 | 1269 条 | 中文姓名英译用“名 姓”顺序（张三 → San Zhang），称呼写作 Xiao Li、Lao Wang |
 | [v3](https://huggingface.co/ThermalEX/voxflow-rewrite/tree/main/v3) | 2026-10-14 | 1321 条 | 姓名拼音：常见名字用字、多音字姓、复姓、隔音符号 |
 | [v4](https://huggingface.co/ThermalEX/voxflow-rewrite/tree/main/v4) | 2026-10-15 | 1427 条 | 针对 v3 弱点补数据：有意义的“然后/就是”保留、中英夹杂保留、按位置删句、时间推算、只改语气的委婉改写。**当前推荐** |
 

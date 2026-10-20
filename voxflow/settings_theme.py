@@ -73,6 +73,23 @@ def stylesheet(theme: Theme) -> str:
         QLabel#warning {{ color: {t.text}; background: {t.hover}; border: 1px solid {t.border};
                          border-radius: 10px; padding: 9px 12px; font-size: 12px; }}
         QLabel#entryText {{ font-size: 14px; }}
+        QDialog#memoryDialog {{ background: {t.window}; color: {t.text}; }}
+        QLabel#dialogTitle {{ font-size: 22px; font-weight: 650; }}
+        QWidget#memoryList {{ background: transparent; }}
+        QWidget#memoryRow {{ border-bottom: 1px solid {t.divider}; border-radius: 0; }}
+        QWidget#memoryRow:hover {{ background: {t.hover}; border-radius: 8px; }}
+        QLabel#memoryText {{ font-size: 14px; }}
+        QLabel#memoryMeta {{ color: {t.muted}; font-size: 12px; }}
+        QLineEdit#searchBox {{ border-radius: 17px; min-height: 22px; padding-left: 6px; }}
+        QToolButton#iconButton {{ background: transparent; border: none; border-radius: 8px; padding: 5px; }}
+        QToolButton#iconButton:hover {{ background: {t.hover}; }}
+        QToolButton#iconButton:checked {{ background: {t.selected}; }}
+        QToolButton#iconButton::menu-indicator {{ image: none; width: 0; }}
+        QMenu {{ background: {t.popup}; color: {t.text}; border: 1px solid {t.border}; border-radius: 10px; padding: 5px; }}
+        QMenu::item {{ padding: 7px 22px 7px 14px; border-radius: 6px; }}
+        QMenu::item:selected {{ background: {t.hover}; }}
+        QMenu::item:disabled {{ color: {t.muted}; }}
+        QMenu::separator {{ height: 1px; background: {t.divider}; margin: 4px 6px; }}
         QListWidget {{ background: transparent; border: none; outline: none; color: {t.text}; }}
         QListWidget::item {{ padding: 8px 10px; margin: 1px 0; border-radius: 8px; }}
         QListWidget::item:selected {{ background: {t.selected}; color: {t.text}; }}

@@ -25,21 +25,21 @@ def store(tmp_path, clock):
 
 def test_entries_from_the_user_are_kept_forever_and_extracted_ones_for_a_week(store):
     explicit = store.add_entry("周三下午三点开评审会", source="explicit")
-    extracted = store.add_entry("王书涵", kind="person", source="auto")
+    extracted = store.add_entry("李思涵", kind="person", source="auto")
     assert (explicit.keep, extracted.keep) == (FOREVER, WEEK)
     assert extracted.kind == "person"
-    assert [entry.content for entry in store.entries()] == ["王书涵", "周三下午三点开评审会"]
+    assert [entry.content for entry in store.entries()] == ["李思涵", "周三下午三点开评审会"]
 
 
 def test_a_repeated_mention_refreshes_the_entry_and_never_shortens_it(store, clock):
-    first = store.add_entry("王书涵", kind="person", source="auto")
+    first = store.add_entry("李思涵", kind="person", source="auto")
     clock.now += 60
-    again = store.add_entry(" 王书涵。", source="explicit", detail={"note": "me"})
+    again = store.add_entry(" 李思涵。", source="explicit", detail={"note": "me"})
     assert again.id == first.id
     assert (again.keep, again.source, again.detail) == (FOREVER, "explicit", {"note": "me"})
     assert again.updated_at == clock.now
     assert len(store.entries()) == 1
-    store.add_entry("王书涵", source="auto")
+    store.add_entry("李思涵", source="auto")
     assert store.entry(first.id).keep == FOREVER
 
 
@@ -50,14 +50,14 @@ def test_blank_entries_and_records_are_ignored(store):
 
 
 def test_entries_can_be_edited_searched_and_listed_as_names(store):
-    entry = store.add_entry("王淑涵", kind="person")
+    entry = store.add_entry("李丝涵", kind="person")
     store.add_entry("VoxFlow", kind="term")
     store.add_entry("周五交周报")
-    store.update_entry(entry.id, content="王书涵")
+    store.update_entry(entry.id, content="李思涵")
     store.update_entry(entry.id, content="  ")  # a blank edit keeps the old text
-    assert store.entry(entry.id).content == "王书涵"
+    assert store.entry(entry.id).content == "李思涵"
     assert [item.content for item in store.entries(search="周报")] == ["周五交周报"]
-    assert sorted(store.names()) == ["VoxFlow", "王书涵"]
+    assert sorted(store.names()) == ["VoxFlow", "李思涵"]
 
 
 def test_records_are_grouped_by_day_and_track_extraction(store, clock):
@@ -80,7 +80,7 @@ def test_a_new_summary_replaces_the_old_one_but_keeps_its_keep(store):
 
 def test_week_rows_are_forgotten_after_seven_days_and_forever_rows_stay(store, clock):
     week_entry = store.add_entry("临时会议室 B2", source="auto")
-    forever_entry = store.add_entry("王书涵", kind="person", source="explicit")
+    forever_entry = store.add_entry("李思涵", kind="person", source="explicit")
     record = store.add_record("今天下午去取快递。")
     kept_record = store.add_record("项目代号是北极星。")
     store.set_keep("records", kept_record.id, FOREVER)
@@ -106,7 +106,7 @@ def test_delete_day_clear_and_bad_arguments(store):
     store.add_record("今天的第一句。")
     day = store.days()[0]
     store.save_summary(day, "总结")
-    store.add_entry("王书涵")
+    store.add_entry("李思涵")
     store.delete_day(day)
     assert store.days() == [] and len(store.entries()) == 1
     store.clear()
@@ -120,8 +120,8 @@ def test_delete_day_clear_and_bad_arguments(store):
 def test_the_database_survives_reopening(tmp_path, clock):
     path = tmp_path / "memory.db"
     first = MemoryStore(path, clock=clock)
-    first.add_entry("王书涵", kind="person")
+    first.add_entry("李思涵", kind="person")
     first.close()
     second = MemoryStore(path, clock=clock)
-    assert [entry.content for entry in second.entries()] == ["王书涵"]
+    assert [entry.content for entry in second.entries()] == ["李思涵"]
     second.close()

@@ -24,7 +24,7 @@ def test_well_formed_memory_seeds_pass():
     (EXTRACT | {"today": "Tuesday"}, "today must be an ISO date"),
     (EXTRACT | {"items": [{"kind": "mood", "content": "开心"}]}, "needs a kind"),
     (EXTRACT | {"items": [{"kind": "event", "content": "演示", "time": "10月22日"}]}, "time must be copied"),
-    (EXTRACT | {"items": [{"kind": "person", "content": "王书涵", "time": "周四"}]}, "not allowed for person"),
+    (EXTRACT | {"items": [{"kind": "person", "content": "李思涵", "time": "周四"}]}, "not allowed for person"),
     (FILL | {"memories": []}, "memories must not be empty"),
     (FILL | {"output": "确认一下周四16点的产品演示。"}, "adds numbers"),
     (SUMMARY | {"output": "x" * 301}, "longer than"),

@@ -17,7 +17,7 @@ def test_memory_off_never_creates_the_database(tmp_path):
     memory, _settings = make_memory(tmp_path, enabled=False)
     assert memory.store is None
     assert memory.strip_command("记住周三开会") is None
-    assert memory.correct("王淑涵") == "王淑涵"
+    assert memory.correct("李丝涵") == "李丝涵"
     memory.remember("周三开会", explicit=True)
     assert not memory_path(tmp_path).exists()
     memory.close()
@@ -29,10 +29,10 @@ def test_turning_memory_on_opens_the_database_and_keeps_texts(tmp_path):
     memory.changed.connect(lambda: changes.append(True))
     memory.set_enabled(True)
     assert settings.value("memory/enabled", type=bool)
-    memory.remember("记住我叫王书涵", explicit=True)
+    memory.remember("记住我叫李思涵", explicit=True)
     assert memory_path(tmp_path).is_file()
     [entry] = memory.store.entries()
-    assert (entry.content, entry.keep) == ("我叫王书涵", FOREVER)
+    assert (entry.content, entry.keep) == ("我叫李思涵", FOREVER)
     assert len(changes) == 2
     memory.close()
 
@@ -51,11 +51,11 @@ def test_turning_memory_off_keeps_existing_rows_readable(tmp_path):
 
 def test_names_are_corrected_from_people_and_terms(tmp_path):
     store = MemoryStore(":memory:")
-    store.add_entry("王书涵", kind="person")
+    store.add_entry("李思涵", kind="person")
     store.add_entry("周三开会", kind="event")
     memory, settings = make_memory(tmp_path, enabled=True)
     memory = Memory(settings, store=store)
-    assert memory.correct("王淑涵说周三开会") == "王书涵说周三开会"
+    assert memory.correct("李丝涵说周三开会") == "李思涵说周三开会"
     memory.close()
 
 

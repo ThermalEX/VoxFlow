@@ -247,7 +247,7 @@ class SettingsWindow(QWidget):
         self._show_hotkey_message(key, **values)
         if self.download_panel is not None:
             self.download_panel.retranslate()
-        self.memory_page.refresh()
+        self.memory_page.retranslate()
 
     def _set_language(self, _index: int) -> None:
         choice = str(self.language_box.currentData())

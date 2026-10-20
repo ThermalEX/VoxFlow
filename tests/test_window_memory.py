@@ -130,29 +130,29 @@ def test_text_is_recorded_even_when_pasting_fails(tmp_path, preserve_clipboard):
 
 def test_remembered_names_are_fixed_without_smart_editing(tmp_path):
     store = MemoryStore(tmp_path / "m.db")
-    store.add_entry("王书涵", kind="person")
+    store.add_entry("李思涵", kind="person")
     app, window, output = make_window(tmp_path, store=store)
-    window.apply_transcript("final", "把文件发给王淑涵。")
+    window.apply_transcript("final", "把文件发给李丝涵。")
     animation = window.smart.animation
     assert animation.state() == animation.State.Running
     finish(app, animation)
-    assert window.transcript.toPlainText() == "把文件发给王书涵。"
+    assert window.transcript.toPlainText() == "把文件发给李思涵。"
     assert window.smart.undo_button.isVisibleTo(window)
     window._confirm_text()
-    assert output.calls == ["把文件发给王书涵。"]
+    assert output.calls == ["把文件发给李思涵。"]
     window.close()
 
 
 def test_remembered_names_are_fixed_in_the_rewrite(tmp_path):
     store = MemoryStore(tmp_path / "m.db")
-    store.add_entry("王书涵", kind="person")
-    client = FakeClient("把文件发给王淑涵。")
+    store.add_entry("李思涵", kind="person")
+    client = FakeClient("把文件发给李丝涵。")
     app, window, _output = make_window(tmp_path, store=store, client=client)
-    window.apply_transcript("final", "额，把文件发给王淑涵。")
+    window.apply_transcript("final", "额，把文件发给李丝涵。")
     animation = window.smart.animation
     settle(app, window, lambda: animation.state() == animation.State.Running)
     finish(app, animation)
-    assert window.transcript.toPlainText() == "把文件发给王书涵。"
+    assert window.transcript.toPlainText() == "把文件发给李思涵。"
     window.close()
 
 
@@ -203,10 +203,10 @@ class MemoryClient(FakeClient):
 
 def test_confirmed_texts_are_mined_for_entries_once_the_overlay_is_idle(tmp_path):
     store = MemoryStore(tmp_path / "m.db")
-    client = MemoryClient("周三下午三点开评审会，王书涵主持。", extracted=[
-        {"kind": "event", "content": "评审会", "time": "周三下午三点"}, {"kind": "person", "content": "王书涵"}])
+    client = MemoryClient("周三下午三点开评审会，李思涵主持。", extracted=[
+        {"kind": "event", "content": "评审会", "time": "周三下午三点"}, {"kind": "person", "content": "李思涵"}])
     app, window, _output = make_window(tmp_path, store=store, client=client)
-    window.apply_transcript("final", "周三下午三点开评审会，王书涵主持。")
+    window.apply_transcript("final", "周三下午三点开评审会，李思涵主持。")
     settle(app, window, lambda: client.calls and window.smart.future is None)
     assert not any(call[0] == "extract" for call in client.calls)  # never while the overlay is in use
     window._confirm_text()
@@ -217,21 +217,21 @@ def test_confirmed_texts_are_mined_for_entries_once_the_overlay_is_idle(tmp_path
     detail = entries["评审会"].detail
     assert detail["time"] == "周三下午三点" and entries["评审会"].keep == WEEK
     assert date.fromisoformat(detail["date"]).weekday() == 2  # worked out by rule: the coming Wednesday
-    assert entries["王书涵"].kind == "person" and entries["王书涵"].source == "auto"
+    assert entries["李思涵"].kind == "person" and entries["李思涵"].source == "auto"
     window.close()
 
 
 def test_entries_found_in_a_remember_request_are_kept_forever(tmp_path):
     store = MemoryStore(tmp_path / "m.db")
-    client = MemoryClient("我叫王书涵。", extracted=[{"kind": "person", "content": "王书涵"}])
+    client = MemoryClient("我叫李思涵。", extracted=[{"kind": "person", "content": "李思涵"}])
     app, window, _output = make_window(tmp_path, store=store, client=client)
-    window.apply_transcript("final", "记住我叫王书涵。")
+    window.apply_transcript("final", "记住我叫李思涵。")
     finish(app, window.smart.highlight)
     settle(app, window, lambda: window.smart.future is None and window.smart._pending_clean is None)
     window._confirm_text()
     settle(app, window, lambda: not store.pending_records())
     keeps = {entry.content: entry.keep for entry in store.entries()}
-    assert keeps["王书涵"] == FOREVER
+    assert keeps["李思涵"] == FOREVER
     window.close()
 
 

@@ -1,4 +1,4 @@
-"""Fix misheard names and terms by sound: a remembered 王书涵 turns a transcribed 王淑涵 back into 王书涵."""
+"""Fix misheard names and terms by sound: a remembered 张三 turns a transcribed 张叁 back into 张三."""
 
 import re
 

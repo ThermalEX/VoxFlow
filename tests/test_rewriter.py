@@ -206,12 +206,12 @@ def test_extract_sends_the_date_and_keeps_only_well_formed_items(endpoint):
     from voxflow.rewrite_prompts import MEMORY_EXTRACT_SYSTEM_PROMPT
 
     endpoint.reply = {"content": '```json\n[{"kind": "event", "content": "评审会", "time": "周三下午三点"}, '
-                                 '{"kind": "person", "content": " 王书涵 ", "time": "today"}, '
+                                 '{"kind": "person", "content": " 李思涵 ", "time": "today"}, '
                                  '{"kind": "mood", "content": "项目代号是北极星"}, {"content": ""}, "oops"]\n```'}
     client = rewriter.RewriteClient(endpoint.base_url, "voxflow-rewrite")
-    items = client.extract("周三下午三点开评审会，王书涵主持", date(2026, 10, 20))
+    items = client.extract("周三下午三点开评审会，李思涵主持", date(2026, 10, 20))
     assert items == [{"kind": "event", "content": "评审会", "time": "周三下午三点"},
-                     {"kind": "person", "content": "王书涵"},
+                     {"kind": "person", "content": "李思涵"},
                      {"kind": "fact", "content": "项目代号是北极星"}]
     body = endpoint.requests[-1][3]
     assert body["messages"][0]["content"] == MEMORY_EXTRACT_SYSTEM_PROMPT
