@@ -220,6 +220,7 @@ STRINGS: dict[str, tuple[str, str]] = {
     "memory.today": ("{day} (today)", "{day}（今天）"),
     "button.delete_day": ("Delete this day", "删除这一天"),
     "memory.no_records": ("No texts kept for this day", "这一天没有保存的文字"),
+    "field.memory_summary": ("Summary", "总结"),
     "memory.no_summary": ("No summary for this day yet", "这一天还没有总结"),
     "memory.summary_made": ("Summarized {when}", "生成于 {when}"),
     "button.summarize": ("Summarize", "生成总结"),

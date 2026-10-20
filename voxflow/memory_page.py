@@ -1,6 +1,7 @@
 """The Memory page of the settings window: the switch and privacy notes, the table of what VoxFlow remembers,
 and each day's confirmed texts with its summary. Everything here can be kept for a week or forever."""
 
+import time
 from datetime import datetime
 
 from PySide6.QtCore import QUrl, Qt
@@ -25,7 +26,7 @@ class MemoryPage:
         self.owner = owner
         self.memory = None
         self._day = ""
-        self._summary_message: tuple[str, dict] | None = None
+        self._summary_message: tuple[str, dict, float] | None = None  # key, values, when it happened
         # Dialogs go through these hooks so tests can answer them.
         self.ask_text = lambda title, text: QInputDialog.getText(owner, title, title, QLineEdit.EchoMode.Normal, text)
         self.confirm = lambda text: QMessageBox.question(owner, tr("category.memory"), text) == \
@@ -60,7 +61,7 @@ class MemoryPage:
         card = owner._section(layout, "section.memory_entries")
         owner._row(card, "field.memory_search", None, owner._sized(self.search, 260))
         owner._row(card, "field.memory_add", "desc.memory_add", owner._sized(self.new_entry, 220),
-                   owner._sized(self.new_kind, 110), self.add_button)
+                   owner._sized(self.new_kind, 130), self.add_button)
         self.entry_card = SettingsCard()
         layout.addSpacing(8)
         layout.addWidget(self.entry_card)
@@ -69,7 +70,7 @@ class MemoryPage:
         self.day_box.currentIndexChanged.connect(self._day_chosen)
         self.delete_day_button = owner._button("button.delete_day", self._delete_day)
         card = owner._section(layout, "section.memory_days")
-        owner._row(card, "field.memory_day", "desc.memory_day", owner._sized(self.day_box, 180),
+        owner._row(card, "field.memory_day", "desc.memory_day", owner._sized(self.day_box, 220),
                    self.delete_day_button)
         self.summary_card = SettingsCard()
         layout.addSpacing(8)
@@ -100,7 +101,9 @@ class MemoryPage:
             self.enabled.blockSignals(True)
             self.enabled.setChecked(on)
             self.enabled.blockSignals(False)
-        location = str(self.memory.location()) if self.memory is not None else ""
+        # A path has no spaces to wrap at; let it break after each folder so the row fits narrow windows.
+        location = str(self.memory.location()).replace("\\", "\\​").replace("/", "/​") \
+            if self.memory is not None else ""
         self.location_row.set_desc(tr("desc.memory_location", path=location) if location else "")
         endpoint = self.memory.remote_endpoint() if self.memory is not None else ""
         self.remote_note.setText(tr("memory.remote_note", endpoint=endpoint))
@@ -202,13 +205,23 @@ class MemoryPage:
         if summary is not None:
             controls += [self._keep_control("summaries", summary.id, summary.keep),
                          self._small_button("button.delete", lambda: self._delete("summaries", summary.id))]
-        message = tr(self._summary_message[0], **self._summary_message[1]) if self._summary_message else ""
-        text = summary.text if summary is not None else tr("memory.no_summary")
-        row = self._text_row(text, message or (tr("memory.summary_made", when=_when(summary.created_at))
-                                               if summary is not None else ""), *controls)
-        if summary is None:
-            row.title.setObjectName("rowDesc")
-        self.summary_card.add_row(row)
+        message = ""
+        if self._summary_message is not None:
+            key, values, when = self._summary_message
+            # A failure is old news once a newer summary exists.
+            message = tr(key, **values) if summary is None or summary.created_at < when else ""
+        made = tr("memory.summary_made", when=_when(summary.created_at)) if summary is not None else ""
+        header = SettingRow()
+        header.title.setText(tr("field.memory_summary"))
+        header.set_desc(message or made)
+        for control in controls:
+            header.control_layout.addWidget(control, 0, Qt.AlignmentFlag.AlignVCenter)
+        self.summary_card.add_row(header)
+        # The summary gets the full width of its own row, so its points are not squeezed by the buttons.
+        if summary is not None:
+            self.summary_card.add_row(self._text_row(summary.text, ""))
+        else:
+            self._placeholder(self.summary_card, "memory.no_summary")
         if not records:
             self._placeholder(self.record_card, "memory.no_records")
         for record in records:
@@ -281,8 +294,8 @@ class MemoryPage:
         if reason is None:
             self._summary_message = None
         elif reason in ("empty", "model"):
-            self._summary_message = (f"memory.summary_{reason}", {})
+            self._summary_message = (f"memory.summary_{reason}", {}, time.time())
         else:
-            self._summary_message = ("memory.summary_failed", {"reason": reason})
+            self._summary_message = ("memory.summary_failed", {"reason": reason}, time.time())
         if day == self._day:
             self._fill_day()

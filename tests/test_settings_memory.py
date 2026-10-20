@@ -28,7 +28,8 @@ def test_the_switch_turns_memory_on_and_off(tmp_path):
     assert not page.enabled.isChecked() and not page.add_button.isEnabled()
     page.enabled.click()
     assert memory.enabled and page.add_button.isEnabled()
-    assert str(tmp_path / "memory") in page.location_row.desc.text()
+    # The path may break after any folder (zero-width spaces), so narrow windows do not overflow.
+    assert str(tmp_path / "memory") in page.location_row.desc.text().replace("​", "")
     page.enabled.click()
     assert not memory.enabled
     window.close()
@@ -88,7 +89,7 @@ def test_each_day_shows_its_texts_and_summary(tmp_path):
     assert page.day_box.currentData() == day and "(today)" in page.day_box.currentText()
     assert row_texts(page.record_card) == ["记住周三开会", "明天交房租。"]
     assert "You said remember" in page.record_card.rows[0].desc.text()
-    assert row_texts(page.summary_card) == ["No summary for this day yet"]
+    assert row_texts(page.summary_card) == ["Summary", "No summary for this day yet"]
     assert page.generate_button.text() == "Summarize" and page.generate_button.isEnabled()
 
     page.generate_button.click()  # no model: smart editing is off
@@ -96,7 +97,8 @@ def test_each_day_shows_its_texts_and_summary(tmp_path):
 
     store.save_summary(day, "- 周三开会\n- 交房租")
     memory.changed.emit()
-    assert row_texts(page.summary_card) == ["- 周三开会\n- 交房租"]
+    assert row_texts(page.summary_card) == ["Summary", "- 周三开会\n- 交房租"]
+    assert page.summary_card.rows[0].desc.text().startswith("Summarized ")
     assert page.generate_button.text() == "Summarize again"
     window.close()
 
