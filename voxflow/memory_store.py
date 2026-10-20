@@ -28,7 +28,7 @@ CREATE TABLE IF NOT EXISTS entries (
     created_at REAL NOT NULL, updated_at REAL NOT NULL);
 CREATE TABLE IF NOT EXISTS records (
     id INTEGER PRIMARY KEY, text TEXT NOT NULL, day TEXT NOT NULL, keep TEXT NOT NULL,
-    extracted INTEGER NOT NULL DEFAULT 0, created_at REAL NOT NULL);
+    extracted INTEGER NOT NULL DEFAULT 0, explicit INTEGER NOT NULL DEFAULT 0, created_at REAL NOT NULL);
 CREATE TABLE IF NOT EXISTS summaries (
     id INTEGER PRIMARY KEY, day TEXT NOT NULL UNIQUE, text TEXT NOT NULL, keep TEXT NOT NULL,
     created_at REAL NOT NULL);
@@ -65,6 +65,7 @@ class Record:
     keep: str
     extracted: bool
     created_at: float
+    explicit: bool = False  # the user asked VoxFlow to remember this text
 
 
 @dataclass(frozen=True)
@@ -163,24 +164,35 @@ class MemoryStore:
 
     # Records -----------------------------------------------------------------------------------
 
-    def add_record(self, text: str, keep: str = WEEK) -> Record | None:
+    def add_record(self, text: str, keep: str = WEEK, explicit: bool = False) -> Record | None:
         text = text.strip()
         if not text:
             return None
         now = self._clock()
-        cursor = self._run("INSERT INTO records (text, day, keep, created_at) VALUES (?, ?, ?, ?)",
-                           (text, day_of(now), keep if keep in KEEPS else WEEK, now))
+        cursor = self._run("INSERT INTO records (text, day, keep, explicit, created_at) VALUES (?, ?, ?, ?, ?)",
+                           (text, day_of(now), keep if keep in KEEPS else WEEK, int(explicit), now))
         return self.record(cursor.lastrowid)
 
+    _RECORD_COLUMNS = "SELECT id, text, day, keep, extracted, created_at, explicit FROM records"
+
+    @staticmethod
+    def _record(row: tuple) -> Record:
+        id_, text, day, keep, extracted, created_at, explicit = row
+        return Record(id_, text, day, keep, bool(extracted), created_at, bool(explicit))
+
     def record(self, record_id: int) -> Record | None:
-        rows = self._rows("SELECT id, text, day, keep, extracted, created_at FROM records WHERE id = ?", (record_id,))
-        return Record(*rows[0][:4], bool(rows[0][4]), rows[0][5]) if rows else None
+        rows = self._rows(self._RECORD_COLUMNS + " WHERE id = ?", (record_id,))
+        return self._record(rows[0]) if rows else None
 
     def records(self, day: str | None = None) -> list[Record]:
-        sql = "SELECT id, text, day, keep, extracted, created_at FROM records"
-        rows = self._rows(sql + (" WHERE day = ?" if day else "") + " ORDER BY created_at, id",
+        rows = self._rows(self._RECORD_COLUMNS + (" WHERE day = ?" if day else "") + " ORDER BY created_at, id",
                           (day,) if day else ())
-        return [Record(*row[:4], bool(row[4]), row[5]) for row in rows]
+        return [self._record(row) for row in rows]
+
+    def entries_since(self, timestamp: float) -> list[Entry]:
+        """Entries added or mentioned again since a moment, oldest first (what a day brought)."""
+        rows = self._rows("SELECT * FROM entries WHERE updated_at >= ? ORDER BY updated_at, id", (timestamp,))
+        return [self._entry(row) for row in rows]
 
     def days(self) -> list[str]:
         """Days with confirmed texts or a summary, newest first."""

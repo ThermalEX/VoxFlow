@@ -49,6 +49,7 @@ def line_icon(name: str, color: str = "#526376") -> QIcon:
         "settings": "settings",
         "restore": "restart_alt",
         "smart": "auto_fix_high",
+        "memory": "psychology",
         "shortcuts": "keyboard",
         "about": "info",
     }

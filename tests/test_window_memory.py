@@ -172,3 +172,141 @@ def test_a_rewrite_that_arrives_during_the_pulse_waits_for_it(tmp_path):
     window._confirm_text()
     assert [entry.content for entry in store.entries()] == ["周三下午三点开评审会。"]
     window.close()
+
+
+class MemoryClient(FakeClient):
+    """A rewrite model that also knows the memory tasks."""
+
+    def __init__(self, clean, extracted=(), filled=None, summary="- 周三下午三点评审会", suggestions=()):
+        super().__init__(clean)
+        self.extracted = list(extracted)
+        self.filled = filled
+        self.summary = summary
+        self.suggestions = list(suggestions)
+
+    def suggest(self, text):
+        self.calls.append(("suggest", text))
+        return self.suggestions
+
+    def extract(self, text, today):
+        self.calls.append(("extract", text, today))
+        return self.extracted
+
+    def fill(self, text, memories):
+        self.calls.append(("fill", text, memories))
+        return self.filled if self.filled is not None else text
+
+    def summarize(self, day, texts, memories):
+        self.calls.append(("summarize", day, texts, memories))
+        return self.summary
+
+
+def test_confirmed_texts_are_mined_for_entries_once_the_overlay_is_idle(tmp_path):
+    store = MemoryStore(tmp_path / "m.db")
+    client = MemoryClient("周三下午三点开评审会，王书涵主持。", extracted=[
+        {"kind": "event", "content": "评审会", "time": "周三下午三点"}, {"kind": "person", "content": "王书涵"}])
+    app, window, _output = make_window(tmp_path, store=store, client=client)
+    window.apply_transcript("final", "周三下午三点开评审会，王书涵主持。")
+    settle(app, window, lambda: client.calls and window.smart.future is None)
+    assert not any(call[0] == "extract" for call in client.calls)  # never while the overlay is in use
+    window._confirm_text()
+    settle(app, window, lambda: not store.pending_records())
+    entries = {entry.content: entry for entry in store.entries()}
+    assert entries["评审会"].detail == {"time": "周三下午三点"} and entries["评审会"].keep == WEEK
+    assert entries["王书涵"].kind == "person" and entries["王书涵"].source == "auto"
+    window.close()
+
+
+def test_entries_found_in_a_remember_request_are_kept_forever(tmp_path):
+    store = MemoryStore(tmp_path / "m.db")
+    client = MemoryClient("我叫王书涵。", extracted=[{"kind": "person", "content": "王书涵"}])
+    app, window, _output = make_window(tmp_path, store=store, client=client)
+    window.apply_transcript("final", "记住我叫王书涵。")
+    finish(app, window.smart.highlight)
+    settle(app, window, lambda: window.smart.future is None and window.smart._pending_clean is None)
+    window._confirm_text()
+    settle(app, window, lambda: not store.pending_records())
+    keeps = {entry.content: entry.keep for entry in store.entries()}
+    assert keeps["王书涵"] == FOREVER
+    window.close()
+
+
+def test_an_unreachable_model_leaves_the_text_for_later(tmp_path):
+    from voxflow.rewriter import RewriteError
+
+    store = MemoryStore(tmp_path / "m.db")
+    store.add_record("明天十点开会。")
+
+    class Down(MemoryClient):
+        def extract(self, text, today):
+            raise RewriteError("down", kind="unreachable")
+
+    client = Down("x")
+    app, window, _output = make_window(tmp_path, store=store, client=client)
+    window.hide_overlay()
+    settle(app, window, lambda: window.memory._retry_at > 0)
+    assert len(store.pending_records()) == 1
+    window.close()
+
+
+def test_related_memories_offer_a_fill_in_suggestion(tmp_path):
+    store = MemoryStore(tmp_path / "m.db")
+    store.add_entry("评审会", kind="event", detail={"time": "周三下午三点"})
+    client = MemoryClient("提醒大家参加评审会。", filled="提醒大家参加周三下午三点的评审会。",
+                          suggestions=[{"label": "更正式", "text": "请各位准时参加评审会。"}])
+    app, window, _output = make_window(tmp_path, store=store, client=client)
+    window.smart.suggest_delay_ms = 0
+    window.apply_transcript("final", "提醒大家参加评审会。")
+    button = window.smart.suggestion_buttons[0]
+    settle(app, window, lambda: button.text() == "Fill from memory")
+    assert ("fill", "提醒大家参加评审会。", ["评审会（周三下午三点）"]) in client.calls
+    assert window.smart.suggestion_buttons[1].text() == "更正式"
+    button.click()
+    assert window.transcript.toPlainText() == "提醒大家参加周三下午三点的评审会。"
+    window.close()
+
+
+def test_no_fill_in_without_related_memories_or_when_nothing_changes(tmp_path):
+    store = MemoryStore(tmp_path / "m.db")
+    store.add_entry("北极星项目", kind="term")
+    client = MemoryClient("明天交房租。")
+    app, window, _output = make_window(tmp_path, store=store, client=client)
+    window.smart.suggest_delay_ms = 0
+    window.apply_transcript("final", "明天交房租。")
+    settle(app, window, lambda: any(call[0] == "suggest" for call in client.calls) and window.smart.future is None)
+    assert not any(call[0] == "fill" for call in client.calls)
+    assert all(button.isHidden() for button in window.smart.suggestion_buttons)
+    window.close()
+
+
+def test_a_day_is_summarized_on_request(tmp_path):
+    from voxflow.memory_store import day_of
+
+    store = MemoryStore(tmp_path / "m.db")
+    record = store.add_record("周三下午三点开评审会。")
+    store.add_entry("评审会", kind="event", detail={"time": "周三下午三点"})
+    client = MemoryClient("x")
+    app, window, _output = make_window(tmp_path, store=store, client=client)
+    ready = []
+    window.memory.summary_ready.connect(ready.append)
+    day = day_of(record.created_at)
+    assert window.memory.summarize(day)
+    assert not window.memory.summarize(day)  # already running
+    settle(app, window, lambda: ready == [day])
+    assert store.summary(day).text == "- 周三下午三点评审会"
+    _name, sent_day, texts, memories = next(call for call in client.calls if call[0] == "summarize")
+    assert (sent_day.isoformat(), texts, memories) == (day, ["周三下午三点开评审会。"], ["评审会（周三下午三点）"])
+    window.close()
+
+
+def test_summaries_need_texts_and_a_model(tmp_path):
+    store = MemoryStore(tmp_path / "m.db")
+    app, window, _output = make_window(tmp_path, store=store)
+    failures = []
+    window.memory.summary_failed.connect(lambda day, reason: failures.append(reason))
+    assert not window.memory.summarize("2026-10-20")
+    store.add_record("周三开会。")
+    from voxflow.memory_store import day_of
+    assert not window.memory.summarize(day_of(store.records()[0].created_at))
+    assert failures == ["empty", "model"]
+    window.close()

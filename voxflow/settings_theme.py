@@ -70,6 +70,9 @@ def stylesheet(theme: Theme) -> str:
         QLabel#sectionTitle {{ font-size: 15px; font-weight: 600; }}
         QLabel#rowTitle {{ font-size: 14px; font-weight: 500; }}
         QLabel#rowDesc, QLabel#note {{ color: {t.muted}; font-size: 12px; }}
+        QLabel#warning {{ color: {t.text}; background: {t.hover}; border: 1px solid {t.border};
+                         border-radius: 10px; padding: 9px 12px; font-size: 12px; }}
+        QLabel#entryText {{ font-size: 14px; }}
         QListWidget {{ background: transparent; border: none; outline: none; color: {t.text}; }}
         QListWidget::item {{ padding: 8px 10px; margin: 1px 0; border-radius: 8px; }}
         QListWidget::item:selected {{ background: {t.selected}; color: {t.text}; }}

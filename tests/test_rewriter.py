@@ -198,3 +198,48 @@ def test_old_default_off_is_switched_on_once(tmp_path, monkeypatch):
 
 def test_list_models_returns_every_id(endpoint):
     assert rewriter.RewriteClient(endpoint.base_url, "m").list_models() == ["voxflow-rewrite"]
+
+
+def test_extract_sends_the_date_and_keeps_only_well_formed_items(endpoint):
+    from datetime import date
+
+    from voxflow.rewrite_prompts import MEMORY_EXTRACT_SYSTEM_PROMPT
+
+    endpoint.reply = {"content": '```json\n[{"kind": "event", "content": "评审会", "time": "周三下午三点"}, '
+                                 '{"kind": "person", "content": " 王书涵 ", "time": "today"}, '
+                                 '{"kind": "mood", "content": "项目代号是北极星"}, {"content": ""}, "oops"]\n```'}
+    client = rewriter.RewriteClient(endpoint.base_url, "voxflow-rewrite")
+    items = client.extract("周三下午三点开评审会，王书涵主持", date(2026, 10, 20))
+    assert items == [{"kind": "event", "content": "评审会", "time": "周三下午三点"},
+                     {"kind": "person", "content": "王书涵"},
+                     {"kind": "fact", "content": "项目代号是北极星"}]
+    body = endpoint.requests[-1][3]
+    assert body["messages"][0]["content"] == MEMORY_EXTRACT_SYSTEM_PROMPT
+    assert body["messages"][1]["content"].startswith("今天是10月20日（星期二，2026-10-20）。")
+    assert body["max_tokens"] == rewriter.EXTRACT_ANSWER_TOKENS
+
+
+def test_extract_without_a_json_array_finds_nothing(endpoint):
+    from datetime import date
+
+    endpoint.reply = {"content": "没有值得记住的内容。"}
+    assert rewriter.RewriteClient(endpoint.base_url, "m").extract("你好", date(2026, 10, 20)) == []
+
+
+def test_fill_and_summarize_send_their_memories(endpoint):
+    from datetime import date
+
+    from voxflow.rewrite_prompts import MEMORY_FILL_SYSTEM_PROMPT, MEMORY_SUMMARY_SYSTEM_PROMPT
+
+    client = rewriter.RewriteClient(endpoint.base_url, "m")
+    endpoint.reply = {"content": "提醒大家参加周三下午三点的评审会。"}
+    assert client.fill("提醒大家参加评审会。", ["评审会（周三下午三点）"]) == "提醒大家参加周三下午三点的评审会。"
+    body = endpoint.requests[-1][3]
+    assert body["messages"][0]["content"] == MEMORY_FILL_SYSTEM_PROMPT
+    assert body["messages"][1]["content"] == "相关记忆：\n- 评审会（周三下午三点）\n文字：提醒大家参加评审会。"
+    endpoint.reply = {"content": "- 周三下午三点评审会"}
+    assert client.summarize(date(2026, 10, 20), ["周三开评审会。"], []) == "- 周三下午三点评审会"
+    body = endpoint.requests[-1][3]
+    assert body["messages"][0]["content"] == MEMORY_SUMMARY_SYSTEM_PROMPT
+    assert "1. 周三开评审会。" in body["messages"][1]["content"] and "（无）" in body["messages"][1]["content"]
+    assert body["max_tokens"] == rewriter.SUMMARY_ANSWER_TOKENS

@@ -16,8 +16,8 @@ def make(tmp_path):
 def test_shortcuts_and_about_pages_follow_smart_editing(tmp_path):
     window, _settings = make(tmp_path)
     names = [window.categories.item(index).text() for index in range(window.categories.count())]
-    assert names == ["General", "Appearance", "Smart editing", "Shortcuts", "About"]
-    assert all(not window.categories.item(index).icon().isNull() for index in range(5))
+    assert names == ["General", "Appearance", "Smart editing", "Memory", "Shortcuts", "About"]
+    assert all(not window.categories.item(index).icon().isNull() for index in range(6))
     assert window.hotkey_buttons["record"].text() == "Ctrl+Shift+Space"
     assert window.hotkey_buttons["continue"].text() == "Ctrl+Alt+Shift+Space"
     window.close()
@@ -118,8 +118,9 @@ def test_about_page_links_open_github_and_hugging_face(tmp_path):
 def test_new_pages_switch_language(tmp_path):
     window, _settings = make(tmp_path)
     window.language_box.setCurrentIndex(window.language_box.findData("zh"))
-    assert window.categories.item(3).text() == "快捷键"
-    assert window.categories.item(4).text() == "关于"
+    assert window.categories.item(3).text() == "记忆"
+    assert window.categories.item(4).text() == "快捷键"
+    assert window.categories.item(5).text() == "关于"
     assert window.about_version.text().startswith("版本 ")
     assert window.update_channel.itemText(1) == "测试版（含正式版）"
     window.language_box.setCurrentIndex(window.language_box.findData("en"))

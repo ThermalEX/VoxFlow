@@ -236,6 +236,13 @@ class SettingsCard(QFrame):
         self._layout.addWidget(row)
         return row
 
+    def clear(self) -> None:
+        """Remove every row, for lists that are rebuilt from data."""
+        for widget in self.rows + self.dividers:
+            self._layout.removeWidget(widget)
+            widget.deleteLater()
+        self.rows, self.dividers = [], []
+
     def refresh(self) -> None:
         seen_visible = False
         for index, row in enumerate(self.rows):

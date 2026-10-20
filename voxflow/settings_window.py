@@ -19,6 +19,7 @@ from .i18n import LANGUAGE_CHOICES, describe_error, resolve, set_language, tr
 from .paths import DATA_ROOT
 from .catalog import builtin_catalog, read_installed
 from .download_panel import DownloadPanel
+from .memory_page import MemoryPage
 from .microphones import MICROPHONE_ROLE, microphone_label
 from .model_catalog import LocalModel, describe as describe_model, discover_models, quant_of
 from .rewriter import RewriteConfig
@@ -30,7 +31,7 @@ from .ui_icons import app_icon, line_icon
 
 BROWSE = "__browse__"
 CATEGORIES = (("settings", "category.general"), ("personalize", "category.appearance"), ("smart", "category.smart"),
-              ("shortcuts", "category.shortcuts"), ("about", "category.about"))
+              ("memory", "category.memory"), ("shortcuts", "category.shortcuts"), ("about", "category.about"))
 HOTKEY_FIELDS = {"record": "field.hotkey_record", "continue": "field.hotkey_continue"}
 AUTHOR = "ThermalEX"
 REPO_URL = "https://github.com/ThermalEX/VoxFlow"
@@ -131,7 +132,7 @@ class SettingsWindow(QWidget):
         self.pages = QStackedWidget()
         root.addWidget(self.pages, 1)
         for build in (self._build_general, self._build_appearance, self._build_smart_editing,
-                      self._build_shortcuts, self._build_about):
+                      self._build_memory, self._build_shortcuts, self._build_about):
             self.pages.addWidget(self._scrollable(build()))
         self._page_effects = []
         for index in range(self.pages.count()):
@@ -246,6 +247,7 @@ class SettingsWindow(QWidget):
         self._show_hotkey_message(key, **values)
         if self.download_panel is not None:
             self.download_panel.retranslate()
+        self.memory_page.refresh()
 
     def _set_language(self, _index: int) -> None:
         choice = str(self.language_box.currentData())
@@ -468,6 +470,14 @@ class SettingsWindow(QWidget):
         self.rewrite_model_path.currentIndexChanged.connect(self._local_model_chosen)
         self._sync_rewrite_rows()
         return page
+
+    def _build_memory(self) -> QWidget:
+        self.memory_page = MemoryPage(self)
+        return self.memory_page.widget
+
+    def set_memory(self, memory) -> None:
+        """Show and manage what the overlay's memory keeps."""
+        self.memory_page.set_memory(memory)
 
     def _build_shortcuts(self) -> QWidget:
         page, layout = self._page("category.shortcuts")

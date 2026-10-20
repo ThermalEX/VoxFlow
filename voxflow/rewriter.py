@@ -5,15 +5,24 @@ import re
 import urllib.error
 import urllib.request
 from dataclasses import asdict, dataclass
+from datetime import date
 
 from PySide6.QtCore import QSettings
 
-from .rewrite_prompts import CLEAN_SYSTEM_PROMPT, SUGGEST_SYSTEM_PROMPT
+from .rewrite_prompts import (
+    CLEAN_SYSTEM_PROMPT, MEMORY_EXTRACT_SYSTEM_PROMPT, MEMORY_FILL_SYSTEM_PROMPT, MEMORY_SUMMARY_SYSTEM_PROMPT,
+    SUGGEST_SYSTEM_PROMPT, memory_extract_message, memory_fill_message, memory_summary_message,
+)
 
 LOCAL_ENDPOINT = "http://127.0.0.1:8765/v1"
 LOCAL_MODEL = "voxflow-rewrite"
 CLEAN_TIMEOUT = 15
 SUGGEST_TIMEOUT = 20
+MEMORY_TIMEOUT = 30
+SUMMARY_TIMEOUT = 90
+EXTRACT_ANSWER_TOKENS = 400
+SUMMARY_ANSWER_TOKENS = 700
+MEMORY_KINDS = ("person", "term", "event", "fact")
 MAX_SUGGESTIONS = 3
 MIN_ANSWER_TOKENS = 512
 MAX_ANSWER_TOKENS = 4096
@@ -106,12 +115,12 @@ class RewriteClient:
         except ValueError as exc:
             raise RewriteError(str(exc), kind="bad_response") from exc
 
-    def _chat(self, system: str, text: str, timeout: float) -> str:
+    def _chat(self, system: str, text: str, timeout: float, max_tokens: int | None = None) -> str:
         reply = self._request("/chat/completions", {
             "model": self.model,
             "messages": [{"role": "system", "content": system}, {"role": "user", "content": text}],
             # A rewrite can be as long as the dictation; Chinese is roughly one token per character.
-            "max_tokens": min(MAX_ANSWER_TOKENS, max(MIN_ANSWER_TOKENS, 2 * len(text))),
+            "max_tokens": max_tokens or min(MAX_ANSWER_TOKENS, max(MIN_ANSWER_TOKENS, 2 * len(text))),
             "temperature": 0,
         }, timeout)
         try:
@@ -131,16 +140,9 @@ class RewriteClient:
         return self._chat(CLEAN_SYSTEM_PROMPT, text, CLEAN_TIMEOUT)
 
     def suggest(self, text: str) -> list[dict]:
-        content = self._chat(SUGGEST_SYSTEM_PROMPT, text, SUGGEST_TIMEOUT)
-        start, end = content.find("["), content.rfind("]")
-        if start == -1 or end < start:
-            return []
-        try:
-            items = json.loads(content[start:end + 1])
-        except ValueError:
-            return []
+        items = _json_list(self._chat(SUGGEST_SYSTEM_PROMPT, text, SUGGEST_TIMEOUT))
         suggestions = []
-        for item in items if isinstance(items, list) else []:
+        for item in items:
             if not isinstance(item, dict):
                 continue
             label, body = item.get("label"), item.get("text")
@@ -148,6 +150,29 @@ class RewriteClient:
                     and body.strip() != text.strip()):
                 suggestions.append({"label": label.strip(), "text": body.strip()})
         return suggestions[:MAX_SUGGESTIONS]
+
+    def extract(self, text: str, today: date) -> list[dict]:
+        """Things worth remembering in a confirmed text, as {"kind", "content", "time"?} items."""
+        content = self._chat(MEMORY_EXTRACT_SYSTEM_PROMPT, memory_extract_message(text, today), MEMORY_TIMEOUT,
+                             EXTRACT_ANSWER_TOKENS)
+        items = []
+        for item in _json_list(content):
+            if not isinstance(item, dict) or not isinstance(item.get("content"), str) or not item["content"].strip():
+                continue
+            kind = item.get("kind") if item.get("kind") in MEMORY_KINDS else "fact"
+            entry = {"kind": kind, "content": item["content"].strip()}
+            if kind == "event" and isinstance(item.get("time"), str) and item["time"].strip():
+                entry["time"] = item["time"].strip()
+            items.append(entry)
+        return items
+
+    def fill(self, text: str, memories: list[str]) -> str:
+        """The text with details it leaves out filled in from what the user asked VoxFlow to remember."""
+        return self._chat(MEMORY_FILL_SYSTEM_PROMPT, memory_fill_message(text, memories), MEMORY_TIMEOUT)
+
+    def summarize(self, day: date, texts: list[str], memories: list[str]) -> str:
+        return self._chat(MEMORY_SUMMARY_SYSTEM_PROMPT, memory_summary_message(day, texts, memories),
+                          SUMMARY_TIMEOUT, SUMMARY_ANSWER_TOKENS)
 
     def list_models(self, timeout: float = 5) -> list[str]:
         reply = self._request("/models", None, timeout)
@@ -160,3 +185,15 @@ class RewriteClient:
         if models and isinstance(models[0], dict) and models[0].get("id"):
             return str(models[0]["id"])
         return "ok"
+
+
+def _json_list(content: str) -> list:
+    """The JSON array in a model answer, tolerating text or code fences around it."""
+    start, end = content.find("["), content.rfind("]")
+    if start == -1 or end < start:
+        return []
+    try:
+        items = json.loads(content[start:end + 1])
+    except ValueError:
+        return []
+    return items if isinstance(items, list) else []

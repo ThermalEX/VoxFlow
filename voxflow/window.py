@@ -118,6 +118,10 @@ class VoxFlowWindow(QWidget):
         self.memory = Memory(self.settings, store=memory_store, parent=self)
         self.smart = SmartEditor(self, client=rewrite_client, server_factory=local_server_factory)
         self.edit_bar_slot.addWidget(self.smart.bar)
+        # Background memory work waits until the overlay is closed and no rewrite is running.
+        self.memory.connect_model(lambda: self.smart.client if self.smart.ready() else None,
+                                  lambda: self.mode == "idle" and self.smart.future is None)
+        self.settings_window.set_memory(self.memory)
         self.settings_window.rewrite_changed.connect(self.smart.reload)
         self.settings_window.runtime_changed.connect(lambda: self.smart.reload(force=True))
         self.settings_window.server_release_requested.connect(self.smart.release_server)
@@ -951,6 +955,7 @@ class VoxFlowWindow(QWidget):
                     job.kind == "final",
                 )
         self.smart.poll()
+        self.memory.poll()
 
     def apply_transcript(self, kind: str, text: str) -> None:
         if kind not in {"partial", "final"}:

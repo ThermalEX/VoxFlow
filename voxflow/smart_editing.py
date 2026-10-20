@@ -255,9 +255,8 @@ class SmartEditor(QObject):
         self.undo_button.setText(tr("button.undo_edits"))
         self._sync_bar()
 
-    def _submit(self, kind: str, text: str) -> None:
-        call = self.client.clean if kind == "clean" else self.client.suggest
-        self.future = self.executor.submit(call, text)
+    def _submit(self, kind: str, text: str, *extra) -> None:
+        self.future = self.executor.submit(getattr(self.client, kind), text, *extra)
         self._future_kind = kind
         self._future_session = self.session
         if kind == "clean":
@@ -296,8 +295,10 @@ class SmartEditor(QObject):
             return
         if kind == "clean":
             self._apply_clean(result)
-        else:
+        elif kind == "suggest":
             self._show_suggestions(result)
+        else:
+            self._show_fill(result)
 
     def _apply_local_fixes(self) -> None:
         """Without a rewrite, still write remembered names the remembered way."""
@@ -363,6 +364,19 @@ class SmartEditor(QObject):
 
     def _show_suggestions(self, suggestions: list[dict]) -> None:
         self._suggestions = [item for item in suggestions if not same_text(item["text"], self.edited_text)]
+        self._suggestions = self._suggestions[:MAX_SUGGESTIONS]
+        self._sync_bar()
+        memory = getattr(self.window, "memory", None)
+        related = memory.related(self.edited_text) if memory is not None else []
+        if related and self.active:
+            self._submit("fill", self.edited_text, related)
+
+    def _show_fill(self, filled: str) -> None:
+        """Offer the text completed from memory as the first suggestion; the user decides."""
+        if not filled.strip() or same_text(filled, self.edited_text):
+            return
+        fill = {"label": tr("suggestion.memory_fill"), "text": filled.strip()}
+        self._suggestions = [fill] + [item for item in self._suggestions if not same_text(item["text"], filled)]
         self._suggestions = self._suggestions[:MAX_SUGGESTIONS]
         self._sync_bar()
 

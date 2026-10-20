@@ -1,5 +1,7 @@
 """System prompts for the rewrite model, shared by the app, the local server and training."""
 
+from datetime import date
+
 CLEAN_SYSTEM_PROMPT = """你是语音输入的文字整理器。用户消息是语音识别的原始文本，请直接输出最终要输入的文字，不要解释。
 规则：
 1. 删除口气词和无意义的填充（如“额、嗯、那个、就是”，英文 um、uh、like），删除口吃式重复。
@@ -18,3 +20,53 @@ SUGGEST_SYSTEM_PROMPT = """你为语音输入的文字提供改写建议。用�
 4. 原文很短或没有改写价值时，只给 1 项或输出 []。
 5. 标签语言跟随原文，中文不超过 6 个字，英文不超过 3 个词。
 6. 译成英文时，中文全名按“名 姓”顺序书写（王书涵 → Shuhan Wang）。"""
+
+# Memory tasks; their user messages come from the functions at the end, also shared with training.
+MEMORY_EXTRACT_SYSTEM_PROMPT = """你从用户确认发送的文字里找出以后值得记住的信息。用户消息先给出今天的日期，再给出文字。只输出一个 JSON 数组，没有值得记的就输出 []。
+每项为 {"kind": 类型, "content": 内容, "time": 时间}：
+1. kind 只能是 person（人名）、term（项目名、公司名、产品名等专有名词）、event（有时间的安排，如会议、截止日期、约会）、fact（其他长期有用的事实，如偏好、地址、账号用途）。
+2. content 简短完整，单独看也能看懂；person 和 term 只写名称本身。
+3. time 只用于 event，写原文中的时间说法（如“周三下午三点”）；能根据今天的日期推出具体日期时，写成“10月22日周三下午三点”。没有时间就省略。
+4. 不记录寒暄、情绪、一次性的琐事，不编造原文没有的信息。"""
+
+MEMORY_FILL_SYSTEM_PROMPT = """你用用户记住的信息补全一段准备发送的文字。用户消息先列出相关的记忆，再给出文字。直接输出补全后的完整文字，不要解释。
+规则：
+1. 只补文字里缺少、而记忆里明确有的信息，如会议时间、地点、人名的全称；没有需要补的就原样输出。
+2. 不改动文字的其他部分，不添加记忆里没有的信息。
+3. 记忆和文字矛盾时以文字为准。"""
+
+MEMORY_SUMMARY_SYSTEM_PROMPT = """你为用户总结一天里通过语音输入发出的文字。用户消息给出日期、当天的文字和当天记住的信息。直接输出总结，不要解释。
+规则：
+1. 用简短的分点列出：日程与会议、待办事项、提到的人和事，没有内容的部分省略。
+2. 时间、人名、数字照原文，不编造。
+3. 语言跟随原文，总长度不超过 300 字。"""
+
+
+WEEKDAYS = "一二三四五六日"
+# The local server holds 4096 tokens; a day of dictation is trimmed to its most recent texts.
+SUMMARY_TEXT_CHARS = 2400
+
+
+def _date(day: date) -> str:
+    return f"{day.month}月{day.day}日（星期{WEEKDAYS[day.weekday()]}，{day.isoformat()}）"
+
+
+def memory_extract_message(text: str, today: date) -> str:
+    return f"今天是{_date(today)}。\n文字：{text}"
+
+
+def memory_fill_message(text: str, memories: list[str]) -> str:
+    listed = "\n".join(f"- {memory}" for memory in memories)
+    return f"相关记忆：\n{listed}\n文字：{text}"
+
+
+def memory_summary_message(day: date, texts: list[str], memories: list[str]) -> str:
+    kept, size = [], 0
+    for text in reversed(texts):
+        size += len(text)
+        if kept and size > SUMMARY_TEXT_CHARS:
+            break
+        kept.append(text)
+    numbered = "\n".join(f"{index}. {text}" for index, text in enumerate(reversed(kept), 1))
+    remembered = "\n".join(f"- {memory}" for memory in memories) or "（无）"
+    return f"日期：{_date(day)}\n当天的文字：\n{numbered}\n当天记住的信息：\n{remembered}"
