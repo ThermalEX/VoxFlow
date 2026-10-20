@@ -358,7 +358,8 @@ def test_remembered_text_glows_in_the_theme_color_then_the_glow_goes_away(tmp_pa
     glow = window.transcript.graphicsEffect()
     assert isinstance(glow, QGraphicsDropShadowEffect)
     assert glow.offset().x() == glow.offset().y() == 0 and glow.blurRadius() > 20
-    assert glow.color().name() == QColor(teal.accent("dark")).name() and glow.color().alpha() > 200
+    # A light tint of the theme color, so the halo stands out from the overlay's own glow.
+    assert glow.color().name() == QColor(teal.accent("dark")).lighter(175).name() and glow.color().alpha() > 200
     finish(app, highlight)
     assert window.transcript.graphicsEffect() is None
     window.close()
