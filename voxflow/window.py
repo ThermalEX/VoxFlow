@@ -1011,8 +1011,9 @@ class VoxFlowWindow(QWidget):
         if not text.strip():
             return
         remember_request, opening = self.smart.remember_request, self.smart.remember_opening
+        remembered_id = self.smart.remembered_id
         self.smart.reset()  # confirming ends the editing session; late rewrites must not replace it
-        self.memory.remember(text, explicit=remember_request, opening=opening)
+        self.memory.remember(text, explicit=remember_request, opening=opening, entry_id=remembered_id)
         if self.text_output.paste(text):
             self.hide_overlay()
         else:

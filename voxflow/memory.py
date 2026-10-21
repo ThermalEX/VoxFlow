@@ -131,19 +131,41 @@ class Memory(QObject):
             return text
         return correct_names(text, self.store.names())
 
-    def remember(self, text: str, explicit: bool = False, opening: str = "") -> None:
-        """Keep a confirmed text; a "remember …" request also becomes an entry kept forever, without the
-        greeting it may have opened with ("你好，记住我是张三" keeps "我是张三")."""
+    @staticmethod
+    def _requested(text: str, opening: str) -> str:
+        """What a "remember …" request keeps: the text without the request words or the greeting before
+        them ("你好，记住我是张三" keeps "我是张三")."""
+        content = strip_command(text) or text
+        opening = opening.strip()
+        if opening and content.startswith(opening) and content[len(opening):].strip():
+            content = content[len(opening):].strip()
+        return content.strip()
+
+    def remember_now(self, text: str, opening: str = "", entry_id: int | None = None) -> int | None:
+        """Keep a "remember …" request at once, as an entry kept forever; with `entry_id`, rewrite that entry
+        (the text was polished or edited since). Returns the entry's id."""
+        if not self.enabled or self.store is None:
+            return None
+        content = self._requested(text, opening)
+        if not content:
+            return entry_id
+        if entry_id is not None and self.store.entry(entry_id) is not None:
+            self.store.update_entry(entry_id, content=content)
+        else:
+            entry = self.store.add_entry(content, source="explicit")
+            entry_id = entry.id if entry is not None else None
+        self.changed.emit()
+        return entry_id
+
+    def remember(self, text: str, explicit: bool = False, opening: str = "", entry_id: int | None = None) -> None:
+        """Keep a confirmed text; a "remember …" request also keeps (or updates) its entry with the final words."""
         if not self.enabled or not text.strip():
             return
         self.store.add_record(text, explicit=explicit)
         if explicit:
-            content = strip_command(text) or text
-            opening = opening.strip()
-            if opening and content.startswith(opening) and content[len(opening):].strip():
-                content = content[len(opening):].strip()
-            self.store.add_entry(content, source="explicit")
-        self.changed.emit()
+            self.remember_now(text, opening, entry_id)  # tells listeners itself
+        else:
+            self.changed.emit()
 
     def related(self, text: str) -> list[str]:
         """Remembered entries that share words with a text, best first, as lines for the fill-in task."""

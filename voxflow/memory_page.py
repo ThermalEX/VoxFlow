@@ -359,7 +359,8 @@ class DaysDialog(_Dialog):
         days = self.store.days() if self.store is not None else []
         today = datetime.now().strftime("%Y-%m-%d")
         choices = days if today in days or not days else [today] + days
-        chosen = self._day if self._day in choices else (choices[0] if choices else "")
+        # Open on the latest day that has texts, not on an empty today.
+        chosen = self._day if self._day in choices else (days[0] if days else (choices[0] if choices else ""))
         self.day_box.blockSignals(True)
         self.day_box.clear()
         for day in choices:

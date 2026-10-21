@@ -76,20 +76,25 @@ def test_with_memory_off_nothing_is_stripped_or_written(tmp_path):
     window.close()
 
 
-def test_a_remember_request_pulses_and_is_remembered_forever_when_confirmed(tmp_path):
+def test_a_remember_request_is_kept_as_soon_as_its_glow_ends(tmp_path):
     store = MemoryStore(tmp_path / "m.db")
     app, window, output = make_window(tmp_path, store=store)
     window.apply_transcript("final", "记住周三下午三点开评审会")
     highlight = window.smart.highlight
     assert window.transcript.toPlainText() == "周三下午三点开评审会"
     assert highlight.state() == highlight.State.Running
-    assert "Will remember" in window.status_label.text()
+    assert "Remembering" in window.status_label.text()
+    assert store.entries() == []  # not before the glow has played
     highlight.setCurrentTime(highlight.duration() // 2)
     markup = window.transcript.toHtml()
     assert "color:#" in markup and "#f3f7ff" not in markup  # tinted, not the plain text color
     assert window.transcript.isReadOnly()
     finish(app, highlight)
     assert window.transcript.toPlainText() == "周三下午三点开评审会" and not window.transcript.isReadOnly()
+    assert "Remembered" in window.status_label.text()
+    assert [(entry.content, entry.source, entry.keep) for entry in store.entries()] == [
+        ("周三下午三点开评审会", "explicit", FOREVER)]  # saved without waiting for the confirm
+    assert store.records() == []  # the text itself is kept once it is confirmed
     window._confirm_text()
     assert output.calls == ["周三下午三点开评审会"]
     [entry] = store.entries()
@@ -99,12 +104,29 @@ def test_a_remember_request_pulses_and_is_remembered_forever_when_confirmed(tmp_
     window.close()
 
 
-def test_cancelling_a_remember_request_remembers_nothing(tmp_path):
+def test_cancelling_before_the_glow_ends_remembers_nothing_and_after_it_keeps_the_entry(tmp_path):
     store = MemoryStore(tmp_path / "m.db")
     app, window, _output = make_window(tmp_path, store=store)
     window.apply_transcript("final", "记住周三开会")
-    window.smart.reset()
+    window.hide_overlay()
     assert store.entries() == [] and store.records() == []
+    window.reveal()
+    window.apply_transcript("final", "记住周五交周报")
+    finish(app, window.smart.highlight)
+    window.hide_overlay()
+    assert [entry.content for entry in store.entries()] == ["周五交周报"] and store.records() == []
+    window.close()
+
+
+def test_editing_a_remembered_text_before_confirming_updates_its_entry(tmp_path):
+    store = MemoryStore(tmp_path / "m.db")
+    app, window, output = make_window(tmp_path, store=store)
+    window.apply_transcript("final", "记住周五交周报")
+    finish(app, window.smart.highlight)
+    window.transcript.setPlainText("周五下午五点前交周报")
+    window._confirm_text()
+    assert [entry.content for entry in store.entries()] == ["周五下午五点前交周报"]
+    assert [record.text for record in store.records()] == ["周五下午五点前交周报"]
     window.close()
 
 
@@ -164,7 +186,7 @@ def test_a_rewrite_that_arrives_during_the_pulse_waits_for_it(tmp_path):
     assert client.calls == [] or client.calls[0] == ("clean", "额周三下午三点开评审会")
     settle(app, window, lambda: window.smart._pending_clean is not None)
     assert window.smart.animation.state() != window.smart.animation.State.Running
-    assert "Will remember" in window.status_label.text()  # not replaced by "Polishing…" mid-glow
+    assert "Remembering" in window.status_label.text()  # not replaced by "Polishing…" mid-glow
     finish(app, window.smart.highlight)
     animation = window.smart.animation
     assert animation.state() == animation.State.Running

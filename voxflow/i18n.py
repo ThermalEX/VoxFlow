@@ -43,7 +43,8 @@ STRINGS: dict[str, tuple[str, str]] = {
     "status.local_failed": ("Local model unavailable · kept the original", "本地模型不可用 · 已保留原文"),
     "status.suggestion_applied": ("Suggestion applied · Undo edits returns to the original",
                                   "已采用建议 · “撤回修改”可回到原文"),
-    "status.will_remember": ("Will remember this · saved when you confirm", "将记住这段内容 · 确认后保存"),
+    "status.will_remember": ("Remembering…", "正在记住…"),
+    "status.remembered": ("Remembered · see Settings › Memory", "已记住 · 可在 设置 › 记忆 中查看"),
     "status.memory_off": ("Memory is off, so nothing was remembered · turn it on in Settings › Memory",
                           "记忆未开启，这次没有记住 · 可在 设置 › 记忆 中打开"),
     # Overlay buttons and tooltips

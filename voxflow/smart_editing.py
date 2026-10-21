@@ -76,6 +76,7 @@ class SmartEditor(QObject):
         self._suggestions: list[dict] = []
         self.remember_request = False  # this dictation asked VoxFlow to remember it
         self.remember_opening = ""  # a greeting said before the request, left out of the remembered entry
+        self.remembered_id: int | None = None  # the entry saved for this request once its glow ended
         self._memory_off_hint = False  # asked to remember while memory is off: say where to turn it on
         self._pending_clean: str | None = None  # a rewrite that arrived while the remember pulse was playing
 
@@ -251,6 +252,7 @@ class SmartEditor(QObject):
                 self.transcript.setReadOnly(False)
         self.remember_request = False
         self.remember_opening = ""
+        self.remembered_id = None
         self._memory_off_hint = False
         self._status_after_glow = None
         self._pending_clean = None
@@ -345,6 +347,7 @@ class SmartEditor(QObject):
         self._set_html(frame_html(self.original_text, self.edited_text, float(value), TEXT_RGB, REMOVED_RGB, ADDED_RGB))
 
     def _finish_animation(self) -> None:
+        self._keep_remembered(self.edited_text)
         self._set_plain(self.edited_text)
         self.transcript.setReadOnly(False)
         self._sync_bar()
@@ -387,8 +390,17 @@ class SmartEditor(QObject):
         if isinstance(self.transcript.graphicsEffect(), QGraphicsDropShadowEffect):
             self.transcript.setGraphicsEffect(None)
 
+    def _keep_remembered(self, text: str) -> None:
+        """Save the remember request now, or update it to the words now on screen."""
+        memory = getattr(self.window, "memory", None)
+        if self.remember_request and memory is not None:
+            self.remembered_id = memory.remember_now(text, self.remember_opening, self.remembered_id)
+
     def _finish_highlight(self) -> None:
         self._end_glow()
+        # The glow means "remembered": save it now rather than only when the text is confirmed.
+        self._keep_remembered(self.original_text)
+        self._set_status("status.remembered")
         waiting, self._status_after_glow = self._status_after_glow, None
         if waiting is not None:
             key, tooltip, values = waiting
@@ -501,8 +513,11 @@ class SmartEditor(QObject):
         return 0 if self.bar.isHidden() else self.bar.sizeHint().height() + 10
 
     def _set_status(self, key: str, tooltip: str = "", **values) -> None:
-        if self._memory_off_hint and key in ("status.polished", "status.no_edits", "status.ready"):
-            key, values = "status.memory_off", {}
+        if key in ("status.polished", "status.no_edits", "status.ready"):
+            if self._memory_off_hint:
+                key, values = "status.memory_off", {}
+            elif self.remembered_id is not None:
+                key, values = "status.remembered", {}
         if key != "status.will_remember" and self.highlight.state() == QVariantAnimation.State.Running:
             # Keep "will remember" on screen while the text glows; show what came meanwhile afterwards.
             self._status_after_glow = (key, tooltip, values)
