@@ -133,7 +133,7 @@ def test_suggestions_appear_and_apply(tmp_path):
     polish(app, window)
     chip = window.smart.suggestion_buttons[0]
     settle(app, window, lambda: chip.isVisibleTo(window))
-    assert chip.text() == "更正式" and chip.toolTip() == "我明天需请假一天。"
+    assert chip.text() == "More formal" and chip.toolTip() == "我明天需请假一天。"  # labelled in the UI language
     assert not window.smart.suggestion_buttons[1].isVisibleTo(window)
     assert ("suggest", POLISHED) in client.calls
     chip.click()
@@ -141,6 +141,31 @@ def test_suggestions_appear_and_apply(tmp_path):
     window.smart.undo_button.click()
     assert window.transcript.toPlainText() == ORIGINAL
     window.close()
+
+
+def test_english_texts_get_english_labels_and_no_chinese_translation(tmp_path):
+    from voxflow import i18n
+
+    client = FakeClient(clean="Send me the slides.", suggestions=[
+        {"label": "In Chinese", "text": "把幻灯片发给我。"},
+        {"label": "更礼貌", "text": "Could you send me the slides, please?"}])
+    app, window, _output = make_window(tmp_path, client)
+    polish(app, window)
+    chips = window.smart.suggestion_buttons
+    settle(app, window, lambda: chips[0].isVisibleTo(window))
+    assert chips[0].text() == "More polite" and not chips[1].isVisibleTo(window)
+    window.close()
+
+    try:
+        app, window, _output = make_window(tmp_path, client)
+        i18n.set_language("zh")  # after the window has applied its own language setting
+        polish(app, window)
+        chips = window.smart.suggestion_buttons
+        settle(app, window, lambda: chips[1].isVisibleTo(window))
+        assert [chip.text() for chip in chips[:2]] == ["译成中文", "更礼貌"]
+        window.close()
+    finally:
+        i18n.set_language("en")
 
 
 def test_rewrite_failure_keeps_original(tmp_path):
@@ -482,5 +507,5 @@ def test_continued_text_gets_suggestions_again(tmp_path):
     settle(app, window, lambda: animation.state() == animation.State.Running)
     animation.setCurrentTime(animation.duration())
     settle(app, window, lambda: not window.smart.suggestion_buttons[0].isHidden())
-    assert window.smart.suggestion_buttons[0].text() == "译成英文"
+    assert window.smart.suggestion_buttons[0].text() == "In English"
     window.close()

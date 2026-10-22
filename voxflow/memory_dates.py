@@ -83,5 +83,8 @@ def resolve(phrase: str, today: date) -> date | None:
     return None
 
 
-def describe_date(day: date) -> str:
+def describe_date(day: date, language: str = "zh") -> str:
+    """"10月21日周三", or "Wed 21 Oct" in English. The model is always given the Chinese form it was trained on."""
+    if language == "en":
+        return f"{_ENGLISH_DAYS[day.weekday()][:3].title()} {day.day} {_MONTHS[day.month - 1][:3].title()}"
     return f"{day.month}月{day.day}日周{WEEKDAY_NAMES[day.weekday()]}"

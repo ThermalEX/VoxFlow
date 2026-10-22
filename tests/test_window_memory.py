@@ -287,7 +287,7 @@ def test_related_memories_offer_a_fill_in_suggestion(tmp_path):
     button = window.smart.suggestion_buttons[0]
     settle(app, window, lambda: button.text() == "Fill from memory")
     assert ("fill", "提醒大家参加评审会。", ["评审会（周三下午三点）"]) in client.calls
-    assert window.smart.suggestion_buttons[1].text() == "更正式"
+    assert window.smart.suggestion_buttons[1].text() == "More formal"
     button.click()
     assert window.transcript.toPlainText() == "提醒大家参加周三下午三点的评审会。"
     window.close()

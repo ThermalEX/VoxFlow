@@ -15,8 +15,8 @@ from PySide6.QtWidgets import (
     QVBoxLayout, QWidget,
 )
 
-from .i18n import tr
-from .memory import describe_when
+from .i18n import language, tr
+from .memory import describe_when, display_summary
 from .memory_store import FOREVER, KEEPS, KINDS, WEEK
 from .settings_widgets import SegmentedControl, SettingRow, SettingsCard, SettingsComboBox, ToggleSwitch
 from .ui_icons import line_icon
@@ -278,8 +278,9 @@ class MemoriesDialog(_Dialog):
 
     def _row(self, entry) -> MemoryRow:
         parts = [tr(f"memory.kind.{entry.kind}"), tr(KEEP_KEYS[entry.keep])]
-        if describe_when(entry.detail):
-            parts.append(tr("memory.time", time=describe_when(entry.detail)))
+        when = describe_when(entry.detail, language())
+        if when:
+            parts.append(tr("memory.time", time=when))
         parts += [tr(f"memory.source.{entry.source}"), _when(entry.updated_at)]
         other = FOREVER if entry.keep == WEEK else WEEK
         actions = [(tr("button.edit"), lambda: self.edit_entry(entry)),
@@ -391,7 +392,8 @@ class DaysDialog(_Dialog):
         self.summary_delete.setVisible(summary is not None)
         if summary is not None:
             self.summary_keep.buttons[summary.keep].setChecked(True)
-        self.summary_text.setText(summary.text if summary is not None else tr("memory.no_summary"))
+        self.summary_text.setText(display_summary(summary.text, language()) if summary is not None
+                                  else tr("memory.no_summary"))
         self.summary_text.setObjectName("memoryText" if summary is not None else "rowDesc")
         self.summary_text.style().unpolish(self.summary_text)
         self.summary_text.style().polish(self.summary_text)

@@ -12,6 +12,9 @@ from voxflow.memory_names import correct_names
     ("你记住一下，客户姓欧阳", "客户姓欧阳"),
     ("Remember that the demo is on Friday.", "The demo is on Friday."),
     ("please remember: my manager is Lisa", "My manager is Lisa"),
+    ("Remember my name is John Smith.", "My name is John Smith."),
+    ("Remember this: the seminar room is G33.", "The seminar room is G33."),
+    ("Could you remember Dr Jones is my supervisor", "Dr Jones is my supervisor"),
 ])
 def test_remember_requests_lose_the_request_words(spoken, kept):
     assert strip_command(spoken) == kept
@@ -22,7 +25,11 @@ def test_remember_requests_lose_the_request_words(spoken, kept):
     "记住没？",
     "我记住你说的了。",
     "Remember to buy milk.",
+    "Remember when we met?",
+    "Remember me to your mother.",
+    "Do you remember how it works?",
     "I remember that day.",
+    "I remember my first car.",
     "记住",
     "remember:",
     "今天开会。",

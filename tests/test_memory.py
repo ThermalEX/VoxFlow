@@ -76,3 +76,14 @@ def test_events_are_described_with_the_words_said_and_the_date_they_mean():
     assert describe_when({}) == ""
     entry = Entry(1, "event", "评审会", "auto", "week", 0.0, 0.0, {"time": "周三下午三点", "date": "2026-10-21"})
     assert describe_entry(entry) == "评审会（周三下午三点，10月21日周三）"
+    assert describe_when({"time": "Wednesday at 3pm", "date": "2026-10-21"}, "en") == "Wednesday at 3pm, Wed 21 Oct"
+
+
+def test_summary_headings_follow_the_interface_language():
+    from voxflow.memory import display_summary
+
+    chinese = "日程与会议：\n- 周三下午三点评审会\n待办事项：\n- 交报告\n提到的人和事：\n- 张三"
+    assert display_summary(chinese, "en") == "Schedule:\n- 周三下午三点评审会\nTo do:\n- 交报告\nPeople and things:\n- 张三"
+    assert display_summary("Schedule:\n- Seminar on Friday", "zh") == "日程与会议：\n- Seminar on Friday"
+    assert display_summary("今天没有需要特别记录的安排或待办。", "en") == "Nothing in particular to note today."
+    assert display_summary(chinese, "zh") == chinese

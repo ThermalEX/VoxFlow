@@ -8,8 +8,11 @@ import re
 
 # 记住 / 请记住 / 帮我记住 / 你记一下 / 记下来 …, but not 记住了 / 记住没 (a reply, not a request).
 _CHINESE = re.compile(r"(?:请|麻烦)?(?:你|帮我|给我)?(?:记住|记一下|记下来)(?![了没吗啦呀])(?:一下)?[，,：:、。\s]*")
-# "remember that …", "remember, …" or "remember: …"; "remember to …" stays ordinary text.
-_ENGLISH = re.compile(r"\b(?:please\s+)?remember(?:\s+that\b|\s*[,:])\s*", re.I)
+# "remember that …", "remember this: …", "please remember my name is …"; "remember to …", "remember when …" and
+# "remember me" stay ordinary text.
+_NOT_A_REQUEST = r"(?:to|when|how|what|where|why|who|whom|which|whether|if|me|us|him|her|them|it)\b"
+_ENGLISH = re.compile(r"\b(?:please\s+|(?:can|could|would)\s+you\s+)?remember"
+                      rf"(?:\s+that\b|(?:\s+this)?\s*[,:]|(?=\s+(?!{_NOT_A_REQUEST})[A-Za-z]))\s*", re.I)
 _CLAUSE_END = "，,。.！!？?；;、：:"
 MAX_OPENING = 12  # characters of a greeting or filler allowed before the request
 

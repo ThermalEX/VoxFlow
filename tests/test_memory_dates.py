@@ -54,3 +54,4 @@ def test_december_rolls_next_month_into_january():
 
 def test_dates_are_described_with_their_weekday():
     assert describe_date(date(2026, 10, 21)) == "10月21日周三"
+    assert describe_date(date(2026, 10, 21), "en") == "Wed 21 Oct"

@@ -41,13 +41,25 @@ def _keys(text: str) -> set[str]:
     return keys
 
 
-def describe_when(detail: dict) -> str:
+def describe_when(detail: dict, language: str = "zh") -> str:
     """When an event happens: the words that were said, with the date they point to."""
     when = detail.get("time", "")
     if detail.get("date"):
-        day = describe_date(date.fromisoformat(detail["date"]))
-        when = f"{when}，{day}" if when else day
+        day = describe_date(date.fromisoformat(detail["date"]), language)
+        when = f"{when}{'，' if language == 'zh' else ', '}{day}" if when else day
     return when
+
+
+# The fixed lines of a summary, which the model writes in the language of the day's texts.
+SUMMARY_LINES = (("日程与会议：", "Schedule:"), ("待办事项：", "To do:"), ("提到的人和事：", "People and things:"),
+                 ("今天没有需要特别记录的安排或待办。", "Nothing in particular to note today."))
+
+
+def display_summary(text: str, language: str) -> str:
+    """A summary with its headings in the interface language; the points under them stay as they were said."""
+    column = 1 if language == "en" else 0
+    lookup = {line.casefold(): pair[column] for pair in SUMMARY_LINES for line in pair}
+    return "\n".join(lookup.get(line.strip().casefold(), line) for line in text.split("\n"))
 
 
 def describe_entry(entry: Entry) -> str:

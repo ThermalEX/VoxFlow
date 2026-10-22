@@ -15,11 +15,12 @@ from PySide6.QtWidgets import QGraphicsDropShadowEffect, QHBoxLayout, QWidget
 
 from .color_themes import saved_color_theme
 from .edit_diff import frame_html, highlight_html, same_text
-from .i18n import describe_error, tr
+from .i18n import describe_error, language, tr
 from .local_server import LocalRewriteServer
 from .overlay_widgets import PillButton
 from .paths import DATA_ROOT
 from .rewriter import LOCAL_ENDPOINT, RewriteClient, RewriteConfig, RewriteError
+from .suggestion_labels import localize_label, translates_into_chinese
 
 EDIT_ANIMATION_MS = 800
 REMEMBER_ANIMATION_MS = 1300
@@ -417,7 +418,11 @@ class SmartEditor(QObject):
             self._submit("suggest", self.edited_text)
 
     def _show_suggestions(self, suggestions: list[dict]) -> None:
-        self._suggestions = [item for item in suggestions if not same_text(item["text"], self.edited_text)]
+        shown = language()
+        self._suggestions = [{**item, "label": localize_label(item["label"], shown)} for item in suggestions
+                             if not same_text(item["text"], self.edited_text)
+                             # an English speaker has no use for the Chinese version the model likes to offer
+                             and not (shown == "en" and translates_into_chinese(self.edited_text, item["text"]))]
         self._suggestions = self._suggestions[:MAX_SUGGESTIONS]
         self._sync_bar()
         memory = getattr(self.window, "memory", None)
