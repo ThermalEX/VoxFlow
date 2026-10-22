@@ -68,9 +68,10 @@ VoxFlow 的本地智能编辑模型：把语音识别得到的口语原文，整
 | [v2](https://huggingface.co/ThermalEX/voxflow-rewrite/tree/main/v2) | 2026-10-14 | 1269 条 | 中文姓名英译用“名 姓”顺序（张三 → San Zhang），称呼写作 Xiao Li、Lao Wang |
 | [v3](https://huggingface.co/ThermalEX/voxflow-rewrite/tree/main/v3) | 2026-10-14 | 1321 条 | 姓名拼音：常见名字用字、多音字姓、复姓、隔音符号 |
 | [v4](https://huggingface.co/ThermalEX/voxflow-rewrite/tree/main/v4) | 2026-10-15 | 1427 条 | 针对 v3 弱点补数据：有意义的“然后/就是”保留、中英夹杂保留、按位置删句、时间推算、只改语气的委婉改写 |
+| [v5](https://huggingface.co/ThermalEX/voxflow-rewrite/tree/main/v5) | 2026-10-18 | 1589 条 | **已弃用，无模型文件**：名句纠错有所改善，但建议偏向语气调整、风格改写退步；仅保留实验说明 |
 | [v6](https://huggingface.co/ThermalEX/voxflow-rewrite/tree/main/v6) | 2026-10-20 | 1833 条 | 新增记忆的三个任务（提取 186、补全 89、总结 35 条）；补充按位置删句、即时纠正、一句话的正式改写等 96 条整理样本。**当前推荐** |
 
-v5 效果不如 v4，未发布。v1–v3 与 v4 使用的测试集不同，指标不能直接横向比较；v6 与 v4 使用同一测试集。逐版本的评估见研究记录。
+v5 曾训练和评测，但效果不如 v4，模型文件在公开发布前已删除；上方链接仅指向弃用说明，不能下载模型。v1–v3 与 v4 使用的测试集不同，指标不能直接横向比较；v6 与 v4 使用同一测试集。逐版本的评估见研究记录。
 
 `runtime/` 目录里是 VoxFlow 软件内下载用的 llama.cpp b11596 Windows 版本（通用 Vulkan 版、NVIDIA CUDA 版及其 CUDA 运行库），从 [llama.cpp 官方发布页](https://github.com/ggml-org/llama.cpp/releases/tag/b11596) 原样转存（MIT 许可，见 `runtime/LICENSE-llama.cpp`），以便国内镜像也能下载；`catalog.json` 是软件读取的下载清单。
 
