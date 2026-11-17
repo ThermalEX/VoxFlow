@@ -55,6 +55,73 @@ def frame_html(old: str, new: str, progress: float, text_rgb, removed_rgb, added
     return f'<div style="white-space: pre-wrap;">{body}</div>'
 
 
+def review_hunks(old: str, new: str) -> list[tuple]:
+    """Split a rewrite into kept text and separate changes a reviewer can accept or reject.
+
+    Returns ("same", text) and ("change", old_part, new_part) items in order. A heavy rewrite is one
+    change; a single character or bare whitespace between two changes joins them, so a reworded
+    phrase stays one decision instead of a scatter of letters."""
+    if similarity(old, new) < LARGE_CHANGE_SIMILARITY:
+        return [("change", old, new)]
+    items: list[list] = []
+    for kind, text in diff_segments(old, new):
+        if kind == "same":
+            items.append(["same", text])
+            continue
+        if not items or items[-1][0] != "change":
+            items.append(["change", "", ""])
+        items[-1][1 if kind == "removed" else 2] += text
+    merged: list[list] = []
+    for index, item in enumerate(items):
+        between = 0 < index < len(items) - 1 and item[0] == "same" and len(item[1].strip()) <= 1
+        if between and merged and merged[-1][0] == "change" and items[index + 1][0] == "change":
+            merged[-1][1] += item[1]
+            merged[-1][2] += item[1]
+            continue
+        if item[0] == "change" and merged and merged[-1][0] == "change":
+            merged[-1][1] += item[1]
+            merged[-1][2] += item[2]
+            continue
+        merged.append(list(item))
+    return [tuple(item) for item in merged]
+
+
+def resolve_review(hunks: list[tuple], accepted: list[bool]) -> str:
+    """The text with each change taken from the rewrite if accepted, else from what was said."""
+    parts, change = [], 0
+    for item in hunks:
+        if item[0] == "same":
+            parts.append(item[1])
+        else:
+            parts.append(item[2] if accepted[change] else item[1])
+            change += 1
+    return "".join(parts)
+
+
+def review_html(hunks: list[tuple], accepted: list[bool], text_rgb, removed_rgb, added_rgb) -> str:
+    """Show every change in place: the version in use is underlined, the other is struck through,
+    and each change is a link the reviewer clicks to switch it."""
+    parts, change = [], 0
+    for item in hunks:
+        if item[0] == "same":
+            parts.append(_span(item[1], text_rgb, 1.0))
+            continue
+        old, new = item[1], item[2]
+        if accepted[change]:
+            dropped, kept, kept_rgb = old, new, added_rgb
+        else:
+            dropped, kept, kept_rgb = new, old, text_rgb
+        inner = ""
+        if dropped:
+            inner += _span(dropped, removed_rgb, 0.75, strike=True)
+        if kept:
+            inner += (f'<span style="color: rgb({kept_rgb[0]},{kept_rgb[1]},{kept_rgb[2]});'
+                      f' text-decoration: underline;">{html.escape(kept)}</span>')
+        parts.append(f'<a href="change:{change}" style="text-decoration: none;">{inner}</a>')
+        change += 1
+    return f'<div style="white-space: pre-wrap;">{"".join(parts)}</div>'
+
+
 def highlight_html(text: str, progress: float, text_rgb, accent_rgb) -> str:
     """One frame of the "remembered" pulse: the text glows in the accent color and fades back."""
     progress = min(1.0, max(0.0, progress))

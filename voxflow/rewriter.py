@@ -62,6 +62,7 @@ class RewriteConfig:
     api_key: str = ""
     server_path: str = "runtime/llama.cpp/llama-server.exe"
     model_path: str = "training/rewrite/runs/qwen3.5-2b/gguf/voxflow-rewrite-q8_0.gguf"
+    review: bool = False  # show the edits for the user to keep or reject instead of applying them at once
 
     @property
     def base_url(self) -> str:

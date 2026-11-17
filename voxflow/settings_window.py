@@ -406,6 +406,9 @@ class SettingsWindow(QWidget):
         self.rewrite_enabled.setChecked(config.enabled)
         card = self._section(layout)
         self._row(card, "field.smart_enable", "desc.smart_enable", self.rewrite_enabled)
+        self.rewrite_review = ToggleSwitch()
+        self.rewrite_review.setChecked(config.review)
+        self._row(card, "field.smart_review", "desc.smart_review", self.rewrite_review)
 
         self.rewrite_provider = SettingsComboBox()
         self.rewrite_provider.addItem(tr("source.local"), "local")
@@ -465,6 +468,7 @@ class SettingsWindow(QWidget):
         self._sync_delete_button()
 
         self.rewrite_enabled.toggled.connect(self._save_rewrite)
+        self.rewrite_review.toggled.connect(self._save_rewrite)
         self.rewrite_provider.currentIndexChanged.connect(self._sync_rewrite_rows)
         self.rewrite_provider.currentIndexChanged.connect(self._save_rewrite)
         self.rewrite_model_path.currentIndexChanged.connect(self._local_model_chosen)
@@ -668,6 +672,7 @@ class SettingsWindow(QWidget):
             api_key=self.rewrite_api_key.text().strip(),
             server_path=self.rewrite_server_path.text().strip() or RewriteConfig.server_path,
             model_path=self._selected_model_path() or RewriteConfig.model_path,
+            review=self.rewrite_review.isChecked(),
         )
 
     def _sync_rewrite_rows(self) -> None:

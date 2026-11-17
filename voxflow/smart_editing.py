@@ -1,5 +1,8 @@
 """Polish final transcripts with the rewrite model: one edit animation, undo with hover preview, suggestions.
 
+In review mode the edits are not applied at once: each one stays marked in place, and clicking it switches
+between the rewrite and what was said. Typing ends the review and edits the text as it then stands.
+
 With memory on, a "remember …" request loses its request words and pulses once in the theme color, and names
 the user taught VoxFlow are written the remembered way.
 """
@@ -9,12 +12,12 @@ import math
 from concurrent.futures import Future, ThreadPoolExecutor
 from pathlib import Path
 
-from PySide6.QtCore import QEasingCurve, QObject, QTimer, QVariantAnimation
-from PySide6.QtGui import QColor
+from PySide6.QtCore import QEasingCurve, QEvent, QObject, Qt, QTimer, QVariantAnimation
+from PySide6.QtGui import QColor, QTextCursor
 from PySide6.QtWidgets import QGraphicsDropShadowEffect, QHBoxLayout, QWidget
 
 from .color_themes import saved_color_theme
-from .edit_diff import frame_html, highlight_html, same_text
+from .edit_diff import frame_html, highlight_html, resolve_review, review_html, review_hunks, same_text
 from .i18n import describe_error, language, tr
 from .local_server import LocalRewriteServer
 from .overlay_widgets import PillButton
@@ -80,6 +83,8 @@ class SmartEditor(QObject):
         self.remembered_id: int | None = None  # the entry saved for this request once its glow ended
         self._memory_off_hint = False  # asked to remember while memory is off: say where to turn it on
         self._pending_clean: str | None = None  # a rewrite that arrived while the remember pulse was playing
+        self.review_hunks: list[tuple] | None = None  # set while the edits wait for the user's review
+        self.review_accepted: list[bool] = []
 
         self.animation = QVariantAnimation(self)
         self.animation.setDuration(EDIT_ANIMATION_MS)
@@ -123,6 +128,8 @@ class SmartEditor(QObject):
         bar_layout.addStretch(1)
         self.bar.hide()
         self.transcript.textChanged.connect(self._on_text_changed)
+        self.transcript.installEventFilter(self)
+        self.transcript.viewport().installEventFilter(self)
         self.reload()
 
     # Configuration ---------------------------------------------------------------------------
@@ -205,6 +212,9 @@ class SmartEditor(QObject):
         self.undo_button.setText(tr("button.restore_edits" if self.showing_original else "button.undo_edits"))
 
     def shutdown(self) -> None:
+        self._leave_review()
+        self.transcript.removeEventFilter(self)
+        self.transcript.viewport().removeEventFilter(self)
         self.animation.stop()
         self.executor.shutdown(wait=False, cancel_futures=True)
         if self.server is not None:
@@ -264,6 +274,10 @@ class SmartEditor(QObject):
                 self.transcript.setReadOnly(False)
         if self._hover_text is not None:
             self._end_preview(self._hover_text)
+        if self.reviewing:
+            self._leave_review()
+            if self.window.mode == "result":
+                self.transcript.setReadOnly(False)
         self.session = None
         self._waiting = False
         self._user_edited = False
@@ -340,6 +354,9 @@ class SmartEditor(QObject):
             return
         self.edited_text = cleaned
         self.transcript.setReadOnly(True)
+        if self.config.review:
+            self._start_review()
+            return
         self.animation.start()
 
     def _render_frame(self, value) -> None:
@@ -455,10 +472,19 @@ class SmartEditor(QObject):
 
     def _end_preview(self, text: str) -> None:
         self._hover_text = None
+        if self.reviewing:
+            self._render_review()
+            return
         self._set_plain(text)
         self.transcript.setReadOnly(False)
 
     def _toggle_undo(self) -> None:
+        if self.reviewing:
+            # Undo turns back every edit still kept; Restore keeps them all again.
+            keep = not any(self.review_accepted)
+            self.review_accepted = [keep] * len(self.review_accepted)
+            self._review_changed()
+            return
         target = self._other_version()
         self.showing_original = not self.showing_original
         self.undo_button.setText(tr("button.restore_edits" if self.showing_original else "button.undo_edits"))
@@ -468,6 +494,7 @@ class SmartEditor(QObject):
     def _apply_suggestion(self, index: int) -> None:
         if index >= len(self._suggestions):
             return
+        self._leave_review()
         self.edited_text = self._suggestions[index]["text"]
         self.showing_original = False
         self.undo_button.setText(tr("button.undo_edits"))
@@ -477,6 +504,8 @@ class SmartEditor(QObject):
         self.window._expand_for_result()
 
     def current_text(self) -> str:
+        if self.reviewing:
+            return self.reviewed_text()
         return self._hover_text if self._hover_text is not None else self.transcript.toPlainText()
 
     def _on_text_changed(self) -> None:
@@ -491,6 +520,111 @@ class SmartEditor(QObject):
             self._suggestions = []
             self.edited_text = self.original_text
             self._sync_bar()
+
+    # Review mode ------------------------------------------------------------------------------
+
+    @property
+    def reviewing(self) -> bool:
+        return self.review_hunks is not None
+
+    def reviewed_text(self) -> str:
+        return resolve_review(self.review_hunks, self.review_accepted)
+
+    def _start_review(self) -> None:
+        """Mark each edit in place, all kept to begin with; the user clicks the ones to turn back."""
+        self.review_hunks = review_hunks(self.original_text, self.edited_text)
+        self.review_accepted = [True] * sum(1 for item in self.review_hunks if item[0] == "change")
+        self.transcript.viewport().setMouseTracking(True)
+        self._render_review()
+        self._keep_remembered(self.reviewed_text())
+        self._sync_bar()
+        self.window._expand_for_result()
+        count = len(self.review_accepted)
+        self._set_status("status.review_one" if count == 1 else "status.review", count=count)
+        self._suggest_timer.start(self.suggest_delay_ms)
+
+    def _render_review(self) -> None:
+        self._set_html(review_html(self.review_hunks, self.review_accepted, TEXT_RGB, REMOVED_RGB, ADDED_RGB))
+        self.transcript.setReadOnly(True)
+
+    def toggle_change(self, index: int) -> None:
+        if not self.reviewing or not 0 <= index < len(self.review_accepted):
+            return
+        self.review_accepted[index] = not self.review_accepted[index]
+        self._review_changed()
+
+    def _review_changed(self) -> None:
+        self.showing_original = not any(self.review_accepted)
+        self.undo_button.setText(tr("button.restore_edits" if self.showing_original else "button.undo_edits"))
+        self._render_review()
+        self._keep_remembered(self.reviewed_text())
+        self.window._expand_for_result()
+        self._set_status("status.review_progress", kept=sum(self.review_accepted),
+                         count=len(self.review_accepted))
+
+    def finish_review(self) -> None:
+        """Turn the marked-up review into plain text the user can edit, keeping the choices made."""
+        if not self.reviewing:
+            return
+        text = self.reviewed_text()
+        any_kept = any(self.review_accepted)
+        if any_kept:
+            self.edited_text = text  # Undo edits still returns to what was said
+        self._leave_review()
+        self.showing_original = not any_kept
+        self.undo_button.setText(tr("button.restore_edits" if self.showing_original else "button.undo_edits"))
+        self._set_plain(text)
+        self.transcript.setReadOnly(False)
+        self._sync_bar()
+
+    def _leave_review(self) -> None:
+        if self.review_hunks is None:
+            return
+        self.review_hunks = None
+        self.review_accepted = []
+        self.transcript.viewport().setMouseTracking(False)
+        self.transcript.viewport().unsetCursor()
+
+    def _change_at(self, pos) -> int | None:
+        anchor = self.transcript.anchorAt(pos)
+        if anchor.startswith("change:"):
+            return int(anchor.removeprefix("change:"))
+        return None
+
+    def eventFilter(self, watched, event) -> bool:
+        if not self.reviewing or self._hover_text is not None:
+            return False
+        try:
+            return self._review_event(watched, event)
+        except RuntimeError:  # the overlay is being torn down
+            return False
+
+    def _review_event(self, watched, event) -> bool:
+        kind = event.type()
+        if watched is self.transcript.viewport():
+            if kind == QEvent.Type.MouseMove:
+                over = self._change_at(event.position().toPoint()) is not None
+                watched.setCursor(Qt.CursorShape.PointingHandCursor if over else Qt.CursorShape.IBeamCursor)
+            elif kind == QEvent.Type.MouseButtonRelease and event.button() == Qt.MouseButton.LeftButton:
+                index = self._change_at(event.position().toPoint())
+                if index is not None:
+                    self.toggle_change(index)
+                    return True
+            elif kind == QEvent.Type.MouseButtonDblClick:
+                if self._change_at(event.position().toPoint()) is None:
+                    self.finish_review()
+                    self.transcript.moveCursor(QTextCursor.MoveOperation.End)
+                    return True
+        elif watched is self.transcript and kind == QEvent.Type.KeyPress:
+            # Enter still confirms; a key that edits text ends the review and then reaches the editor.
+            if event.key() in (Qt.Key.Key_Return, Qt.Key.Key_Enter, Qt.Key.Key_Escape):
+                return False
+            if event.modifiers() & (Qt.KeyboardModifier.ControlModifier | Qt.KeyboardModifier.AltModifier):
+                return False
+            if event.text() or event.key() in (Qt.Key.Key_Backspace, Qt.Key.Key_Delete):
+                self.finish_review()
+                self.transcript.moveCursor(QTextCursor.MoveOperation.End)
+        return False
 
     # Helpers ----------------------------------------------------------------------------------
 

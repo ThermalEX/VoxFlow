@@ -43,6 +43,12 @@ STRINGS: dict[str, tuple[str, str]] = {
     "status.local_failed": ("Local model unavailable · kept the original", "本地模型不可用 · 已保留原文"),
     "status.suggestion_applied": ("Suggestion applied · Undo edits returns to the original",
                                   "已采用建议 · “撤回修改”可回到原文"),
+    "status.review": ("{count} edits proposed · click an edit to keep your own words, Enter to confirm",
+                      "建议 {count} 处修改 · 点击某处可保留原话，回车确认"),
+    "status.review_one": ("1 edit proposed · click it to keep your own words, Enter to confirm",
+                          "建议 1 处修改 · 点击可保留原话，回车确认"),
+    "status.review_progress": ("Keeping {kept} of {count} edits · click to switch, type to edit",
+                               "保留 {kept}/{count} 处修改 · 点击切换，直接打字可编辑"),
     "status.will_remember": ("Remembering…", "正在记住…"),
     "status.remembered": ("Remembered · see Settings › Memory", "已记住 · 可在 设置 › 记忆 中查看"),
     "status.memory_off": ("Memory is off, so nothing was remembered · turn it on in Settings › Memory",
@@ -157,6 +163,10 @@ STRINGS: dict[str, tuple[str, str]] = {
     "desc.smart_enable": ("Remove fillers, apply spoken edits and instructions, then suggest rewrites. "
                           "The local model loads when VoxFlow starts.",
                           "去掉口气词，按改口和语音指令修改，并给出改写建议。VoxFlow 启动时自动加载本地模型。"),
+    "field.smart_review": ("Review edits before applying", "先审阅再应用修改"),
+    "desc.smart_review": ("Show each edit in place instead of applying it at once; click an edit to keep "
+                          "your own words.",
+                          "不直接替换文字，而是逐处标出修改；点击某处修改即可保留原话。"),
     "desc.model_source": ("Run VoxFlow's model on this PC, or use any OpenAI-compatible service.",
                           "在本机运行 VoxFlow 模型，或使用任意 OpenAI 兼容服务。"),
     "field.local_model": ("Model", "模型"),
