@@ -1,4 +1,4 @@
-{"id": "sum-001", "day": "2026-10-20", "texts": ["周三下午三点开评审会，记得带电脑。", "王书涵明天上午十点来面试，你接待一下。", "好的，收到。", "帮我把会议纪要发群里。"], "memories": ["评审会（周三下午三点）", "王书涵"], "mentions": ["评审会", "三点", "王书涵", "面试", "会议纪要"]}
+{"id": "sum-001", "day": "2026-10-20", "texts": ["周三下午三点开评审会，记得带电脑。", "张三明天上午十点来面试，你接待一下。", "好的，收到。", "帮我把会议纪要发群里。"], "memories": ["评审会（周三下午三点）", "张三"], "mentions": ["评审会", "三点", "张三", "面试", "会议纪要"]}
 {"id": "sum-002", "day": "2026-10-20", "texts": ["10月28日之前把年度报告交给财务部。", "我对芒果过敏，聚餐别点芒果。", "周五晚上七点和欧阳小雨在海底捞吃饭。"], "memories": ["交年度报告（10月28日）", "对芒果过敏", "欧阳小雨"], "mentions": ["年度报告", "10月28日", "欧阳小雨", "周五"]}
 {"id": "sum-003", "day": "2026-10-20", "texts": ["Meeting with Sarah Chen on Thursday at 2pm about the Q4 budget.", "Please review the pull request.", "Our staging server is called Atlas."], "memories": ["Meeting with Sarah Chen (Thursday at 2pm)", "Atlas"], "mentions": ["Sarah", "Thursday", "budget", "pull request"]}
 {"id": "sum-004", "day": "2026-10-20", "texts": ["明天早上八点的高铁去上海，G102次。", "帮我订上海的酒店，住两晚。", "下个月三号去杭州出差。"], "memories": ["高铁去上海（明天早上八点）", "去杭州出差（11月3日）"], "mentions": ["上海", "八点", "酒店", "杭州"]}

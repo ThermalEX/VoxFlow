@@ -1,5 +1,5 @@
 {"id": "ext-001", "today": "2026-10-20", "text": "周三下午三点开评审会，记得带电脑。", "expected": [{"kind": "event", "content": "评审会", "time": ["周三下午三点", "10月21日"]}]}
-{"id": "ext-002", "today": "2026-10-20", "text": "王书涵明天上午十点来面试，你接待一下。", "expected": [{"kind": "person", "content": "王书涵"}, {"kind": "event", "content": "王书涵面试", "time": ["明天上午十点", "10月21日"]}]}
+{"id": "ext-002", "today": "2026-10-20", "text": "张三明天上午十点来面试，你接待一下。", "expected": [{"kind": "person", "content": "张三"}, {"kind": "event", "content": "张三面试", "time": ["明天上午十点", "10月21日"]}]}
 {"id": "ext-003", "today": "2026-10-20", "text": "北极星项目下周一上线，大家把测试做完。", "expected": [{"kind": "term", "content": "北极星项目"}, {"kind": "event", "content": "北极星项目上线", "time": ["下周一", "10月26日"]}]}
 {"id": "ext-004", "today": "2026-10-20", "text": "好的，收到，谢谢！", "expected": []}
 {"id": "ext-005", "today": "2026-10-20", "text": "哈哈今天天气真好。", "expected": []}

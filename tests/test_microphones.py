@@ -14,7 +14,7 @@ DEVICES = [
     device("麦克风 (Steam Streaming Microphone", 0),  # MME cuts names at 31 characters
     device("麦克风 (ToDesk Virtual Audio)", 0),
     device("麦克风 (Realtek(R) Audio)", 0),
-    device("耳机 (书涵的Pixel Buds Pro 2)", 0),
+    device("耳机 (张三的Pixel Buds Pro 2)", 0),
     device("扬声器 (Realtek(R) Audio)", 0, inputs=0),
     device("主声音捕获驱动程序", 1),
     device("麦克风 (KZ Acoustics M2)", 1),
@@ -22,7 +22,7 @@ DEVICES = [
     device("麦克风 (ToDesk Virtual Audio)", 2),
     device("麦克风 (Realtek(R) Audio)", 2),
     device("麦克风 (KZ Acoustics M2)", 2),
-    device("耳机 (书涵的Pixel Buds Pro 2)", 2),
+    device("耳机 (张三的Pixel Buds Pro 2)", 2),
     device("麦克风 (KZ Acoustics M2)", 3),
 ]
 
@@ -30,7 +30,7 @@ DEVICES = [
 def test_each_microphone_is_listed_once_real_ones_first():
     mics = list_microphones(DEVICES, APIS)
     assert [mic.name for mic in mics] == [
-        "麦克风 (Realtek(R) Audio)", "麦克风 (KZ Acoustics M2)", "耳机 (书涵的Pixel Buds Pro 2)",
+        "麦克风 (Realtek(R) Audio)", "麦克风 (KZ Acoustics M2)", "耳机 (张三的Pixel Buds Pro 2)",
         "麦克风 (Steam Streaming Microphone)", "麦克风 (ToDesk Virtual Audio)"]
     assert [mic.virtual for mic in mics] == [False, False, False, True, True]
     assert mics[1].index == 12  # the WASAPI entry, whose name is complete

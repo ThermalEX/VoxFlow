@@ -857,7 +857,7 @@
 {"id": "combo-0044", "categories": ["instr_combo", "edit_replace"], "scene": "work_chat", "raw": "明天由张伟主持会议，张伟换成刘洋，翻成英文", "output": "Yang Liu will host tomorrow's meeting.", "instr_position": "suffix"}
 {"id": "combo-0045", "categories": ["instr_combo"], "scene": "email", "raw": "翻译成英文，正式一点，我是周书宁，想咨询一下合作的事。", "output": "My name is Shuning Zhou, and I would like to inquire about a potential collaboration.", "instr_position": "prefix"}
 {"id": "neg-clean-0063", "categories": ["neg_clean"], "scene": "daily", "raw": "你好我叫张三", "output": "你好，我叫张三。"}
-{"id": "neg-cs-0044", "categories": ["neg_code_switch"], "scene": "work_chat", "raw": "这个PR是Shuhan Wang提的", "output": "这个PR是Shuhan Wang提的。"}
+{"id": "neg-cs-0044", "categories": ["neg_code_switch"], "scene": "work_chat", "raw": "这个PR是San Zhang提的", "output": "这个PR是San Zhang提的。"}
 {"id": "tr-0148", "categories": ["instr_translate"], "scene": "work_chat", "raw": "我的同事张晓雨和刘建国都同意了，翻译成英文", "output": "My colleagues Xiaoyu Zhang and Jianguo Liu both agreed.", "instr_position": "suffix"}
 {"id": "tr-0149", "categories": ["instr_translate"], "scene": "email", "raw": "翻译成英文：请把报价单发给陈欣怡。", "output": "Please send the quotation to Xinyi Chen.", "instr_position": "prefix"}
 {"id": "tr-0150", "categories": ["instr_translate"], "scene": "tech", "raw": "这个接口林睿在维护，翻成英文", "output": "Rui Lin maintains this API.", "instr_position": "suffix"}
