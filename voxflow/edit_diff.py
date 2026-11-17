@@ -83,7 +83,16 @@ def review_hunks(old: str, new: str) -> list[tuple]:
             merged[-1][2] += item[2]
             continue
         merged.append(list(item))
-    return [tuple(item) for item in merged]
+    # Spacing alone (e.g. between Chinese and Latin script) is formatting, not a decision: apply it quietly.
+    result: list[list] = []
+    for item in merged:
+        if item[0] == "change" and "".join(item[1].split()) == "".join(item[2].split()):
+            item = ["same", item[2]]
+        if item[0] == "same" and result and result[-1][0] == "same":
+            result[-1][1] += item[1]
+            continue
+        result.append(item)
+    return [tuple(item) for item in result]
 
 
 def resolve_review(hunks: list[tuple], accepted: list[bool]) -> str:

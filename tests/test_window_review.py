@@ -190,3 +190,10 @@ def test_settings_switch_turns_review_on(tmp_path):
     page.rewrite_review.setChecked(True)
     assert window.smart.config.review is True
     window.close()
+
+
+def test_spacing_alone_is_not_a_decision():
+    hunks = review_hunks("然后把那个 report 发给张三。", "然后把report发给张三。")
+    assert [item for item in hunks if item[0] == "change"] == [("change", "那个 ", "")]
+    assert resolve_review(hunks, [False]) == "然后把那个 report发给张三。"
+    assert resolve_review(hunks, [True]) == "然后把report发给张三。"
