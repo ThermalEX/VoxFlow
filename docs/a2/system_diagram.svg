@@ -1,0 +1,147 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1440" height="800" viewBox="0 0 1440 800"
+ font-family="Segoe UI, Arial, sans-serif">
+<defs>
+<marker id="arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto">
+<path d="M 0 0 L 10 5 L 0 10 z" fill="#4A5568"/></marker>
+<marker id="arrowstart" viewBox="0 0 10 10" refX="1" refY="5" markerWidth="8" markerHeight="8" orient="auto">
+<path d="M 10 0 L 0 5 L 10 10 z" fill="#4A5568"/></marker>
+</defs>
+<rect width="1440" height="800" fill="white"/>
+<text x="40" y="24" font-size="13" fill="#5B6575">VoxFlow system diagram · everything runs on the user's Windows PC unless marked otherwise</text>
+<rect x="40" y="40" width="220" height="64" rx="10" fill="#F1F3F5" stroke="#5B6575" stroke-width="2"/>
+<text x="52" y="64" font-size="15" font-weight="700" fill="#1E2430">Person</text>
+<text x="52" y="84" font-size="13" fill="#3A4252">speaks · presses keys · clicks</text>
+<rect x="1140" y="40" width="220" height="64" rx="10" fill="#F1F3F5" stroke="#5B6575" stroke-width="2"/>
+<text x="1152" y="64" font-size="15" font-weight="700" fill="#1E2430">Previous app</text>
+<text x="1152" y="84" font-size="13" fill="#3A4252">chat, email, document…</text>
+<rect x="790" y="40" width="250" height="64" rx="10" fill="#EAF2FB" stroke="#2F6DB5" stroke-width="2"/>
+<text x="802" y="64" font-size="15" font-weight="700" fill="#1E2430">Paste-back</text>
+<text x="802" y="84" font-size="13" fill="#3A4252">clipboard + SendInput</text>
+<rect x="40" y="180" width="220" height="64" rx="10" fill="#EAF2FB" stroke="#2F6DB5" stroke-width="2"/>
+<text x="52" y="204" font-size="15" font-weight="700" fill="#1E2430">Microphone capture</text>
+<text x="52" y="224" font-size="13" fill="#3A4252">audio kept in RAM only</text>
+<rect x="40" y="300" width="220" height="64" rx="10" fill="#EAF2FB" stroke="#2F6DB5" stroke-width="2"/>
+<text x="52" y="324" font-size="15" font-weight="700" fill="#1E2430">Recognition scheduler</text>
+<text x="52" y="344" font-size="13" fill="#3A4252">partial ≈1.2 s · final on stop</text>
+<rect x="40" y="420" width="220" height="100" rx="10" fill="#EDE7FB" stroke="#6B4FC8" stroke-width="2"/>
+<text x="52" y="444" font-size="15" font-weight="700" fill="#1E2430">ASR worker process</text>
+<text x="248" y="444" font-size="12" font-weight="700" fill="#6B4FC8" text-anchor="end">AI</text>
+<text x="52" y="464" font-size="13" fill="#3A4252">SenseVoiceSmall INT8</text>
+<text x="52" y="482" font-size="13" fill="#3A4252">(sherpa-onnx, local)</text>
+<text x="52" y="500" font-size="13" fill="#3A4252">incremental segments</text>
+<rect x="40" y="560" width="220" height="80" rx="10" fill="#FFFFFF" stroke="#2F6DB5" stroke-width="2" stroke-dasharray="8 6"/>
+<text x="52" y="584" font-size="15" font-weight="700" fill="#1E2430">Qwen3-ASR comparison</text>
+<text x="248" y="630" font-size="11" font-weight="700" fill="#8A5A00" text-anchor="end">PLANNED</text>
+<text x="52" y="604" font-size="13" fill="#3A4252">candidate ASR, real recordings</text>
+<rect x="340" y="170" width="380" height="360" rx="10" fill="#EAF2FB" stroke="#2F6DB5" stroke-width="2"/>
+<text x="352" y="194" font-size="15" font-weight="700" fill="#1E2430">Overlay (PySide6)</text>
+<text x="352" y="214" font-size="13" fill="#3A4252">status line: listening / polishing / ready</text>
+<text x="352" y="232" font-size="13" fill="#3A4252">live draft while speaking</text>
+<text x="352" y="250" font-size="13" fill="#3A4252">edit animation (strike &amp; fade)</text>
+<text x="352" y="268" font-size="13" fill="#3A4252">  or review mode: per-edit keep/reject</text>
+<text x="352" y="286" font-size="13" fill="#3A4252">Undo edits · hover shows original</text>
+<text x="352" y="304" font-size="13" fill="#3A4252">0–3 suggestion chips (applied on click)</text>
+<text x="352" y="322" font-size="13" fill="#3A4252">Continue · Enter confirms · Esc closes</text>
+<text x="352" y="340" font-size="13" fill="#3A4252"></text>
+<text x="352" y="358" font-size="13" fill="#3A4252">modes: idle → recording →</text>
+<text x="352" y="376" font-size="13" fill="#3A4252">            finalizing → result</text>
+<rect x="790" y="170" width="250" height="170" rx="10" fill="#FFF6E0" stroke="#B7862B" stroke-width="2"/>
+<text x="802" y="194" font-size="15" font-weight="700" fill="#1E2430">Smart editor (rules)</text>
+<text x="802" y="214" font-size="13" fill="#3A4252">“remember …” detector</text>
+<text x="802" y="232" font-size="13" fill="#3A4252">pinyin name correction</text>
+<text x="802" y="250" font-size="13" fill="#3A4252">relative dates resolved by rule</text>
+<text x="802" y="268" font-size="13" fill="#3A4252">JSON / truncation checks</text>
+<text x="802" y="286" font-size="13" fill="#3A4252">any failure → keep original</text>
+<rect x="1110" y="170" width="250" height="170" rx="10" fill="#EDE7FB" stroke="#6B4FC8" stroke-width="2"/>
+<text x="1122" y="194" font-size="15" font-weight="700" fill="#1E2430">llama-server (local GPU)</text>
+<text x="1348" y="194" font-size="12" font-weight="700" fill="#6B4FC8" text-anchor="end">AI</text>
+<text x="1122" y="214" font-size="13" fill="#3A4252">VoxFlow-rewrite v6</text>
+<text x="1122" y="232" font-size="13" fill="#3A4252">Qwen3.5-2B + LoRA, GGUF</text>
+<text x="1122" y="250" font-size="13" fill="#3A4252">clean · suggest · fill</text>
+<text x="1122" y="268" font-size="13" fill="#3A4252">extract · daily summary</text>
+<text x="1122" y="286" font-size="13" fill="#3A4252">(or any OpenAI-compatible</text>
+<text x="1122" y="304" font-size="13" fill="#3A4252"> API, reviewer's own key)</text>
+<rect x="340" y="610" width="230" height="84" rx="10" fill="#EAF2FB" stroke="#2F6DB5" stroke-width="2"/>
+<text x="352" y="634" font-size="15" font-weight="700" fill="#1E2430">Memory store (SQLite)</text>
+<text x="352" y="654" font-size="13" fill="#3A4252">local · off by default</text>
+<text x="352" y="672" font-size="13" fill="#3A4252">7 days or forever</text>
+<rect x="600" y="610" width="210" height="84" rx="10" fill="#EAF2FB" stroke="#2F6DB5" stroke-width="2"/>
+<text x="612" y="634" font-size="15" font-weight="700" fill="#1E2430">Settings › Memory</text>
+<text x="612" y="654" font-size="13" fill="#3A4252">inspect · edit · delete</text>
+<text x="612" y="672" font-size="13" fill="#3A4252">change retention</text>
+<rect x="1110" y="380" width="250" height="90" rx="10" fill="#EAF2FB" stroke="#2F6DB5" stroke-width="2"/>
+<text x="1122" y="404" font-size="15" font-weight="700" fill="#1E2430">Training pipeline</text>
+<text x="1122" y="424" font-size="13" fill="#3A4252">seeds → dataset → LoRA → GGUF</text>
+<text x="1122" y="442" font-size="13" fill="#3A4252">(WSL, offline)</text>
+<rect x="1110" y="500" width="250" height="90" rx="10" fill="#F4F4F4" stroke="#7A7A7A" stroke-width="2" stroke-dasharray="2 4"/>
+<text x="1122" y="524" font-size="15" font-weight="700" fill="#1E2430">Offline evaluation</text>
+<text x="1348" y="580" font-size="11" font-weight="700" fill="#8A5A00" text-anchor="end">SIMULATED</text>
+<text x="1122" y="544" font-size="13" fill="#3A4252">fixed test sets replayed,</text>
+<text x="1122" y="562" font-size="13" fill="#3A4252">no participants; v1 → v7</text>
+<rect x="870" y="620" width="490" height="74" rx="10" fill="#FFFFFF" stroke="#2F6DB5" stroke-width="2" stroke-dasharray="8 6"/>
+<text x="882" y="644" font-size="15" font-weight="700" fill="#1E2430">Review study</text>
+<text x="1348" y="684" font-size="11" font-weight="700" fill="#8A5A00" text-anchor="end">PLANNED</text>
+<text x="882" y="664" font-size="13" fill="#3A4252">log keep / reject decisions; pilot comparing</text>
+<text x="882" y="682" font-size="13" fill="#3A4252">immediate edits with review mode</text>
+<path d="M 150 104 L 150 180" fill="none" stroke="#4A5568" stroke-width="2" marker-end="url(#arrow)"/>
+<rect x="161" y="134" width="48" height="16" fill="white" fill-opacity="0.92"/>
+<text x="165" y="146" font-size="12" fill="#2D3748" text-anchor="start">speech</text>
+<path d="M 260 72 L 300 72 L 300 230 L 340 230" fill="none" stroke="#4A5568" stroke-width="2" marker-end="url(#arrow)"/>
+<rect x="302" y="118" width="95" height="16" fill="white" fill-opacity="0.92"/>
+<text x="306" y="130" font-size="12" fill="#2D3748" text-anchor="start">keys · clicks</text>
+<path d="M 150 244 L 150 300" fill="none" stroke="#4A5568" stroke-width="2" marker-end="url(#arrow)"/>
+<rect x="156" y="264" width="42" height="16" fill="white" fill-opacity="0.92"/>
+<text x="160" y="276" font-size="12" fill="#2D3748" text-anchor="start">audio</text>
+<path d="M 150 364 L 150 420" fill="none" stroke="#4A5568" stroke-width="2" marker-end="url(#arrow)"/>
+<rect x="156" y="384" width="149" height="16" fill="white" fill-opacity="0.92"/>
+<text x="160" y="396" font-size="12" fill="#2D3748" text-anchor="start">snapshot + session id</text>
+<path d="M 260 460 L 340 460" fill="none" stroke="#4A5568" stroke-width="2" marker-end="url(#arrow)"/>
+<rect x="246" y="472" width="108" height="16" fill="white" fill-opacity="0.92"/>
+<text x="300" y="484" font-size="12" fill="#2D3748" text-anchor="middle">partial / final</text>
+<path d="M 720 242 L 790 224" fill="none" stroke="#4A5568" stroke-width="2" marker-end="url(#arrow)"/>
+<rect x="718" y="196" width="75" height="16" fill="white" fill-opacity="0.92"/>
+<text x="755" y="208" font-size="12" fill="#2D3748" text-anchor="middle">final text</text>
+<path d="M 790 298 L 720 375" fill="none" stroke="#4A5568" stroke-width="2" marker-end="url(#arrow)"/>
+<rect x="711" y="282" width="88" height="16" fill="white" fill-opacity="0.92"/>
+<text x="755" y="294" font-size="12" fill="#2D3748" text-anchor="middle">edit · chips</text>
+<path d="M 1040 221 L 1110 221" fill="none" stroke="#4A5568" stroke-width="2" marker-end="url(#arrow)"/>
+<rect x="1048" y="202" width="55" height="16" fill="white" fill-opacity="0.92"/>
+<text x="1075" y="214" font-size="12" fill="#2D3748" text-anchor="middle">request</text>
+<path d="M 1110 306 L 1040 306" fill="none" stroke="#4A5568" stroke-width="2" marker-end="url(#arrow)"/>
+<rect x="1034" y="286" width="82" height="16" fill="white" fill-opacity="0.92"/>
+<text x="1075" y="298" font-size="12" fill="#2D3748" text-anchor="middle">text / JSON</text>
+<path d="M 530 170 L 530 72 L 790 72" fill="none" stroke="#4A5568" stroke-width="2" marker-end="url(#arrow)"/>
+<rect x="609" y="54" width="102" height="16" fill="white" fill-opacity="0.92"/>
+<text x="660" y="66" font-size="12" fill="#2D3748" text-anchor="middle">confirmed text</text>
+<path d="M 1040 72 L 1140 72" fill="none" stroke="#4A5568" stroke-width="2" marker-end="url(#arrow)"/>
+<rect x="1069" y="54" width="42" height="16" fill="white" fill-opacity="0.92"/>
+<text x="1090" y="66" font-size="12" fill="#2D3748" text-anchor="middle">paste</text>
+<path d="M 455 530 L 455 610" fill="none" stroke="#4A5568" stroke-width="2" marker-end="url(#arrow)"/>
+<rect x="250" y="564" width="202" height="16" fill="white" fill-opacity="0.92"/>
+<text x="448" y="576" font-size="12" fill="#2D3748" text-anchor="end">confirmed text (if memory on)</text>
+<path d="M 570 652 L 600 652" fill="none" stroke="#4A5568" stroke-width="2" marker-end="url(#arrow)" marker-start="url(#arrowstart)"/>
+<path d="M 540 610 L 540 585 L 900 585 L 900 340" fill="none" stroke="#4A5568" stroke-width="2" marker-end="url(#arrow)"/>
+<rect x="639" y="567" width="162" height="16" fill="white" fill-opacity="0.92"/>
+<text x="720" y="579" font-size="12" fill="#2D3748" text-anchor="middle">names · related entries</text>
+<path d="M 1235 380 L 1235 340" fill="none" stroke="#4A5568" stroke-width="2" marker-end="url(#arrow)"/>
+<rect x="1238" y="352" width="35" height="16" fill="white" fill-opacity="0.92"/>
+<text x="1242" y="364" font-size="12" fill="#2D3748" text-anchor="start">GGUF</text>
+<path d="M 1360 545 L 1395 545 L 1395 255 L 1360 255" fill="none" stroke="#4A5568" stroke-width="2" marker-end="url(#arrow)"/>
+<rect x="1346" y="408" width="48" height="16" fill="white" fill-opacity="0.92"/>
+<text x="1390" y="420" font-size="12" fill="#2D3748" text-anchor="end">replay</text>
+<path d="M 720 490 L 840 490 L 840 657 L 870 657" fill="none" stroke="#4A5568" stroke-width="2" stroke-dasharray="7 5" marker-end="url(#arrow)"/>
+<rect x="746" y="472" width="68" height="16" fill="white" fill-opacity="0.92"/>
+<text x="780" y="484" font-size="12" fill="#2D3748" text-anchor="middle">decisions</text>
+<rect x="40" y="730" width="34" height="20" rx="4" fill="#EAF2FB" stroke="#2F6DB5" stroke-width="2"/>
+<text x="82" y="745" font-size="13" fill="#1E2430">implemented</text>
+<rect x="189.2" y="730" width="34" height="20" rx="4" fill="#FFFFFF" stroke="#2F6DB5" stroke-width="2" stroke-dasharray="8 6"/>
+<text x="231.2" y="745" font-size="13" fill="#1E2430">planned</text>
+<rect x="309.6" y="730" width="34" height="20" rx="4" fill="#F4F4F4" stroke="#7A7A7A" stroke-width="2" stroke-dasharray="2 4"/>
+<text x="351.6" y="745" font-size="13" fill="#1E2430">simulated (replayed test data)</text>
+<rect x="595.6" y="730" width="34" height="20" rx="4" fill="#EDE7FB" stroke="#6B4FC8" stroke-width="2"/>
+<text x="637.6" y="745" font-size="13" fill="#1E2430">AI model</text>
+<rect x="723.2" y="730" width="34" height="20" rx="4" fill="#FFF6E0" stroke="#B7862B" stroke-width="2"/>
+<text x="765.2" y="745" font-size="13" fill="#1E2430">deterministic rules around the model</text>
+<path d="M 1052.4 740 L 1092.4 740" stroke="#4A5568" stroke-width="2" stroke-dasharray="7 5" marker-end="url(#arrow)"/>
+<text x="1102.4" y="745" font-size="13" fill="#1E2430">planned flow</text>
+</svg>

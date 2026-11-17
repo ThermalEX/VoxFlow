@@ -1,0 +1,68 @@
+{
+ "latency": [
+  0.567,
+  0.612,
+  0.15,
+  0.375,
+  0.217,
+  0.486,
+  0.39,
+  0.511,
+  0.268,
+  0.336,
+  0.431,
+  0.383,
+  0.278
+ ],
+ "sb1_status_after_clean": "status.polishing",
+ "sb1_polished": "Can we move the design review to Thursday at 3pm, and please send the slides to Zhang San before that?",
+ "sb1_suggestions": [
+  [
+   "More concise",
+   "Move design review to Thursday at 3 pm. Please send slides to Zhang San before then."
+  ]
+ ],
+ "sb2_polished": "周五前交给我。",
+ "sb2_after_undo": "告诉小李，第一句删了吧，太啰嗦，然后周五前交给我。",
+ "sb2b_hunks": [
+  [
+   "change",
+   "um tell",
+   "Tell"
+  ],
+  [
+   "change",
+   "Friday, no wait, ",
+   ""
+  ],
+  [
+   "change",
+   ",",
+   ""
+  ],
+  [
+   "change",
+   "shorter, like, ",
+   ""
+  ]
+ ],
+ "sb2b_kept_text": "Tell Zhang San the deadline is Monday and the report should be shorter, like, two pages.",
+ "sb3_entries": [
+  [
+   "The design review is on Thursday at 3 pm in room 204.",
+   "forever",
+   "explicit"
+  ]
+ ],
+ "sb3_fill_suggestions": [
+  [
+   "Fill from memory",
+   "Please remind everyone to come to the design review on Thursday at 3 pm in room 204."
+  ],
+  [
+   "More polite",
+   "Could everyone please make it to the design review?"
+  ]
+ ],
+ "sb3_final": "Please remind everyone to come to the design review on Thursday at 3 pm in room 204."
+}

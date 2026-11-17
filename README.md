@@ -1,95 +1,85 @@
-# VoxFlow · 本地语音识别原型
+# VoxFlow · local voice input with checkable AI edits
 
-开发交接与代码结构见 [HANDOFF.md](HANDOFF.md)。
+*README prose word count: about 970 words (code and commands excluded).* 中文说明见 [README.zh-CN.md](README.zh-CN.md).
 
-VoxFlow 是 Windows 上的本地语音输入工具：按一下快捷键说话，识别出的文字经本地小模型整理（去掉口气词、按改口修改、执行“翻译成英文”“正式一点”等语音指令）后，输入到你正在用的应用里。语音识别和智能编辑都在本机运行，默认不保存录音。界面支持中文和英文，识别结果保留原语种。
+VoxFlow is a Windows voice-input tool. You press a hotkey and speak; a local speech recogniser shows a live draft; when you stop, a small fine-tuned language model removes fillers and applies spoken corrections and instructions ("Wednesday, no, Thursday", "make it more formal"). The edit is always shown and reversible, and nothing is typed into the target app until you press Enter. It is the prototype for my Intelligent Interactive Systems project on steering and checking AI edits to dictated text.
 
-## 安装与首次使用
+## Project status
 
-运行安装程序 `VoxFlow-Setup-<版本>.exe`（只含程序本体，装在当前用户目录，不需要管理员权限）。第一次打开会出现新手教程：
+**Works (implemented)**
 
-1. 选择界面语言。
-2. 选择颜色模式（跟随系统 / 浅色 / 深色）和配色主题，右侧实时预览语音浮层。
-3. 选择麦克风，对着说话可看到音量条跳动（只在本机计算音量，不录音）。
-4. 下载组件：语音识别模型（必需，约 230 MB）、llama.cpp（运行智能编辑）和智能编辑模型。默认勾选推荐项，点“下载所选”才开始；也可以跳过，之后在 设置 › 智能编辑 中下载。
-5. 动手试一次。
-6. 小技巧。
+- Dictation overlay: hotkey `Ctrl+Shift+Space`, live draft, editable result, paste back into the previously focused app; `Continue` adds more speech to the current text.
+- Smart editing with a local model: one strike-and-fade edit animation, `Undo edits` with a hover preview of what was said, 0–3 suggestion buttons. Any model failure keeps the original text.
+- Review mode (Settings › Smart editing › *Review edits before applying*, off by default): every edit stays marked in place and can be kept or turned back individually.
+- Memory (off by default): "remember …" requests, background extraction of names, terms and events, pinyin-based correction of misheard names, "Fill from memory" suggestions, daily summaries; a settings page to inspect, edit, delete and set retention (7 days or forever).
+- Chinese/English interface, first-run tutorial, in-app model downloads with checksum verification, Windows installer.
+- Fine-tuning and evaluation pipeline for the rewrite model (`training/rewrite/`), with fixed test sets.
 
-教程可在 设置 › 关于 › 重新开始教程 再次打开。
+**Simulated**
 
-**下载**：可下载的内容来自 [Hugging Face](https://huggingface.co/ThermalEX/voxflow-rewrite)，下载源可选“自动 / Hugging Face / 国内镜像（hf-mirror.com）”；“自动”在连不上或太慢时切换到镜像。下载支持断点续传，校验 SHA-256 后才安装，存放在 `%LOCALAPPDATA%\VoxFlow`，重装软件不用重新下载；卸载时会询问是否一并删除。llama.cpp 有两个版本可选：
+- Evaluation uses fixed, hand-written test sets replayed through the model; no participants have used VoxFlow yet.
 
-- **通用版（Vulkan）**：30 MB，NVIDIA / AMD / Intel 显卡都能用，第一次启动约 8 秒，之后与加速版一样快（推荐）。
-- **NVIDIA 加速版（CUDA）**：625 MB，仅 NVIDIA 显卡，实测速度与通用版相同。
+**Unfinished / planned**
 
-## 使用
+- Logging which edits people keep or reject in review mode, and a small pilot comparing immediate edits with review mode.
+- Real-recording comparison of the speech recogniser with newer candidates (e.g. Qwen3-ASR).
+- Not validated by hand on every set-up: multi-monitor/high-DPI layouts and pasting into every kind of app.
 
-先聚焦目标应用的输入框，按 `Ctrl+Shift+Space` 开始录音，再按一次停止；中央胶囊和右侧麦克风按钮也可操作录音。停录后浮层展示最终文字，可直接编辑；按回车或左侧确认键，程序会回到之前的应用并粘贴文字（编辑时用 `Shift+Enter` 换行）。若目标窗口无法重新获得焦点，浮层会保留结果并复制文字，供手动粘贴。按 `Esc` 或右侧关闭按钮隐藏浮层并丢弃本次内容。结果出来后可点“继续说”或按 `Ctrl+Alt+Shift+Space` 接着已有文字继续口述，新内容会和原文一起再整理一次。单次录音上限 5 分钟。
+## Technology stack
 
-设置窗口可从托盘或浮层左侧的设置图标打开：
+| Part | Technology | Role |
+| --- | --- | --- |
+| Interface | Python 3.12, PySide6 (Qt) | Overlay, settings, tray, animations |
+| Audio | sounddevice | Microphone capture; audio stays in memory |
+| Speech recognition (AI) | SenseVoiceSmall INT8 via sherpa-onnx, in a worker process | Live draft and final transcript, Chinese/English/Japanese/Korean/Cantonese |
+| Rewrite model (AI) | Qwen3.5-2B + LoRA ("VoxFlow-rewrite" v6), GGUF Q8, served by llama.cpp `llama-server` (Vulkan) | Clean, suggest, memory extract / fill / summary |
+| Rules around the model | Python (`memory_dates.py`, `memory_names.py` with pypinyin, `memory_command.py`) | Dates, name correction, "remember" detection, output checks |
+| Memory | SQLite (standard library) | Local store, only when memory is on |
+| Training | Unsloth + PEFT LoRA in WSL; llama.cpp tools for GGUF export | Not needed to run the app |
+| Packaging | PyInstaller, Inno Setup | Installer |
 
-- **常规**：界面语言、麦克风、文字对齐。
-- **外观**：颜色模式、配色主题（6 个预设 + 自定义，统一浮层柔光和设置界面的颜色）、文字字体和字号。
-- **智能编辑**：开关、模型来源、已安装的模型、下载模型。
-- **记忆**：开关、记忆表（搜索、添加、编辑、删除，每条可在“7 天”和“永久”之间转移）、按日期查看保存的原文并手动生成每日总结、清空全部。
-- **快捷键**：录音和“继续说”两个全局快捷键可录制更换；被其他程序占用时会提示并保留原来的键。
-- **关于**：版本、GitHub 与 Hugging Face 链接、重新开始教程。
+Undecided: whether to switch the speech recogniser (needs a real-recording benchmark) and whether to move to a larger base model once one fits a 6 GB GPU.
 
-## 智能编辑
+## Running or inspecting the work
 
-默认开启。打开 VoxFlow 时会在后台启动本地模型（约 4 秒就绪），停录得到的最终文字交给改写模型整理，以一次修改动画替换原文；鼠标悬停“撤回修改”可预览原文，点击撤回或恢复；下方还会浮动 0–3 个改写建议，点击即采用。
-
-如果希望逐处把关，可在 设置 › 智能编辑 中打开“先审阅再应用修改”（默认关闭）：整理结果不再直接替换原文，而是在原位标出每一处修改（删掉的划线、改成的加下划线），点击某处即在“采用修改”和“保留原话”之间切换；直接打字则结束审阅、按当前选择继续编辑；回车按当前选择确认。模型出错、超时或未就绪时保留原文，不影响正常使用。实时草稿不做改写。
-
-- **VoxFlow 本地模型**：VoxFlow 直接启动 llama.cpp 的 `llama-server.exe` 加载 GGUF 模型（运行时不需要 WSL）。缺少 llama.cpp 或模型时，状态会显示“未安装”，点“去下载”跳到下载列表。也可以选择本机已有的 GGUF 文件。
-- **自定义 OpenAI 兼容接口**：填写地址、模型名和可选 API Key，可接 LM Studio、Ollama、llama.cpp server 或云端服务。API Key 以明文保存在本机设置中。
-
-## 记忆
-
-默认关闭，可在新手教程或 设置 › 记忆 中开启。开启后：
-
-- **记住口令**：句首说“记住……”“帮我记一下……”（英文 “remember that …”），浮层去掉口令词，并按配色主题的强调色把这段文字高亮一次；确认后照常粘贴，同时把内容永久记入记忆表。
-- **自动提取**：确认发送的文字保存在本机 7 天；浮层关闭、模型空闲时，后台从中找出人名、专有名词、有时间的安排和长期有用的事实，记入记忆表（保留 7 天；来自“记住”口令的永久保留）。安排里说的“周三”“下周一”“11月3日”等由程序按规则换算成具体日期，不交给模型推算。
-- **纠正人名和专有名词**：按读音把识别错的同音字改成记住的写法（如记住“张三”后，识别成“张叁”会改回“张三”）；两个字的名字要求第一个字相同，避免把“黎明”这类普通词改成人名。改动包含在修改动画里，可用“撤回修改”还原。
-- **按记忆补全**：文字提到已记住的事、却漏了时间地点等细节时，建议栏第一个按钮是“按记忆补全”，点了才生效。
-- **每日总结**：在 设置 › 记忆 中选择日期，点“生成总结”，按日程、待办、提到的人和事分点列出。
-
-数据保存在 `%LOCALAPPDATA%\VoxFlow\memory\memory.db`（源码运行时在仓库的 `memory/`，已忽略）。关闭记忆不会删除已有内容，“清空”才会删除。智能编辑使用在线模型时，提取、补全和总结会把文字和记忆发送到所配置的接口，设置页会醒目提示。
-
-## 从源码运行
-
-需要 Windows 和 Python 3.12：
+Windows 10/11 with Python 3.12. A GPU is optional for the rewrite model (any Vulkan GPU; CPU works but is slow).
 
 ```powershell
 py -3.12 -m venv .venv
 .\.venv\Scripts\python.exe -m pip install -e ".[test]"
-.\.venv\Scripts\python.exe -m voxflow
+.\.venv\Scripts\python.exe scripts\download_model.py   # speech model (~240 MB) into models/
+.\.venv\Scripts\python.exe -m voxflow                  # start; the tutorial offers llama.cpp and the rewrite model
 ```
 
-从源码运行时，模型和 llama.cpp 都放在仓库目录（`models/`、`runtime/llama.cpp/`、`runtime/models/`），可以在软件里下载，也可以用 `scripts/download_model.py` 下载语音模型。日常使用可运行 `.\.venv\Scripts\pythonw.exe -m voxflow`，不会弹出终端窗口。用音频文件验证识别：`.\.venv\Scripts\python.exe -m voxflow --file path\to\speech.wav`。测试：`.\.venv\Scripts\python.exe -m pytest -q`。
+- **Without a microphone:** `.\.venv\Scripts\python.exe -m voxflow --file path\to\speech.wav` transcribes one file.
+- **Tests (452, no microphone or model needed):** `$env:QT_QPA_PLATFORM='offscreen'; .\.venv\Scripts\python.exe -m pytest -q -p no:cacheprovider`. The review mode is covered by `tests/test_window_review.py`.
+- **Replay the storyboards with the real model:** see the commands at the top of [docs/a2/scripts/capture.py](docs/a2/scripts/capture.py); model outputs and latencies of the submitted run are in [docs/a2/capture_log.json](docs/a2/capture_log.json).
+- **Model evaluation:** start `llama-server` on port 8765, then `.\.venv\Scripts\python.exe -m training.rewrite.evaluate --endpoint http://127.0.0.1:8765/v1 --output training/rewrite/runs/<name>`. Results and their test-set versions are recorded in [docs/research-log.md](docs/research-log.md) (Chinese).
+- **Using an online model instead:** Settings › Smart editing › Model source › *OpenAI-compatible service*; enter your own endpoint and key. No key is stored in this repository; keys are kept in your Windows user settings.
+- **Installer build:** `.\.venv\Scripts\python.exe packaging\build.py` (needs `pip install -e ".[build]"` and Inno Setup).
 
-## 打包安装程序
+## Development record
 
-```powershell
-.\.venv\Scripts\python.exe -m pip install -e ".[build]"
-winget install JRSoftware.InnoSetup --scope user      # 只需一次
-.\.venv\Scripts\python.exe packaging\build.py         # --skip-installer 只生成便携文件夹
-```
+Links point to commits on GitHub. The full experiment history, including failed attempts, is in [docs/research-log.md](docs/research-log.md).
 
-输出 `dist\VoxFlow\`（便携版）和 `dist\VoxFlow-Setup-<版本>.exe`。安装程序只含程序本体，可选桌面图标和开机启动；安装或卸载前会自动结束正在运行的 VoxFlow。第三方许可见安装目录的 `THIRD_PARTY.txt`。
+| Stage | What changed and why | What I checked |
+| --- | --- | --- |
+| 1. Local dictation (6–7 Oct) | Overlay, worker-process ASR and paste-back ([f86dec1](https://github.com/ThermalEX/VoxFlow/commit/f86dec1)); an empty final result no longer erases the live draft ([2f085c3](https://github.com/ThermalEX/VoxFlow/commit/2f085c3)). | Unit tests for scheduler, buffer and session isolation; microphone smoke script. |
+| 2. Rewrite model (13–15 Oct) | Hand-written seed data and a fixed test set ([14a6813](https://github.com/ThermalEX/VoxFlow/commit/14a6813)); LoRA fitted into 6 GB ([c644f3b](https://github.com/ThermalEX/VoxFlow/commit/c644f3b)); v4 targeted the sentences the model over-edited ([31a9748](https://github.com/ThermalEX/VoxFlow/commit/31a9748)). | Instruction residue 35% → 0% and unchanged-sentence preservation 80% → 95% on the same test set. |
+| 3. Showing the edit (13 Oct) | Diff-based edit animation and undo instead of silently replacing text ([ff78323](https://github.com/ThermalEX/VoxFlow/commit/ff78323), [2f78a89](https://github.com/ThermalEX/VoxFlow/commit/2f78a89)). | Window tests for animation, undo, hover preview and stale results. |
+| 4. Latency (13 Oct) | Native `llama-server` instead of a Python model in WSL ([32c4073](https://github.com/ThermalEX/VoxFlow/commit/32c4073)), because 1.1 s per sentence felt like waiting. | Median 0.14 s per sentence, quality unchanged. |
+| 5. Usable by others (14–18 Oct) | Bilingual UI ([184c8f2](https://github.com/ThermalEX/VoxFlow/commit/184c8f2)), Continue ([e1f6a10](https://github.com/ThermalEX/VoxFlow/commit/e1f6a10)), installer ([ac95e76](https://github.com/ThermalEX/VoxFlow/commit/ac95e76)), verified downloads ([4d4f945](https://github.com/ThermalEX/VoxFlow/commit/4d4f945)), tutorial ([3e84aef](https://github.com/ThermalEX/VoxFlow/commit/3e84aef)). | Tests for resumable downloads, checksums and the tutorial. |
+| 6. Rejected directions (18–19 Oct) | v5 data was reverted after it got worse ([8455631](https://github.com/ThermalEX/VoxFlow/commit/8455631)); a Gemma 4 E2B base was tried and stopped ([5fe9b3a](https://github.com/ThermalEX/VoxFlow/commit/5fe9b3a)). | Same test set for every comparison. |
+| 7. Memory (20–21 Oct) | Memory store, settings page and fill-in suggestions ([bb2e259](https://github.com/ThermalEX/VoxFlow/commit/bb2e259), [70a15f7](https://github.com/ThermalEX/VoxFlow/commit/70a15f7)); dates computed by rules because the model got them wrong ([657e818](https://github.com/ThermalEX/VoxFlow/commit/657e818)); v6 model ([649b386](https://github.com/ThermalEX/VoxFlow/commit/649b386)). | Memory evaluation set: event-time correctness 31% → 54% once dates moved to rules; v6 extraction recall 94%. |
+| 8. Review mode (17 Nov) | Per-edit keep/reject, the comparison condition proposed in my literature review ([c3a3ddb](https://github.com/ThermalEX/VoxFlow/commit/c3a3ddb)); spacing-only changes no longer count as decisions ([bc882dd](https://github.com/ThermalEX/VoxFlow/commit/bc882dd)). | 17 new tests; storyboards captured with the real model. |
 
-发布新的 llama.cpp 版本或更新下载清单：`.\.venv\Scripts\python.exe packaging\publish_runtime.py`（需要 `gh` 和 `hf auth login`），它把 llama.cpp 的 Windows 版本转存到 Hugging Face 仓库的 `runtime/`，并更新 `catalog.json` 与内置清单 `voxflow/assets/catalog.json`。上传新的改写模型后，在清单里加一项即可让已安装的软件看到它。
+## AI assistance
 
-## 当前模型
+I used Claude Code (Anthropic) as a coding and writing assistant: it drafted code, tests, training data and evaluation scripts, parts of this README, and the report's figures, and it searched documentation. I set the goals and design decisions, ran the tests and the app to check its work, and dropped changes that did not hold up; for example, the v5 data and the Gemma base model were abandoned after evaluation.
 
-使用 [SenseVoiceSmall](https://github.com/QwenAudio/SenseVoice) 的 [sherpa-onnx INT8 转换版本](https://github.com/k2-fsa/sherpa-onnx/releases/tag/asr-models)，本地 CPU 推理；模型约 240 MB，首次单独下载，文件不会进入 Git。该模型是离线整段识别；窗口将长录音按约 6–10 秒的安静处分段，缓存已完成片段，只反复识别当前片段来更新临时草稿，并非模型原生流式输出。中英混说质量尚需真实语料评测。模型权重遵循其[模型卡中的许可条款](https://huggingface.co/FunAudioLLM/SenseVoiceSmall)。
+## Additional files
 
-智能编辑与记忆使用 VoxFlow 改写模型 v6（基于 Qwen3.5-2B 微调，[Hugging Face](https://huggingface.co/ThermalEX/voxflow-rewrite)），下载列表默认推荐 v6 Q8，v4 仍可下载。下载完成后会自动切换到新模型；设置里的模型列表按“名称 版本 · 量化 · 大小”显示，最新版本排在最前并标“推荐”。
-
-## 已知边界
-
-- 需要可用麦克风及录音权限；模型文件下载完成后识别可离线运行。
-- 临时草稿会随录音变化；最终文本以停录后的完整识别结果为准。
-- 自动输入依赖 Windows 允许程序切回之前的窗口，并使用系统剪贴板粘贴；某些受保护的输入框或权限更高的应用可能拒绝接收。
-- 为减少安静环境下的短词误报，整体音量极低的录音会被判为空；麦克风增益过低时可能漏识别。
-- `sherpa-onnx` 的 CPU 模型目前未使用 RTX 3060。后续可在相同接口下比较 Qwen3-ASR 等候选。
+- [docs/a2/](docs/a2/): storyboards, system diagram (PNG and SVG) and the scripts that generate them.
+- [docs/research-log.md](docs/research-log.md): experiments, results by test-set version, problems and fixes (Chinese).
+- [HANDOFF.md](HANDOFF.md): code structure and developer notes (Chinese).
+- Models are not in Git; they download from [Hugging Face](https://huggingface.co/ThermalEX/voxflow-rewrite) inside the app or via `scripts/download_model.py`.

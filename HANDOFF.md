@@ -1,6 +1,6 @@
 # VoxFlow 交接说明
 
-更新日期：2026-10-14。主分支为 `main`（开发分支 `feature/rewrite-dataset` 尚未合并），远端为 `https://github.com/ThermalEX/VoxFlow.git`。本文件面向接手开发的 agent；面向使用者的说明见 [README.md](README.md)；改写模型的实验结果、问题与结论汇总在 [docs/research-log.md](docs/research-log.md)（写论文用，每次训练/评估后追加）。先以仓库当前代码和测试结果为准，历史讨论中的构想不等于已实现功能。
+更新日期：2026-10-14。主分支为 `main`（开发分支 `feature/rewrite-dataset` 尚未合并），远端为 `https://github.com/ThermalEX/VoxFlow.git`。本文件面向接手开发的 agent；面向使用者的说明见 [README.zh-CN.md](README.zh-CN.md)（英文版 [README.md](README.md)，含课程项目要求的开发记录）；改写模型的实验结果、问题与结论汇总在 [docs/research-log.md](docs/research-log.md)（写论文用，每次训练/评估后追加）。先以仓库当前代码和测试结果为准，历史讨论中的构想不等于已实现功能。
 
 ## 1. 项目现状
 
