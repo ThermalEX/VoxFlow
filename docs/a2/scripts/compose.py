@@ -1,4 +1,4 @@
-"""Compose storyboard sheets from overlay screenshots."""
+﻿"""Compose storyboard sheets from overlay screenshots."""
 import sys
 from pathlib import Path
 
@@ -36,7 +36,7 @@ BOARDS = {
     ]),
 }
 
-COLS = 3
+COLS = 2
 CELL_W = 500
 PAD = 22
 BACKDROP = QColor("#2B3140")
@@ -115,10 +115,11 @@ for name, (title, cells) in BOARDS.items():
         p.setFont(badge)
         p.setPen(INK)
         p.drawText(QRectF(x + 10, y + 10, 30, 30), Qt.AlignmentFlag.AlignCenter, str(index + 1))
-        p.setFont(QFont("Segoe UI", 10))
+        p.setFont(QFont("Segoe UI", 12))
         p.setPen(INK)
         for n, line in enumerate(wrap(p, caption, CELL_W - 8)[:3]):
-            p.drawText(QRectF(x + 2, y + img_h + 8 + n * 19, CELL_W - 4, 19), Qt.AlignmentFlag.AlignLeft, line)
+            p.drawText(QRectF(x + 2, y + img_h + 8 + n * 22, CELL_W - 4, 22), Qt.AlignmentFlag.AlignLeft, line)
     p.end()
     sheet.save(str(OUT / f"{name}.png"))
     print(name, sheet.size().toTuple())
+
