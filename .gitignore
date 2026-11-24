@@ -1,7 +1,8 @@
 .venv/
 models/
-# Memory data when running from source (the app keeps it in %LOCALAPPDATA%\VoxFlow)
+# Memory data and download records when running from source (the app keeps them in %LOCALAPPDATA%\VoxFlow)
 memory/
+installed.json
 .pytest_cache/
 __pycache__/
 *.pyc
@@ -13,12 +14,8 @@ __pycache__/
 .DS_Store
 Thumbs.db
 
-# Claude Code
-CLAUDE.md
-.claude/
 training/rewrite/build/
 training/rewrite/runs/
-.superpowers/
 unsloth_compiled_cache/
 runtime/
 

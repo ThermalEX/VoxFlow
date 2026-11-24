@@ -1,7 +1,5 @@
 # VoxFlow · local voice input with checkable AI edits
 
-*README prose word count: about 970 words (code and commands excluded).* 中文说明见 [README.zh-CN.md](README.zh-CN.md).
-
 VoxFlow is a Windows voice-input tool. You press a hotkey and speak; a local speech recogniser shows a live draft; when you stop, a small fine-tuned language model removes fillers and applies spoken corrections and instructions ("Wednesday, no, Thursday", "make it more formal"). The edit is always shown and reversible, and nothing is typed into the target app until you press Enter. It is the prototype for my Intelligent Interactive Systems project on steering and checking AI edits to dictated text.
 
 ## Project status
@@ -75,7 +73,7 @@ Links point to commits on GitHub. The full experiment history, including failed 
 
 ## AI assistance
 
-I used Claude Code (Anthropic) as a coding and writing assistant: it drafted code, tests, training data and evaluation scripts, parts of this README, and the report's figures, and it searched documentation. I set the goals and design decisions, ran the tests and the app to check its work, and dropped changes that did not hold up; for example, the v5 data and the Gemma base model were abandoned after evaluation.
+I used AI assistance in two ways, through Claude Code (Anthropic, model Claude Opus 5.5). For the software, it helped write the programs and code, including tests, training data, evaluation scripts and the scripts that draw the figures. For the writing, it helped draft and translate Chinese to English of this README and the report, correcting grammar and wording. I set the goals and design decisions, ran the tests and the app to check the code, and dropped changes that did not hold up; for example, the v5 data and the Gemma base model were abandoned after evaluation.
 
 ## Additional files
 
