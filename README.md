@@ -1,5 +1,7 @@
 # VoxFlow · local voice input with checkable AI edits
 
+*README prose word count: about 1,000 words (code and commands excluded).*
+
 VoxFlow is a Windows voice-input tool. You press a hotkey and speak; a local speech recogniser shows a live draft; when you stop, a small fine-tuned language model removes fillers and applies spoken corrections and instructions ("Wednesday, no, Thursday", "make it more formal"). The edit is always shown and reversible, and nothing is typed into the target app until you press Enter. It is the prototype for my Intelligent Interactive Systems project on steering and checking AI edits to dictated text.
 
 ## Project status
