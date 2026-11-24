@@ -75,7 +75,7 @@ Links point to commits on GitHub. The full experiment history, including failed 
 
 ## AI assistance
 
-I used AI assistance in two ways, through Claude Code (Anthropic, model Claude Opus 5.5). For the software, it helped write the programs and code, including tests, training data, evaluation scripts and the scripts that draw the figures. For the writing, it helped draft and translate Chinese to English of this README and the report, correcting grammar and wording. I set the goals and design decisions, ran the tests and the app to check the code, and dropped changes that did not hold up; for example, the v5 data and the Gemma base model were abandoned after evaluation.
+I used AI assistance in two ways, through Claude Code (Anthropic, model Claude Opus 5.5). For the software, it helped write the programs and code, including tests, training data, evaluation scripts and the scripts that draw the figures. For the writing, it helped draft this README and the report and translate them from Chinese into English, correcting grammar and wording. I set the goals and design decisions, ran the tests and the app to check the code, and dropped changes that did not hold up; for example, the v5 data and the Gemma base model were abandoned after evaluation.
 
 ## Additional files
 
